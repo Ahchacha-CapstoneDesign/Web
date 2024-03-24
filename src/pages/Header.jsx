@@ -20,7 +20,7 @@ const Header = () => {
       <HeaderContent>
         <Logo src="/assets/img/Logo_login.png" alt="Ah!Chacha" />
         <Nav>
-          <NavItem active={activePage === '/mainpage/1' && '/mainpage/2' && '/mainpage/3' }
+          <NavItem active={activePage.startsWith('/mainpage/')}
             onClick={() => handlePageChange('/mainpage/1')}>홈</NavItem>
           <NavItem active={activePage === '/rent'}
             onClick={() => handlePageChange('/rent')}>아차! 대여</NavItem>
@@ -79,7 +79,7 @@ export const activeBar = css`
   content: '';
   display: block;
   position: absolute;
-  bottom: -10px;
+  bottom: 10px;
   left: 0;
   width: 80%;
   height: 4px;
@@ -107,7 +107,7 @@ export const NavItem = styled.div`
     background: #00FFE0;
     border-radius: 2px;
     position: absolute;
-    bottom: -0.3125rem;
+    bottom: -1rem;
     left: 50%;
     transform: translateX(-50%) scaleX(${props => props.active ? 1 : 0});
     transition: transform 0.3s ease;

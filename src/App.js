@@ -4,6 +4,7 @@ import Login from './pages/Login/Login';
 import SettingNickname from './pages/Login/SettingNickname';
 import Header from './pages/Header';
 import MainPage1 from './pages/Home/MainPage1';
+import MainPage4 from './pages/Home/MainPage4';
 
 function App() {
   return (
@@ -17,6 +18,14 @@ function App() {
             element={
             <>
               <Header /> <MainPage1 />
+            </>
+            }
+          />
+          <Route 
+            path="/mainpage/4" 
+            element={
+            <>
+              <Header /> <MainPage4 />
             </>
             }
           />
