@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
 import styled, { css } from "styled-components";
 import { useNavigate, useLocation } from 'react-router-dom';
+import NotificationModal from './NotificationModal';
 
 const Header = () => {
   const [activePage, setActivePage] = useState('');
   const location = useLocation(); // 현재 위치를 가져옵니다.
   const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const toggleModal = () => {
+    setModalOpen(!modalOpen);
+  };
 
   useEffect(() => {
     setActivePage(location.pathname); // 현재 경로를 상태로 설정합니다.
@@ -38,7 +44,8 @@ const Header = () => {
             <UserTrack>모바일소프트웨어</UserTrack>
             <UserName>사용자님</UserName>
           </UserInfo>
-          <NotificationIcon src="/assets/img/notification.png" alt="알림" />
+          <NotificationIcon onClick={toggleModal} src="/assets/img/notification.png" alt="알림" />
+          <NotificationModal isOpen={modalOpen} onClose={toggleModal} />
         </UserAndNotificationContainer>
       </HeaderContent>
     </HeaderContainer>

@@ -10,8 +10,17 @@ import 'swiper/css/pagination';
 
 
 const MainPage1 = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
+
+  const handleModalOpen = () => {
+    setIsModalOpen(true); // 모달 열기
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false); // 모달 닫기
+  };
 
   useEffect(() => {
     const handleWheel = (e) => {
