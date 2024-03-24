@@ -10,7 +10,8 @@ const Login = () => {
 
   const handleLogin = () => {
     console.log(username, password);
-    navigate('/setting-nickname');
+    // navigate('/setting-nickname');
+    navigate('/loading'); 
   };
 
   return (

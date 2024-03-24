@@ -5,6 +5,7 @@ import SettingNickname from './pages/Login/SettingNickname';
 import Header from './pages/Header';
 import MainPage1 from './pages/Home/MainPage1';
 import MainPage4 from './pages/Home/MainPage4';
+import Loading from './pages/Login/Loading';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/setting-nickname" element={<SettingNickname />} />
+          <Route path="/loading" element={<Loading />} />
           <Route 
             path="/mainpage/1" 
             element={
