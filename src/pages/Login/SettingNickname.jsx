@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
+import config from '../../path/config';
+import apiClient from '../../path/apiClient';
 
 // SettingNickname 컴포넌트 구현
 const SettingNickname = () => {
@@ -12,9 +15,25 @@ const SettingNickname = () => {
     setNickname(e.target.value);
   };
 
-  const handleSetNickname = () => {
-    console.log('닉네임 설정:', nickname);
-    navigate('/loading');
+  const handleSetNickname = async (event) => {
+    event.preventDefault();
+    
+    try {
+      // FormData 객체를 사용하여 nickname을 추가합니다.
+      const formData = new URLSearchParams();
+      formData.append('nickname', nickname);
+      
+      // apiClient 인스턴스를 사용하여 요청을 보냅니다.
+      await apiClient.post('/users/nickname', formData.toString(), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+      console.log('닉네임 설정:', nickname);
+      navigate('/loading');
+    } catch (error) {
+      console.error("닉네임 설정 실패:", error);
+    }
   };
 
   return (

@@ -1,11 +1,27 @@
 import React, { useState, useEffect } from "react";
 import styled, { css } from "styled-components";
 import { useNavigate, useLocation } from 'react-router-dom';
+import NotificationModal from './NotificationModal';
 
 const Header = () => {
   const [activePage, setActivePage] = useState('');
   const location = useLocation(); // 현재 위치를 가져옵니다.
   const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userTrack, setUserTrack] = useState('');
+
+
+  const toggleModal = () => {
+    setModalOpen(!modalOpen);
+  };
+
+  useEffect(() => {
+    const name = localStorage.getItem('userName');
+    setUserName(name);
+    const track = localStorage.getItem('userTrack');
+    setUserTrack(track);
+  });
 
   useEffect(() => {
     setActivePage(location.pathname); // 현재 경로를 상태로 설정합니다.
@@ -20,7 +36,7 @@ const Header = () => {
       <HeaderContent>
         <Logo src="/assets/img/Logo_login.png" alt="Ah!Chacha" />
         <Nav>
-          <NavItem active={activePage === '/mainpage/1' && '/mainpage/2' && '/mainpage/3' }
+          <NavItem active={activePage.startsWith('/mainpage/')}
             onClick={() => handlePageChange('/mainpage/1')}>홈</NavItem>
           <NavItem active={activePage === '/rent'}
             onClick={() => handlePageChange('/rent')}>아차! 대여</NavItem>
@@ -35,10 +51,11 @@ const Header = () => {
         </Nav>  
         <UserAndNotificationContainer>
           <UserInfo>
-            <UserTrack>모바일소프트웨어</UserTrack>
-            <UserName>사용자님</UserName>
+            <UserTrack>{userTrack}</UserTrack>
+            <UserName>{userName}님</UserName>
           </UserInfo>
-          <NotificationIcon src="/assets/img/notification.png" alt="알림" />
+          <NotificationIcon onClick={toggleModal} src="/assets/img/notification.png" alt="알림" />
+          <NotificationModal isOpen={modalOpen} onClose={toggleModal} />
         </UserAndNotificationContainer>
       </HeaderContent>
     </HeaderContainer>
@@ -79,7 +96,7 @@ export const activeBar = css`
   content: '';
   display: block;
   position: absolute;
-  bottom: -10px;
+  bottom: 10px;
   left: 0;
   width: 80%;
   height: 4px;
@@ -107,7 +124,7 @@ export const NavItem = styled.div`
     background: #00FFE0;
     border-radius: 2px;
     position: absolute;
-    bottom: -0.3125rem;
+    bottom: -1rem;
     left: 50%;
     transform: translateX(-50%) scaleX(${props => props.active ? 1 : 0});
     transition: transform 0.3s ease;
