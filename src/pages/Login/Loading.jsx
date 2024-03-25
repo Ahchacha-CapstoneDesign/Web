@@ -1,5 +1,5 @@
 // Loading.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
@@ -7,20 +7,24 @@ import { createGlobalStyle } from 'styled-components';
 
 const Loading = () => {
     const navigate = useNavigate();
+    const [userName, setUserName] = useState('');
   
     useEffect(() => {
-      const timer = setTimeout(() => {
-        navigate('/mainpage/1');
-      }, 5000);
-  
-      return () => clearTimeout(timer);
+
+        const name = localStorage.getItem('userName');
+        setUserName(name);
+        const timer = setTimeout(() => {
+            navigate('/mainpage/1');
+        }, 5000);
+    
+        return () => clearTimeout(timer);
     }, [navigate]);
   
     return (
         <>
             <GlobalStyle /> 
             <LoadingContainer>
-                <Name>이름 님!</Name>
+                <Name>{userName} 님!</Name>
                 <LoadingText src="/assets/img/Welcome.png" alt="Welcome to Ah!Chacha" />
                 <Spinner />
             </LoadingContainer>

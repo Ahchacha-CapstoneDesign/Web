@@ -1,17 +1,43 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
+import apiClient from '../../path/apiClient';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordShown, setPasswordShown] = useState(false);
+  const [loginFailed, setLoginFailed] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    console.log(username, password);
-    // navigate('/setting-nickname');
-    navigate('/loading'); 
+  const togglePasswordVisibility = () => {
+    setPasswordShown(!passwordShown);
+  };
+
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await apiClient.post('/users/login', {
+        id: username,
+        passwd: password,
+      });
+
+      localStorage.setItem('userName', response.data.name);
+      localStorage.setItem('userTrack', response.data.track1);
+
+      // 로그인 후 처리 로직
+      if (!response.data.nickname) {
+        navigate('/setting-nickname');
+      } else {
+        navigate('/loading');
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      setLoginFailed(true);
+    }
   };
 
   return (
@@ -31,13 +57,20 @@ const Login = () => {
           value={username} 
           onChange={(e) => setUsername(e.target.value)}
         />
-        <LoginInput 
-          type="password" 
-          id="password" 
-          placeholder="비밀번호" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <PasswordContainer>
+          <LoginInput 
+            type={passwordShown ? "text" : "password"}
+            id="password" 
+            placeholder="비밀번호" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <EyeIcon src="/assets/img/Eye.png"  onClick={togglePasswordVisibility} />
+        </PasswordContainer>
+        {loginFailed && <ErrorMessage>
+          <p>아차차! 로그인 실패! </p>
+          <p>아이디와 비밀번호가 일치하지 않습니다</p>
+          </ErrorMessage>}
         <LoginButton type="submit">로그인</LoginButton>
       </LoginForm>
       <LoginFooter>
@@ -92,6 +125,11 @@ export const LoginHint = styled.div`
 export const LoginForm = styled.form`
   display: flex;
   flex-direction: column;
+  position: relative;
+`;
+
+const PasswordContainer = styled.div`
+  position: relative;
 `;
 
 export const LoginInput = styled.input`
@@ -112,6 +150,26 @@ export const LoginInput = styled.input`
         color: rgba(255, 255, 255, 0.5); // 플레이스홀더 글자 색상
     }
 `;
+
+const EyeIcon = styled.img`
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  height: 1.75rem;
+  width: 1.75rem;
+  cursor: pointer;
+`;
+
+const ErrorMessage = styled.div`
+  color: #F00;
+  font-family: "Pretendard";
+  font-size: 0.9375rem;
+  font-style: normal;
+  font-weight: 800;
+  position: absolute; 
+  top: 7rem; 
+  left: 1rem;
+`;  
 
 export const LoginButton = styled.button`
     width: 22.25rem;

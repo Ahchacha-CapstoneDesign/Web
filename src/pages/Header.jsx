@@ -8,10 +8,20 @@ const Header = () => {
   const location = useLocation(); // 현재 위치를 가져옵니다.
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userTrack, setUserTrack] = useState('');
+
 
   const toggleModal = () => {
     setModalOpen(!modalOpen);
   };
+
+  useEffect(() => {
+    const name = localStorage.getItem('userName');
+    setUserName(name);
+    const track = localStorage.getItem('userTrack');
+    setUserTrack(track);
+  });
 
   useEffect(() => {
     setActivePage(location.pathname); // 현재 경로를 상태로 설정합니다.
@@ -41,8 +51,8 @@ const Header = () => {
         </Nav>  
         <UserAndNotificationContainer>
           <UserInfo>
-            <UserTrack>모바일소프트웨어</UserTrack>
-            <UserName>사용자님</UserName>
+            <UserTrack>{userTrack}</UserTrack>
+            <UserName>{userName}님</UserName>
           </UserInfo>
           <NotificationIcon onClick={toggleModal} src="/assets/img/notification.png" alt="알림" />
           <NotificationModal isOpen={modalOpen} onClose={toggleModal} />
