@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
@@ -9,21 +9,37 @@ import apiClient from '../../path/apiClient';
 // SettingNickname 컴포넌트 구현
 const SettingNickname = () => {
   const [nickname, setNickname] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
+
   const handleNicknameChange = (e) => {
-    setNickname(e.target.value);
+    const input = e.target.value;
+    const containsSpecialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~\s]/.test(input);
+
+    if (!containsSpecialChars && input.length <= 8) {
+      setNickname(input);
+      setErrorMessage('');
+    } else if (input.length > 8) {
+      setErrorMessage('아차! 8글자를 넘어버렸습니다.');
+    } else {
+      setErrorMessage('아차! 특수 문자와 띄어쓰기는 사용할 수 없습니다.');
+    }
   };
 
   const handleSetNickname = async (event) => {
     event.preventDefault();
     
+    // 닉네임이 비어 있을 때 처리
+    if (!nickname.trim()) {
+      setErrorMessage('아차! 닉네임을 설정해주세요!');
+      return;
+    }
+
+    const formData = new URLSearchParams();
+    formData.append('nickname', nickname);
+    
     try {
-      // FormData 객체를 사용하여 nickname을 추가합니다.
-      const formData = new URLSearchParams();
-      formData.append('nickname', nickname);
-      
-      // apiClient 인스턴스를 사용하여 요청을 보냅니다.
       await apiClient.post('/users/nickname', formData.toString(), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -32,9 +48,18 @@ const SettingNickname = () => {
       console.log('닉네임 설정:', nickname);
       navigate('/loading');
     } catch (error) {
+      if (error.response && error.response.status === 400) {
+        // 서버에서 반환한 에러 메시지를 사용자에게 표시
+        setErrorMessage("아차! 사용 중인 닉네임입니다.");
+      } else {
+        // 그 외 오류에 대한 일반적인 에러 메시지
+        setErrorMessage("닉네임 설정 중 에러가 발생했습니다.");
+      }
       console.error("닉네임 설정 실패:", error);
     }
   };
+
+ 
 
   return (
     <>
@@ -48,14 +73,14 @@ const SettingNickname = () => {
         <NicknameSettingForm onSubmit={handleSetNickname}>
           <NicknameInputContainer> 
             <NicknameInput
-                type="text"
+                type="text" 
                 placeholder="닉네임"
                 value={nickname}
                 onChange={handleNicknameChange}
-                maxLength="8" // 닉네임 길이 제한
             />
             <NicknameCounter>{`${nickname.length}/8`}</NicknameCounter>
           </NicknameInputContainer>
+          {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
           <NicknameButton type="submit">아차차 시작</NicknameButton>
         </NicknameSettingForm>
         </NicknameContainer>
@@ -157,3 +182,13 @@ export const NicknameCounter = styled.span`
   color: #FFFFFF;
   font-size: 0.8rem;
 `;
+
+const ErrorMessage = styled.div`
+  color: #F00;
+  font-family: "Pretendard";
+  font-size: 0.9375rem;
+  font-style: normal;
+  font-weight: 800;
+  position: absolute; 
+  margin-top: 4rem; 
+`;  
