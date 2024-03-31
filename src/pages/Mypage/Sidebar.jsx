@@ -34,7 +34,6 @@ const Sidebar = () => {
   return (
     <SidebarContainer>
       <MenuTitle
-        active={activePage === '/mypage/main'}
         onClick={() => handlePageChange('/mypage/main')}
       >
         마이 페이지
