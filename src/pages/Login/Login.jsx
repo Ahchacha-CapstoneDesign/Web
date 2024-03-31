@@ -27,6 +27,12 @@ const Login = () => {
 
       localStorage.setItem('userName', response.data.name);
       localStorage.setItem('userTrack', response.data.track1);
+      localStorage.setItem('userTrack2', response.data.track2);
+      localStorage.setItem('userNickname', response.data.nickname);
+      localStorage.setItem('userPhoneNumber', response.data.phoneNumber);
+      localStorage.setItem('userID', response.data.id);
+      localStorage.setItem('userGrade', response.data.grade);
+      localStorage.setItem('userStatus', response.data.status);
 
       // 로그인 후 처리 로직
       if (!response.data.nickname) {
