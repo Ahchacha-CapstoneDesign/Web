@@ -31,10 +31,13 @@ const Header = () => {
     navigate(path);
   };
 
+
   return (
     <HeaderContainer>
       <HeaderContent>
-        <Logo src="/assets/img/Logo_login.png" alt="Ah!Chacha" />
+        <Logo src="/assets/img/Logo_login.png" alt="Ah!Chacha"
+          onClick={() => handlePageChange('/mainpage/1')}
+        />
         <Nav>
           <NavItem active={activePage.startsWith('/mainpage/')}
             onClick={() => handlePageChange('/mainpage/1')}>홈</NavItem>
@@ -46,8 +49,8 @@ const Header = () => {
             onClick={() => handlePageChange('/talk')}>아차! 톡</NavItem>
           <NavItem active={activePage === '/community'}
             onClick={() => handlePageChange('/community')}>아차! 게시판</NavItem>
-          <NavItem active={activePage === '/mypage'}
-            onClick={() => handlePageChange('/mypage')}>마이페이지</NavItem>
+          <NavItem active={activePage.startsWith('/mypage/')}
+            onClick={() => handlePageChange('/mypage/main')}>마이페이지</NavItem>
         </Nav>  
         <UserAndNotificationContainer>
           <UserInfo>
