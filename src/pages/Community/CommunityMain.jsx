@@ -322,6 +322,7 @@ const MainContainer = styled.div`
     flex-direction: column;
     min-height: 55rem;
     margin-top: 3rem;
+    margin-bottom: 3rem;
     width: 70rem;;
 `;
 
