@@ -45,7 +45,7 @@ const SettingNickname = () => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-      localStorage.setItem('nickname', nickname);
+      localStorage.setItem('userNickname', nickname);
       console.log('닉네임 설정:', nickname);
       navigate('/loading');
     } catch (error) {
@@ -60,7 +60,6 @@ const SettingNickname = () => {
     }
   };
 
- 
 
   return (
     <>
