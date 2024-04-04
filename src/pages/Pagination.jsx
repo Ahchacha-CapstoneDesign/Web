@@ -1,14 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import prevArrow from "/assets/img//PrevArrow.png";
-import nextArrow from "/assets/img//nextArrow.png";
 
 const PaginationContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 60px;
+  margin-top: 2rem;;
+  margin-bottom:2rem;
 `;
 
 const PageButton = styled.button`
@@ -41,7 +40,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   return (
     <PaginationContainer>
         <PageButton onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>
-            <ArrowImage src={prevArrow} alt="Previous page" />
+            <ArrowImage src="/assets/img/PrevArrow.png" alt="Previous page" />
         </PageButton>
         {Array.from({ length: totalPages }, (_, index) => (
             <PageButton key={index + 1} isSelected={currentPage === index + 1} onClick={() => onPageChange(index + 1)}>
@@ -49,7 +48,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
             </PageButton>
         ))}
         <PageButton onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-            <ArrowImage src={nextArrow} alt="Next page" />
+            <ArrowImage src="/assets/img/NextArrow.png"  alt="Next page" />
         </PageButton>
     </PaginationContainer>
   );

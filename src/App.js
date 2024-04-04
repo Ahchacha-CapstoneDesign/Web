@@ -10,6 +10,7 @@ import Sidebar from './pages/Mypage/Sidebar';
 import MypageMain from './pages/Mypage/MypageMain';
 import PasswordCheck from './pages/Mypage/MyAccount/PasswordCheck';
 import AccountSettings from './pages/Mypage/MyAccount/AccountSettings';
+import CommunityMain from './pages/Community/CommunityMain';
 
 function App() {
   return (
@@ -36,6 +37,15 @@ function App() {
             element={
             <>
               <Header /> <MainPage4 />
+            </>
+            }
+          />
+          {/* 커뮤니티 */}
+          <Route 
+            path="/communitymain" 
+            element={
+            <>
+              <Header /> <CommunityMain />
             </>
             }
           />

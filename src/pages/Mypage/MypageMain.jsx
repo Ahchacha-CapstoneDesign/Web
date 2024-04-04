@@ -16,6 +16,10 @@ const MypageMain = () => {
     setUserNickname(nickname);
   });
 
+  const handlePageChange = (path) => {
+    navigate(path);
+  };
+
     return (
         <>
         <GlobalStyle /> 
@@ -32,7 +36,9 @@ const MypageMain = () => {
                         <Nickname>{userNickname}</Nickname>
                       </ProfileDetails>
                   </ProfileInfo>
-                  <Editbutton>계정 관리</Editbutton>
+                  <Editbutton onClick={() => handlePageChange('/mypage/passwordcheck')}>
+                    계정 관리
+                  </Editbutton>
                 </ProfileContainer>
                 
                 <HistoryContainer>
