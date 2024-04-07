@@ -237,7 +237,7 @@ const MainPage2 = () => {
       <ItemTitle>최신 등록 아차! 물건 🎁</ItemTitle>
 
       <PageContainer>
-        <SortButtonsContainer>
+        {/* <SortButtonsContainer>
           <SortButton onClick={() => handleSortChange('date')} active={sort === 'date'}>
             <ButtonImage src={sort == 'date' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
             최근 작성순
@@ -246,7 +246,7 @@ const MainPage2 = () => {
             <ButtonImage src={sort == 'view-counts' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
             조회수 순
           </SortButton>
-        </SortButtonsContainer>
+        </SortButtonsContainer> */}
         <PostList>
           {displayedPosts.map((post) => (
             <PostItem key={post.id}>
