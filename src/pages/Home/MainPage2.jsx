@@ -1,19 +1,192 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from "react";
+import ReactPaginate from 'react-paginate';
+import ReactModal from 'react-modal';
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { Swiper, SwiperSlide } from "swiper/react"; // Import Swiper React components
-import { EffectCoverflow, Pagination, Navigation } from "swiper"; // Swiper에서 가져올 모듈들
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
+import Pagination from "../Pagination";
+import apiClient from "../../path/apiClient";
 
 //최신등록 아이템 page, 메인페이지2
 const MainPage2 = () => {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const navigate = useNavigate();
 
+  const [displayedPosts, setDisplayedPosts] = useState([]); // 현재 페이지에 표시될 포스트
+  const [posts, setPosts] = useState([]);
+  const [searchedPosts, setSearchedPosts] = useState([]); // 검색된 게시글 목록
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [sort, setSort] = useState('date'); 
+  const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
+  const searchInputRef = useRef(null);
+
+  const ITEMS_PER_PAGE = 6;
+
+  const fetchPosts = async () => {
+    // 모든 게시글을 불러오는 URL. 페이지나 사이즈 매개변수 없음
+    let url = `/items/latest`;
+
+    if (sort === 'view-counts') { //조회수 순
+        url = `/items/view-counts`;
+    }
+    // else if (sort === 'reservation') { //예약가능 여부 순
+    //   url = `/items/reservation`;
+    // }
+    // else if (sort === 'personOrOfficial') { //개인 or 학교 여부 순
+    //   url = `/items/personOrOfficial`;
+    // }
+
+    try {
+        const response = await apiClient.get(url);
+        const totalPosts = response.data.content;
+        setPosts(totalPosts);
+        setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE)); // 전체 게시글을 기반으로 총 페이지 수 계산
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+    }
+  };
+
+  const executeSearch = async () => {
+    if (!searchTerm.trim()) {
+      // 검색어가 비어있으면 기존 게시글 목록을 다시 불러옵니다.
+      fetchPosts();
+      setSearchedPosts([]);
+      return; // 함수 종료
+    }
+    // searchTerm 상태를 직접 사용합니다.
+    // 제목으로 검색
+    const searchTitleUrl = `/items/search-title?title=${encodeURIComponent(searchTerm)}&page=1`;
+    // 카테고리로 검색
+    const searchCategoryUrl = `/items/search-category?category=${encodeURIComponent(searchTerm)}&page=1`;
+
+    try {
+      const [titleResponse, categoryResponse] = await Promise.all([
+        apiClient.get(searchTitleUrl),
+        apiClient.get(searchCategoryUrl)
+      ]);
+
+      let combinedResults = [...titleResponse.data.content, ...categoryResponse.data.content];
+
+      // 중복 제거
+      combinedResults = Array.from(new Map(combinedResults.map(post => [post.id, post])).values());
+
+      // '조회수 순' 선택 시 결과를 조회수 수에 따라 정렬
+      if (sort === 'view-counts') {
+        combinedResults.sort((a, b) => b.viewCount - a.viewCount);
+      } else if (sort === 'date') {
+        // '최근 작성순' 선택 시 결과를 생성 날짜에 따라 내림차순 정렬
+        combinedResults.sort((a, b) => new Date(b.createdAt) - new Date(a.created_at));
+      }
+      //TODO: 예약가능, 개인학교 순 추가해야됨
+
+      setTotalPages(Math.ceil(combinedResults.length / ITEMS_PER_PAGE));
+      setCurrentPage(1); // 검색 결과를 보여줄 때는 첫 페이지로 설정
+      setSearchedPosts(combinedResults); // 검색된 게시글 목록 업데이트
+      updateDisplayedAndPagination(combinedResults); // 화면에 표시될 게시글 목록 업데이트
+    } catch (error) {
+      console.error('Error searching posts:', error);
+    }
+  };
+
+  // 처음 렌더링될 때와 sort 상태가 변경될 때 전체 게시글 불러오기
+  useEffect(() => {
+    fetchPosts();
+  }, [sort]);
+
+  useEffect(() => {
+    const newDisplayedPosts = posts.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      currentPage * ITEMS_PER_PAGE
+    );
+    setDisplayedPosts(newDisplayedPosts);
+  }, [currentPage, posts]);
+
+  useEffect(() => {
+    // 검색 결과에 대한 displayedPosts 설정
+    // searchedPosts가 있을 때만 updateDisplayedAndPagination 호출
+    if (searchedPosts.length > 0) {
+      updateDisplayedAndPagination(searchedPosts);
+    } else {
+      updateDisplayedAndPagination(posts);
+    }
+  }, [currentPage, searchedPosts, posts]);
+
+  useEffect(() => {
+    if (searchedPosts.length > 0 || posts.length > 0) {
+      let targetPosts = searchedPosts.length > 0 ? searchedPosts : posts;
+      let sortedPosts = [...targetPosts];
+
+      if (sort === 'view-counts') {
+        sortedPosts.sort((a, b) => b.viewCount - a.viewCount);
+      } else if (sort === 'date') {
+        sortedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      }
+
+      if (searchedPosts.length > 0) {
+        setSearchedPosts(sortedPosts);
+      } else {
+        setPosts(sortedPosts);
+      }
+      updateDisplayedAndPagination(sortedPosts);
+    }
+  }, [sort]);
+
+  const updateDisplayedAndPagination = (postsToUpdate) => {
+    const newDisplayedPosts = postsToUpdate.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      currentPage * ITEMS_PER_PAGE
+    );
+    setDisplayedPosts(newDisplayedPosts);
+    setTotalPages(Math.ceil(postsToUpdate.length / ITEMS_PER_PAGE));
+  };
+
+  function isSortedByViews(posts) {
+    for (let i = 0; i < posts.length - 1; i++) {
+      if (posts[i].viewCount < posts[i + 1].viewCount) {
+        // 조회수 순이 아니라면 false 반환
+        return false;
+      }
+    }
+    // 모든 검사를 통과했다면 true 반환
+    return true;
+  }
+
+  function isSortedByDate(posts) {
+    for (let i = 0; i < posts.length - 1; i++) {
+      if (new Date(posts[i].createdAt) < new Date(posts[i + 1].createdAt)) {
+        // 최근 작성순이 아니라면 false 반환
+        return false;
+      }
+    }
+    // 모든 검사를 통과했다면 true 반환
+    return true;
+  }
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleSortChange = (newSort) => {
+    setSort(newSort);
+    setCurrentPage(1); // 정렬 방식 변경 시 첫 페이지로 이동
+  };
+
+  const handleSearchInputClick = () => {
+    searchInputRef.current.focus(); // SearchInput에 포커스
+  };
+
+  // 아이템 작성 페이지로 이동
+  const goToItemPost = () => {
+    navigate('/items');
+  };
+
+  // 아이템 상세 페이지로 이동
+  // const goToItemDetail = (id) => {
+  //   navigate(`/items/${itemId}`);
+  // };
+  
   const handleModalOpen = () => {
     setIsModalOpen(true); // 모달 열기
   };
@@ -36,16 +209,18 @@ const MainPage2 = () => {
     return () => window.removeEventListener('wheel', handleWheel);
   }, [navigate]);
 
+  function formatTime(dateString) {
+    const date = new Date(dateString);
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    hours = hours < 10 ? `0${hours}` : hours;
+    minutes = minutes < 10 ? `0${minutes}` : minutes;
+    return `${hours}:${minutes}`;
+  }
+
   return (
     <>
       <GlobalStyle />
-      <SearchSection>
-        <SearchText>물건 검색</SearchText>
-        <VerticalLine />
-        <SearchInput />
-        <SearchButton />
-      </SearchSection>
-      <ItemTitle>최신 등록 아차! 물건 🎁</ItemTitle>
       <ScrollIndicators>
         <Circle active={isScrolled} onClick={() => navigate('/mainpage/1')} />
         <Circle active={!isScrolled} onClick={() => navigate('/mainpage/2')} />
@@ -53,18 +228,49 @@ const MainPage2 = () => {
         <Circle active={isScrolled} onClick={() => navigate('/mainpage/4')} />
         <Scroll />
       </ScrollIndicators>
-      <ItemGrid>
-        <ItemCard>
-          <ItemImage src="이미지 URL" alt="아이템 이미지" />
-          <ItemInfo>
-            <div>제목: 아이템 제목</div>
-            <div>비용: 아이템 비용</div>
-            <div>대여장소: 아이템 대여장소</div>
-            <div>대여가능시간: 아이템 대여가능시간</div>
-            <div>예약가능 여부: 예약 가능 여부</div>
-          </ItemInfo>
-        </ItemCard>
-      </ItemGrid>
+      <SearchSection>
+        <SearchText>물건 검색</SearchText>
+        <VerticalLine />
+        <SearchInput />
+        <SearchButton />
+      </SearchSection>
+      <ItemTitle>최신 등록 아차! 물건 🎁</ItemTitle>
+
+      <PageContainer>
+        <SortButtonsContainer>
+          <SortButton onClick={() => handleSortChange('date')} active={sort === 'date'}>
+            <ButtonImage src={sort == 'date' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+            최근 작성순
+          </SortButton>
+          <SortButton onClick={() => handleSortChange('view-counts')} active={sort === 'view-counts'}>
+            <ButtonImage src={sort == 'view-counts' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+            조회수 순
+          </SortButton>
+        </SortButtonsContainer>
+        <PostList>
+          {displayedPosts.map((post) => (
+            <PostItem key={post.id}>
+              <TitleWrapper>
+                {post.title}
+              </TitleWrapper>
+              <Cost>
+                비용 : {post.pricePerHour}원
+              </Cost>
+              <CanBorrowDateTime>
+                대여 가능 시간 : {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
+              </CanBorrowDateTime>
+              {/* <Details>
+                조회수: {post.viewCount}
+              </Details> */}
+            </PostItem>
+          ))}
+        </PostList>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </PageContainer>
     </>
   );
 };
@@ -72,33 +278,6 @@ const MainPage2 = () => {
 export default MainPage2;
 
 // 스타일 컴포넌트들
-
-const ItemGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 3열로 구성 */
-  grid-gap: 20px; /* 그리드 간격 설정 */
-`;
-
-const ItemCard = styled.div`
-  border: 2px solid #FFF; /* 흰색 테두리 추가 */
-  padding: 10px; /* 내부 여백 추가 */
-  text-align: center; /* 텍스트 가운데 정렬 */
-  color: #FFF; /* 텍스트 색상 */
-`;
-
-
-const ItemImage = styled.img`
-  width: 100px; /* 이미지의 너비 설정 */
-  height: auto; /* 이미지의 높이 자동 조정 */
-`;
-
-const ItemInfo = styled.div`
-  display: flex;
-  flex-direction: column; /* 아이템 정보를 세로로 정렬 */
-  margin-left: 10px; /* 이미지와 정보 사이의 여백 설정 */
-  color: #FFF; /* 텍스트 색상 */
-`;
-
 export const GlobalStyle = createGlobalStyle`
 html, body, #root {
   height: 100%;
@@ -108,7 +287,7 @@ html, body, #root {
   flex-direction: column;
   background-color: #000; // body 전체의 배경색을 검은색으로 설정
   overflow: hidden;
-  background-image: url('/assets/img/MainBackground.png'); // 배경 이미지 설정
+  background-image: url('/assets/img/MainBackground23.png'); // 배경 이미지 설정
   background-size: cover; // 배경 이미지가 전체를 커버하도록 설정
   background-position: center;
 }
@@ -209,10 +388,81 @@ const ItemTitle = styled.div`
   color: #FFF;
   margin-top: 4rem;
   text-align: left;
-  margin-left: 22rem;
+  margin-left: 28rem;
   font-family: "Pretendard";
   font-size: 1.5625rem;
   font-style: normal;
   font-weight: 700;
 `;
 
+const SortButtonsContainer = styled.div`
+    display: flex;
+    margin-left: 50rem;
+    margin-top: -2rem;
+`;
+const SortButton = styled.button`
+    background-color: transparent;
+    border: none;
+    margin-right: 2rem;
+    cursor:pointer;
+    color: ${props => props.active ? "#00FFE0" : "#E0E0E0"};
+    font-family: "Pretendard";
+    font-size: 0.9rem;
+    font-style: normal;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+`;
+
+const ButtonImage = styled.img`
+  width: ${({ src }) => (src.includes('Check.png') ? '1.2rem' : '0.3rem')};
+  height: ${({ src }) => (src.includes('Check.png') ? '1rem' : '0.3rem')};
+  margin-right: 0.5rem;
+`;
+
+const PageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const PostList = styled.div`
+    background-color: black;
+    color: #FFF;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px;
+    width:53%;
+    margin-right: 1rem;
+    margin-top: 0.5rem;
+`;
+
+const PostItem = styled.div`
+    padding: 1rem;
+    border: 1px solid #FFF;
+    cursor: pointer;
+    margin-top: 1rem;
+`;
+
+const TitleWrapper = styled.div`
+    font-family: "Pretendard";
+    font-size: 1.1rem;
+    font-style: normal;
+    font-weight: 600; 
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.2rem;
+`;
+
+const Cost = styled.div`
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.875rem; // 한 줄의 높이
+`;
+
+const CanBorrowDateTime = styled.div`
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+`;

@@ -6,6 +6,7 @@ import Header from './pages/Header';
 
 import MainPage2 from './pages/Home/MainPage2'; import MainPage3 from './pages/Home/MainPage3.jsx';
 
+import RentFirstPage from './pages/Rent/RentFirstPage.jsx';
 
 
 import MainPage1 from './pages/Home/MainPage1';
@@ -49,6 +50,8 @@ function App() {
             </>
             }
           />
+          {/* 대여 페이지 */}
+          <Route path="/rent/first" element={<> <Header /> <RentFirstPage /> </>}/>
           {/* 커뮤니티 */}
           <Route 
             path="/communitymain" 
