@@ -17,6 +17,7 @@ import MypageMain from './pages/Mypage/MypageMain';
 import PasswordCheck from './pages/Mypage/MyAccount/PasswordCheck';
 import AccountSettings from './pages/Mypage/MyAccount/AccountSettings';
 import CommunityMain from './pages/Community/CommunityMain';
+import RentMainPage from './pages/Rent/RentMainPage.jsx';
 
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
           />
           {/* 대여 페이지 */}
           <Route path="/rent/first" element={<> <Header /> <RentFirstPage /> </>}/>
+          <Route path="/rent/mainpage" element={<> <Header /> <RentMainPage /> </>}/>
           {/* 커뮤니티 */}
           <Route 
             path="/communitymain" 
