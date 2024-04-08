@@ -7,8 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from "../Pagination";
 import apiClient from "../../path/apiClient";
 
-//최신등록 아이템 page, 메인페이지2
-const MainPage2 = () => {
+//대여물품 메인페이지
+const RentMainPage = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,7 +18,7 @@ const MainPage2 = () => {
   const [searchedPosts, setSearchedPosts] = useState([]); // 검색된 게시글 목록
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [sort, setSort] = useState('date');
+  const [sort, setSort] = useState('date'); 
   const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
   const searchInputRef = useRef(null);
 
@@ -29,16 +29,22 @@ const MainPage2 = () => {
     let url = `/items/latest`;
 
     if (sort === 'view-counts') { //조회수 순
-      url = `/items/view-counts`;
+        url = `/items/view-counts`;
+    }
+    else if (sort === 'reservation') { //예약가능 여부 순
+      url = `/items/reservation`;
+    }
+    else if (sort === 'personOrOfficial') { //개인 or 학교 여부 순
+      url = `/items/personOrOfficial`;
     }
 
     try {
-      const response = await apiClient.get(url);
-      const totalPosts = response.data.content;
-      setPosts(totalPosts);
-      setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE)); // 전체 게시글을 기반으로 총 페이지 수 계산
+        const response = await apiClient.get(url);
+        const totalPosts = response.data.content;
+        setPosts(totalPosts);
+        setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE)); // 전체 게시글을 기반으로 총 페이지 수 계산
     } catch (error) {
-      console.error('Error fetching posts:', error);
+        console.error('Error fetching posts:', error);
     }
   };
 
@@ -72,8 +78,27 @@ const MainPage2 = () => {
       } else if (sort === 'date') {
         // '최근 작성순' 선택 시 결과를 생성 날짜에 따라 내림차순 정렬
         combinedResults.sort((a, b) => new Date(b.createdAt) - new Date(a.created_at));
-      }
-      //TODO: 예약가능, 개인학교 순 추가해야됨
+      } else if (sort === 'reservation') {
+        combinedResults.sort((a, b) => {
+            if (a.reservation === 'YES' && b.reservation === 'NO') {
+                return -1; // 'yes'가 'no'보다 우선순위를 갖도록 설정
+            } else if (a.reservation === 'NO' && b.reservation === 'YES') {
+                return 1; // 'no'가 'yes'보다 우선순위를 갖도록 설정
+            } else {
+                return 0; // 예약 가능 여부가 동일하면 순서를 유지 
+            }
+        });
+    } else if (sort === 'personOrOfficial') {
+      combinedResults.sort((a, b) => {
+        if (a.personOrOfficial === 'OFFICIAL' && b.personOrOfficial === 'PERSON') {
+          return -1; // 'OFFICIAL'이 'PERSON'보다 우선순위를 갖도록 설정
+        } else if (a.personOrOfficial === 'PERSON' && b.personOrOfficial === 'OFFICIAL') {
+          return 1; // 'PERSON'이 'OFFICIAL'보다 우선순위를 갖도록 설정
+        } else {
+          return 0;
+        }
+      });
+    }
 
       setTotalPages(Math.ceil(combinedResults.length / ITEMS_PER_PAGE));
       setCurrentPage(1); // 검색 결과를 보여줄 때는 첫 페이지로 설정
@@ -116,8 +141,28 @@ const MainPage2 = () => {
         sortedPosts.sort((a, b) => b.viewCount - a.viewCount);
       } else if (sort === 'date') {
         sortedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } 
+      else if (sort === 'reservation') {
+        sortedPosts.sort((a, b) => {
+          if (a.reservation === 'YES' && b.reservation === 'NO') {
+            return -1; // 'yes'가 'no'보다 우선순위를 갖도록 설정
+          } else if (a.reservation === 'NO' && b.reservation === 'YES') {
+            return 1; // 'no'가 'yes'보다 우선순위를 갖도록 설정
+          } else {
+            return 0; // 예약 가능 여부가 동일하면 순서를 유지 
+          }
+        });
+      } else if (sort === 'personOrOfficial') {
+        sortedPosts.sort((a, b) => {
+          if (a.personOrOfficial === 'OFFICIAL' && b.personOrOfficial === 'PERSON') {
+            return -1; // 'OFFICIAL'이 'PERSON'보다 우선순위를 갖도록 설정
+          } else if (a.personOrOfficial === 'PERSON' && b.personOrOfficial === 'OFFICIAL') {
+            return 1; // 'PERSON'이 'OFFICIAL'보다 우선순위를 갖도록 설정
+          } else {
+            return 0;
+          }
+        });
       }
-
       if (searchedPosts.length > 0) {
         setSearchedPosts(sortedPosts);
       } else {
@@ -135,28 +180,6 @@ const MainPage2 = () => {
     setDisplayedPosts(newDisplayedPosts);
     setTotalPages(Math.ceil(postsToUpdate.length / ITEMS_PER_PAGE));
   };
-
-  function isSortedByViews(posts) {
-    for (let i = 0; i < posts.length - 1; i++) {
-      if (posts[i].viewCount < posts[i + 1].viewCount) {
-        // 조회수 순이 아니라면 false 반환
-        return false;
-      }
-    }
-    // 모든 검사를 통과했다면 true 반환
-    return true;
-  }
-
-  function isSortedByDate(posts) {
-    for (let i = 0; i < posts.length - 1; i++) {
-      if (new Date(posts[i].createdAt) < new Date(posts[i + 1].createdAt)) {
-        // 최근 작성순이 아니라면 false 반환
-        return false;
-      }
-    }
-    // 모든 검사를 통과했다면 true 반환
-    return true;
-  }
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -180,7 +203,7 @@ const MainPage2 = () => {
   // const goToItemDetail = (id) => {
   //   navigate(`/items/${itemId}`);
   // };
-
+  
   const handleModalOpen = () => {
     setIsModalOpen(true); // 모달 열기
   };
@@ -188,20 +211,6 @@ const MainPage2 = () => {
   const handleModalClose = () => {
     setIsModalOpen(false); // 모달 닫기
   };
-
-  useEffect(() => {
-    const handleWheel = (e) => {
-      if (e.deltaY > 0) { // 마우스 휠을 아래로 스크롤할 경우
-        navigate('/mainpage/3');
-      } else if (e.deltaY < 0) { // 마우스 휠을 위로 스크롤할 경우
-        navigate('/mainpage/1');
-      }
-    };
-
-    window.addEventListener('wheel', handleWheel);
-
-    return () => window.removeEventListener('wheel', handleWheel);
-  }, [navigate]);
 
   function formatTime(dateString) {
     const date = new Date(dateString);
@@ -212,46 +221,67 @@ const MainPage2 = () => {
     return `${hours}:${minutes}`;
   }
 
+
   return (
     <>
       <GlobalStyle />
-      <ScrollIndicators>
-        <Circle active={isScrolled} onClick={() => navigate('/mainpage/1')} />
-        <Circle active={!isScrolled} onClick={() => navigate('/mainpage/2')} />
-        <Circle active={isScrolled} onClick={() => navigate('/mainpage/3')} />
-        <Circle active={isScrolled} onClick={() => navigate('/mainpage/4')} />
-        <Scroll />
-      </ScrollIndicators>
       <SearchSection>
         <SearchText>물건 검색</SearchText>
         <VerticalLine />
         <SearchInput />
         <SearchButton />
       </SearchSection>
-      <ItemTitle>최신 등록 아차! 물건 🎁</ItemTitle>
+      <ItemTitle>000 검색결과 (총 숫자 연동)</ItemTitle>
 
       <PageContainer>
+        <SortButtonsContainer>
+          <SortButton onClick={() => handleSortChange('date')} active={sort === 'date'}>
+            <ButtonImage src={sort == 'date' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+            최근 작성순
+          </SortButton>
+          <SortButton onClick={() => handleSortChange('view-counts')} active={sort === 'view-counts'}>
+            <ButtonImage src={sort == 'view-counts' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+            조회수 순
+          </SortButton>
+          <SortButton onClick={() => handleSortChange('reservation')} active={sort === 'reservation'}>
+            <ButtonImage src={sort == 'reservation' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+            예약 가능
+          </SortButton>
+          <SortButton onClick={() => handleSortChange('personOrOfficial')} active={sort === 'personOrOfficial'}>
+            <ButtonImage src={sort == 'personOrOfficial' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+            학교 대여
+          </SortButton>
+        </SortButtonsContainer>
         <PostList>
           {displayedPosts.map((post) => (
             <PostItem key={post.id}>
               <ImageWrapper>
-                <img src={post.imageUrls[0]} alt="Item" /> {/* 이미지 렌더링 */}
+                <img src={post.imageUrls[0]} alt="Item" />
               </ImageWrapper>
-              <ContentWrapper>
-                <TitleWrapper>
-                  {post.title}
-                </TitleWrapper>
-                <Cost>
-                  비용 : {post.pricePerHour}원
-                </Cost>
-                <CanBorrowDateTime>
-                  대여 가능 시간 : {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
-                </CanBorrowDateTime>
-              </ContentWrapper>
+              <div>
+              <TitleWrapper>
+                {post.title}
+              </TitleWrapper>
+              <Cost>
+                비용 {post.pricePerHour}원
+              </Cost>
+              <RentPlaceWrapper>
+                <RentPlace>대여 장소</RentPlace>
+                {post.personOrOfficial === 'OFFICIAL' ? <RentPlaceColor>{post.borrowPlace}</RentPlaceColor> : <NonColor>{post.borrowPlace}</NonColor>}
+              </RentPlaceWrapper>
+              <CanBorrowDateTime>
+                대여 가능 시간 {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
+              </CanBorrowDateTime>
+              <CanBorrowDateTime>
+                {post.reservation === 'YES' ? <ReservationAvailable>예약 가능</ReservationAvailable> : <ReservationUnavailable>예약 불가</ReservationUnavailable>}
+              </CanBorrowDateTime>
+              {/* <Details>
+                조회수: {post.viewCount}
+              </Details> */}
+              </div>
             </PostItem>
           ))}
         </PostList>
-        
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -262,7 +292,7 @@ const MainPage2 = () => {
   );
 };
 
-export default MainPage2;
+export default RentMainPage;
 
 // 스타일 컴포넌트들
 export const GlobalStyle = createGlobalStyle`
@@ -274,8 +304,6 @@ html, body, #root {
   flex-direction: column;
   background-color: #000; // body 전체의 배경색을 검은색으로 설정
   overflow: hidden;
-  background-image: url('/assets/img/MainBackground23.png'); // 배경 이미지 설정
-  background-size: cover; // 배경 이미지가 전체를 커버하도록 설정
   background-position: center;
 }
 `;
@@ -321,7 +349,6 @@ const SearchInput = styled.input`
   font-size: 1.3rem;
   font-weight: 300;
   color: #fff;
-
   &:focus {
     outline: none; // 입력 시 테두리 없앰
   }
@@ -341,39 +368,9 @@ const SearchButton = styled.button`
   background-size: contain; // 이미지 사이즈를 버튼에 맞게 조정
 `;
 
-const Circle = styled.div`
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: ${props => props.active ? '#D6F800' : '#F8F8F8'};
-  margin: 0.3rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-`;
-
-const Scroll = styled.div`
-  width: 4rem;
-  height: 2rem;
-  background-image: url('/assets/img/Scroll.png'); // 배경 이미지 설정
-  background-repeat: no-repeat;
-  background-size: contain; // 배경 이미지 크기 조절
-  background-position: center; // 배경 이미지 위치
-  margin-left: -2.2rem;
-  margin-top: 0.5rem;
-`;
-
-const ScrollIndicators = styled.div`
-  position: fixed;
-  margin-left: 15rem;
-  top: 60%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-`;
-
 const ItemTitle = styled.div` 
   color: #FFF;
-  margin-top: 4rem;
+  margin-top: 2.8rem;
   text-align: left;
   margin-left: 28rem;
   font-family: "Pretendard";
@@ -382,16 +379,35 @@ const ItemTitle = styled.div`
   font-weight: 700;
 `;
 
+const SortButtonsContainer = styled.div`
+    display: flex;
+    margin-left: 35rem;
+    margin-top: -2rem;
+`;
+const SortButton = styled.button`
+    background-color: transparent;
+    border: none;
+    margin-right: 2rem;
+    cursor:pointer;
+    color: ${props => props.active ? "#00FFE0" : "#E0E0E0"};
+    font-family: "Pretendard";
+    font-size: 0.9rem;
+    font-style: normal;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+`;
+
+const ButtonImage = styled.img`
+  width: ${({ src }) => (src.includes('Check.png') ? '1.2rem' : '0.3rem')};
+  height: ${({ src }) => (src.includes('Check.png') ? '1rem' : '0.3rem')};
+  margin-right: 0.5rem;
+`;
+
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-`;
-
-const ContentWrapper = styled.div`
-    display: flex;
-    flex-direction: column;
-    margin-left: 1rem;
 `;
 
 const PostList = styled.div`
@@ -406,7 +422,7 @@ const PostList = styled.div`
 `;
 
 const PostItem = styled.div`
-    display: flex;
+    display: flex; /* 요소들을 가로로 나란히 정렬하기 위해 flex 사용 */
     padding: 1rem;
     border: 1px solid #FFF;
     cursor: pointer;
@@ -429,7 +445,6 @@ const Cost = styled.div`
     font-style: normal;
     font-weight: 400;
     line-height: 1rem; // 한 줄의 높이
-    margin-top: 0.65rem;
     margin-left: 2rem;
 `;
 
@@ -438,17 +453,58 @@ const CanBorrowDateTime = styled.div`
     font-style: normal;
     font-weight: 400;
     margin-left: 2rem;
-    margin-top: 0.65rem;
+`;
+
+const RentPlaceWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    margin-left: 2rem;
+`;
+
+const RentPlace = styled.div`
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    margin-right: 0.5rem; /* 간격 조정 */
+`;
+
+const RentPlaceColor = styled.div`
+    color: #95F702;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+`;
+
+const NonColor = styled.div`
+    color: #fff;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+`;
+
+const ReservationAvailable = styled.span`
+  color: #B9E0FD; 
+`;
+
+const ReservationUnavailable = styled.span`
+  color: #DB4455; // 빨간색
 `;
 
 const ImageWrapper = styled.div`
   border: 1px solid #fff;
-  width: 90px; /* 원하는 너비 */
-  height: 90px; /* 원하는 높이 */
+  width: 100px; /* 원하는 너비 */
+  height: 100px; /* 원하는 높이 */
   overflow: hidden; /* 이미지가 컨테이너를 벗어나면 숨깁니다. */
   img {
     width: 100%; /* 부모 요소의 100%로 이미지 크기를 조정합니다. */
     height: 100%; /* 부모 요소의 100%로 이미지 크기를 조정합니다. */
     object-fit: cover; /* 이미지가 비율을 유지하면서 컨테이너를 채우도록 합니다. */
   }
+`;
+
+const RentingImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1; /* 이미지 위에 위치하도록 설정 */
 `;

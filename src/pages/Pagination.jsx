@@ -35,7 +35,7 @@ const ArrowImage = styled.img`
   width: 20px; 
   height: 20px; 
 `;
-
+// 아이템 리스트 1,2,3,4,5 페이지 이동 코드
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   return (
     <PaginationContainer>
