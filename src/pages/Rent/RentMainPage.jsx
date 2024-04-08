@@ -31,12 +31,12 @@ const RentMainPage = () => {
     if (sort === 'view-counts') { //조회수 순
         url = `/items/view-counts`;
     }
-    // else if (sort === 'reservation') { //예약가능 여부 순
-    //   url = `/items/reservation`;
-    // }
-    // else if (sort === 'personOrOfficial') { //개인 or 학교 여부 순
-    //   url = `/items/personOrOfficial`;
-    // }
+    else if (sort === 'reservation') { //예약가능 여부 순
+      url = `/items/reservation`;
+    }
+    else if (sort === 'personOrOfficial') { //개인 or 학교 여부 순
+      url = `/items/personOrOfficial`;
+    }
 
     try {
         const response = await apiClient.get(url);
@@ -78,8 +78,27 @@ const RentMainPage = () => {
       } else if (sort === 'date') {
         // '최근 작성순' 선택 시 결과를 생성 날짜에 따라 내림차순 정렬
         combinedResults.sort((a, b) => new Date(b.createdAt) - new Date(a.created_at));
-      }
-      //TODO: 예약가능, 개인학교 순 추가해야됨
+      } else if (sort === 'reservation') {
+        combinedResults.sort((a, b) => {
+            if (a.reservation === 'YES' && b.reservation === 'NO') {
+                return -1; // 'yes'가 'no'보다 우선순위를 갖도록 설정
+            } else if (a.reservation === 'NO' && b.reservation === 'YES') {
+                return 1; // 'no'가 'yes'보다 우선순위를 갖도록 설정
+            } else {
+                return 0; // 예약 가능 여부가 동일하면 순서를 유지 
+            }
+        });
+    } else if (sort === 'personOrOfficial') {
+      combinedResults.sort((a, b) => {
+        if (a.personOrOfficial === 'OFFICIAL' && b.personOrOfficial === 'PERSON') {
+          return -1; // 'OFFICIAL'이 'PERSON'보다 우선순위를 갖도록 설정
+        } else if (a.personOrOfficial === 'PERSON' && b.personOrOfficial === 'OFFICIAL') {
+          return 1; // 'PERSON'이 'OFFICIAL'보다 우선순위를 갖도록 설정
+        } else {
+          return 0;
+        }
+      });
+    }
 
       setTotalPages(Math.ceil(combinedResults.length / ITEMS_PER_PAGE));
       setCurrentPage(1); // 검색 결과를 보여줄 때는 첫 페이지로 설정
@@ -122,8 +141,28 @@ const RentMainPage = () => {
         sortedPosts.sort((a, b) => b.viewCount - a.viewCount);
       } else if (sort === 'date') {
         sortedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } 
+      else if (sort === 'reservation') {
+        sortedPosts.sort((a, b) => {
+          if (a.reservation === 'YES' && b.reservation === 'NO') {
+            return -1; // 'yes'가 'no'보다 우선순위를 갖도록 설정
+          } else if (a.reservation === 'NO' && b.reservation === 'YES') {
+            return 1; // 'no'가 'yes'보다 우선순위를 갖도록 설정
+          } else {
+            return 0; // 예약 가능 여부가 동일하면 순서를 유지 
+          }
+        });
+      } else if (sort === 'personOrOfficial') {
+        sortedPosts.sort((a, b) => {
+          if (a.personOrOfficial === 'OFFICIAL' && b.personOrOfficial === 'PERSON') {
+            return -1; // 'OFFICIAL'이 'PERSON'보다 우선순위를 갖도록 설정
+          } else if (a.personOrOfficial === 'PERSON' && b.personOrOfficial === 'OFFICIAL') {
+            return 1; // 'PERSON'이 'OFFICIAL'보다 우선순위를 갖도록 설정
+          } else {
+            return 0;
+          }
+        });
       }
-
       if (searchedPosts.length > 0) {
         setSearchedPosts(sortedPosts);
       } else {
@@ -141,28 +180,6 @@ const RentMainPage = () => {
     setDisplayedPosts(newDisplayedPosts);
     setTotalPages(Math.ceil(postsToUpdate.length / ITEMS_PER_PAGE));
   };
-
-  function isSortedByViews(posts) {
-    for (let i = 0; i < posts.length - 1; i++) {
-      if (posts[i].viewCount < posts[i + 1].viewCount) {
-        // 조회수 순이 아니라면 false 반환
-        return false;
-      }
-    }
-    // 모든 검사를 통과했다면 true 반환
-    return true;
-  }
-
-  function isSortedByDate(posts) {
-    for (let i = 0; i < posts.length - 1; i++) {
-      if (new Date(posts[i].createdAt) < new Date(posts[i + 1].createdAt)) {
-        // 최근 작성순이 아니라면 false 반환
-        return false;
-      }
-    }
-    // 모든 검사를 통과했다면 true 반환
-    return true;
-  }
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -204,6 +221,7 @@ const RentMainPage = () => {
     return `${hours}:${minutes}`;
   }
 
+
   return (
     <>
       <GlobalStyle />
@@ -225,12 +243,12 @@ const RentMainPage = () => {
             <ButtonImage src={sort == 'view-counts' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
             조회수 순
           </SortButton>
-          <SortButton onClick={() => handleSortChange('view-counts')} active={sort === 'view-counts'}>
-            <ButtonImage src={sort == 'view-counts' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+          <SortButton onClick={() => handleSortChange('reservation')} active={sort === 'reservation'}>
+            <ButtonImage src={sort == 'reservation' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
             예약 가능
           </SortButton>
-          <SortButton onClick={() => handleSortChange('view-counts')} active={sort === 'view-counts'}>
-            <ButtonImage src={sort == 'view-counts' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+          <SortButton onClick={() => handleSortChange('personOrOfficial')} active={sort === 'personOrOfficial'}>
+            <ButtonImage src={sort == 'personOrOfficial' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
             학교 대여
           </SortButton>
         </SortButtonsContainer>
@@ -241,16 +259,19 @@ const RentMainPage = () => {
                 {post.title}
               </TitleWrapper>
               <Cost>
-                비용 : {post.pricePerHour}원
+                비용 {post.pricePerHour}원
               </Cost>
-              <CanBorrowDateTime>
-                대여 장소 {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
-              </CanBorrowDateTime>
+              <RentPlaceWrapper>
+                <RentPlace>대여 장소</RentPlace>
+                {/* <RentPlaceColor>{post.borrowPlace}</RentPlaceColor> */}
+                {post.personOrOfficial === 'OFFICIAL' ? <RentPlaceColor>{post.borrowPlace}</RentPlaceColor> : <NonColor>{post.borrowPlace}</NonColor>}
+              </RentPlaceWrapper>
               <CanBorrowDateTime>
                 대여 가능 시간 {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
               </CanBorrowDateTime>
               <CanBorrowDateTime>
-                예약 여부 {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
+                {/* {post.reservation === 'YES' ? '예약 가능' : '예약 불가'} */}
+                {post.reservation === 'YES' ? <ReservationAvailable>예약 가능</ReservationAvailable> : <ReservationUnavailable>예약 불가</ReservationUnavailable>}
               </CanBorrowDateTime>
               {/* <Details>
                 조회수: {post.viewCount}
@@ -425,4 +446,38 @@ const CanBorrowDateTime = styled.div`
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
+`;
+
+const RentPlaceWrapper = styled.div`
+    display: flex;
+    align-items: center;
+`;
+
+const RentPlace = styled.div`
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    margin-right: 0.5rem; /* 간격 조정 */
+`;
+
+const RentPlaceColor = styled.div`
+    color: #95F702;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+`;
+
+const NonColor = styled.div`
+    color: #fff;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+`;
+
+const ReservationAvailable = styled.span`
+  color: #B9E0FD; 
+`;
+
+const ReservationUnavailable = styled.span`
+  color: #DB4455; // 빨간색
 `;

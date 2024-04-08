@@ -31,12 +31,6 @@ const MainPage2 = () => {
     if (sort === 'view-counts') { //조회수 순
         url = `/items/view-counts`;
     }
-    // else if (sort === 'reservation') { //예약가능 여부 순
-    //   url = `/items/reservation`;
-    // }
-    // else if (sort === 'personOrOfficial') { //개인 or 학교 여부 순
-    //   url = `/items/personOrOfficial`;
-    // }
 
     try {
         const response = await apiClient.get(url);
