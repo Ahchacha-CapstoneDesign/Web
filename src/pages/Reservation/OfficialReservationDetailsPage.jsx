@@ -139,7 +139,7 @@ const BackButton = styled.button`
 // 페이지 제목
 const Title = styled.h1`
   color: #fff;
-  margin: 0; // 기본 마진 제거
+  margin-left: 3.5rem; // 기본 마진 제거
   padding: 0 2rem; // 좌우 패딩
 `;
 
@@ -199,6 +199,7 @@ const CheckboxLabel = styled.label`
 const TextLabel = styled.span`
   flex: 1; // 체크박스와 텍스트 사이의 간격을 유지하기 위해
   font-weight: bold;
+  margin-left:9rem;
   text-align: left; // 텍스트를 왼쪽 정렬
 `;
 
