@@ -256,7 +256,7 @@ const RentMainPage = () => {
           {displayedPosts.map((post) => (
             <PostItem key={post.id}>
               <ImageWrapper>
-                <img src={post.imageUrls[0]} alt="Item" /> {/* 이미지 렌더링 */}
+                <img src={post.imageUrls[0]} alt="Item" />
               </ImageWrapper>
               <div>
               <TitleWrapper>
@@ -500,4 +500,11 @@ const ImageWrapper = styled.div`
     height: 100%; /* 부모 요소의 100%로 이미지 크기를 조정합니다. */
     object-fit: cover; /* 이미지가 비율을 유지하면서 컨테이너를 채우도록 합니다. */
   }
+`;
+
+const RentingImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1; /* 이미지 위에 위치하도록 설정 */
 `;
