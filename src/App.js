@@ -4,12 +4,9 @@ import Login from './pages/Login/Login';
 import SettingNickname from './pages/Login/SettingNickname';
 import Header from './pages/Header';
 
-import MainPage2 from './pages/Home/MainPage2'; import MainPage3 from './pages/Home/MainPage3.jsx';
-
-import RentFirstPage from './pages/Rent/RentFirstPage.jsx';
-
-
 import MainPage1 from './pages/Home/MainPage1';
+import MainPage2 from './pages/Home/MainPage2';
+import MainPage3 from './pages/Home/MainPage3.jsx';
 import MainPage4 from './pages/Home/MainPage4';
 import Loading from './pages/Login/Loading';
 import Sidebar from './pages/Mypage/Sidebar';
@@ -18,7 +15,7 @@ import PasswordCheck from './pages/Mypage/MyAccount/PasswordCheck';
 import AccountSettings from './pages/Mypage/MyAccount/AccountSettings';
 import CommunityMain from './pages/Community/CommunityMain';
 import RentMainPage from './pages/Rent/RentMainPage.jsx';
-
+import RentFirstPage from './pages/Rent/RentFirstPage.jsx';
 
 function App() {
   return (
