@@ -255,6 +255,10 @@ const RentMainPage = () => {
         <PostList>
           {displayedPosts.map((post) => (
             <PostItem key={post.id}>
+              <ImageWrapper>
+                <img src={post.imageUrls[0]} alt="Item" /> {/* 이미지 렌더링 */}
+              </ImageWrapper>
+              <div>
               <TitleWrapper>
                 {post.title}
               </TitleWrapper>
@@ -263,19 +267,18 @@ const RentMainPage = () => {
               </Cost>
               <RentPlaceWrapper>
                 <RentPlace>대여 장소</RentPlace>
-                {/* <RentPlaceColor>{post.borrowPlace}</RentPlaceColor> */}
                 {post.personOrOfficial === 'OFFICIAL' ? <RentPlaceColor>{post.borrowPlace}</RentPlaceColor> : <NonColor>{post.borrowPlace}</NonColor>}
               </RentPlaceWrapper>
               <CanBorrowDateTime>
                 대여 가능 시간 {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
               </CanBorrowDateTime>
               <CanBorrowDateTime>
-                {/* {post.reservation === 'YES' ? '예약 가능' : '예약 불가'} */}
                 {post.reservation === 'YES' ? <ReservationAvailable>예약 가능</ReservationAvailable> : <ReservationUnavailable>예약 불가</ReservationUnavailable>}
               </CanBorrowDateTime>
               {/* <Details>
                 조회수: {post.viewCount}
               </Details> */}
+              </div>
             </PostItem>
           ))}
         </PostList>
@@ -419,6 +422,7 @@ const PostList = styled.div`
 `;
 
 const PostItem = styled.div`
+    display: flex; /* 요소들을 가로로 나란히 정렬하기 위해 flex 사용 */
     padding: 1rem;
     border: 1px solid #FFF;
     cursor: pointer;
@@ -433,6 +437,7 @@ const TitleWrapper = styled.div`
     display: flex;
     align-items: center;
     margin-bottom: 0.2rem;
+    margin-left: 2rem;
 `;
 
 const Cost = styled.div`
@@ -440,17 +445,20 @@ const Cost = styled.div`
     font-style: normal;
     font-weight: 400;
     line-height: 1rem; // 한 줄의 높이
+    margin-left: 2rem;
 `;
 
 const CanBorrowDateTime = styled.div`
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
+    margin-left: 2rem;
 `;
 
 const RentPlaceWrapper = styled.div`
     display: flex;
     align-items: center;
+    margin-left: 2rem;
 `;
 
 const RentPlace = styled.div`
@@ -480,4 +488,16 @@ const ReservationAvailable = styled.span`
 
 const ReservationUnavailable = styled.span`
   color: #DB4455; // 빨간색
+`;
+
+const ImageWrapper = styled.div`
+  border: 1px solid #fff;
+  width: 100px; /* 원하는 너비 */
+  height: 100px; /* 원하는 높이 */
+  overflow: hidden; /* 이미지가 컨테이너를 벗어나면 숨깁니다. */
+  img {
+    width: 100%; /* 부모 요소의 100%로 이미지 크기를 조정합니다. */
+    height: 100%; /* 부모 요소의 100%로 이미지 크기를 조정합니다. */
+    object-fit: cover; /* 이미지가 비율을 유지하면서 컨테이너를 채우도록 합니다. */
+  }
 `;

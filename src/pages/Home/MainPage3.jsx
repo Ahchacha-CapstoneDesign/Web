@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from "../Pagination";
 import apiClient from "../../path/apiClient";
 
-//대여많이한 순 추천, 메인페이지3
+//최신등록 아이템 page, 메인페이지2
 const MainPage3 = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,7 +18,7 @@ const MainPage3 = () => {
   const [searchedPosts, setSearchedPosts] = useState([]); // 검색된 게시글 목록
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [sort, setSort] = useState('date'); 
+  const [sort, setSort] = useState('date');
   const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
   const searchInputRef = useRef(null);
 
@@ -29,22 +29,16 @@ const MainPage3 = () => {
     let url = `/items/latest`;
 
     if (sort === 'view-counts') { //조회수 순
-        url = `/items/view-counts`;
+      url = `/items/view-counts`;
     }
-    // else if (sort === 'reservation') { //예약가능 여부 순
-    //   url = `/items/reservation`;
-    // }
-    // else if (sort === 'personOrOfficial') { //개인 or 학교 여부 순
-    //   url = `/items/personOrOfficial`;
-    // }
 
     try {
-        const response = await apiClient.get(url);
-        const totalPosts = response.data.content;
-        setPosts(totalPosts);
-        setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE)); // 전체 게시글을 기반으로 총 페이지 수 계산
+      const response = await apiClient.get(url);
+      const totalPosts = response.data.content;
+      setPosts(totalPosts);
+      setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE)); // 전체 게시글을 기반으로 총 페이지 수 계산
     } catch (error) {
-        console.error('Error fetching posts:', error);
+      console.error('Error fetching posts:', error);
     }
   };
 
@@ -79,7 +73,6 @@ const MainPage3 = () => {
         // '최근 작성순' 선택 시 결과를 생성 날짜에 따라 내림차순 정렬
         combinedResults.sort((a, b) => new Date(b.createdAt) - new Date(a.created_at));
       }
-      //TODO: 예약가능, 개인학교 순 추가해야됨
 
       setTotalPages(Math.ceil(combinedResults.length / ITEMS_PER_PAGE));
       setCurrentPage(1); // 검색 결과를 보여줄 때는 첫 페이지로 설정
@@ -221,13 +214,6 @@ const MainPage3 = () => {
   return (
     <>
       <GlobalStyle />
-      <SearchSection>
-        <SearchText>물건 검색</SearchText>
-        <VerticalLine />
-        <SearchInput />
-        <SearchButton />
-      </SearchSection>
-      <ItemTitle>OOO님을 위한 물건 추천 🎀</ItemTitle>
       <ScrollIndicators>
         <Circle active={isScrolled} onClick={() => navigate('/mainpage/1')} />
         <Circle active={isScrolled} onClick={() => navigate('/mainpage/2')} />
@@ -235,23 +221,36 @@ const MainPage3 = () => {
         <Circle active={isScrolled} onClick={() => navigate('/mainpage/4')} />
         <Scroll />
       </ScrollIndicators>
+      <SearchSection>
+        <SearchText>물건 검색</SearchText>
+        <VerticalLine />
+        <SearchInput />
+        <SearchButton />
+      </SearchSection>
+      <ItemTitle>OOO님을 위한 물건 추천 🎀</ItemTitle>
 
       <PageContainer>
         <PostList>
           {displayedPosts.map((post) => (
             <PostItem key={post.id}>
-              <TitleWrapper>
-                {post.title}
-              </TitleWrapper>
-              <Cost>
-                비용 : {post.pricePerHour}원
-              </Cost>
-              <CanBorrowDateTime>
-                대여 가능 시간 : {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
-              </CanBorrowDateTime>
+              <ImageWrapper>
+                <img src={post.imageUrls[0]} alt="Item" /> {/* 이미지 렌더링 */}
+              </ImageWrapper>
+              <ContentWrapper>
+                <TitleWrapper>
+                  {post.title}
+                </TitleWrapper>
+                <Cost>
+                  비용 : {post.pricePerHour}원
+                </Cost>
+                <CanBorrowDateTime>
+                  대여 가능 시간 : {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
+                </CanBorrowDateTime>
+              </ContentWrapper>
             </PostItem>
           ))}
         </PostList>
+        
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -265,33 +264,6 @@ const MainPage3 = () => {
 export default MainPage3;
 
 // 스타일 컴포넌트들
-
-const ItemGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 3열로 구성 */
-  grid-gap: 20px; /* 그리드 간격 설정 */
-`;
-
-const ItemCard = styled.div`
-  border: 2px solid #FFF; /* 흰색 테두리 추가 */
-  padding: 10px; /* 내부 여백 추가 */
-  text-align: center; /* 텍스트 가운데 정렬 */
-  color: #FFF; /* 텍스트 색상 */
-`;
-
-
-const ItemImage = styled.img`
-  width: 100px; /* 이미지의 너비 설정 */
-  height: auto; /* 이미지의 높이 자동 조정 */
-`;
-
-const ItemInfo = styled.div`
-  display: flex;
-  flex-direction: column; /* 아이템 정보를 세로로 정렬 */
-  margin-left: 10px; /* 이미지와 정보 사이의 여백 설정 */
-  color: #FFF; /* 텍스트 색상 */
-`;
-
 export const GlobalStyle = createGlobalStyle`
 html, body, #root {
   height: 100%;
@@ -301,7 +273,7 @@ html, body, #root {
   flex-direction: column;
   background-color: #000; // body 전체의 배경색을 검은색으로 설정
   overflow: hidden;
-  background-image: url('/assets/img/MainBackground.png'); // 배경 이미지 설정
+  background-image: url('/assets/img/MainBackground23.png'); // 배경 이미지 설정
   background-size: cover; // 배경 이미지가 전체를 커버하도록 설정
   background-position: center;
 }
@@ -415,6 +387,12 @@ const PageContainer = styled.div`
   align-items: center;
 `;
 
+const ContentWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    margin-left: 1rem;
+`;
+
 const PostList = styled.div`
     background-color: black;
     color: #FFF;
@@ -427,6 +405,7 @@ const PostList = styled.div`
 `;
 
 const PostItem = styled.div`
+    display: flex;
     padding: 1rem;
     border: 1px solid #FFF;
     cursor: pointer;
@@ -441,18 +420,34 @@ const TitleWrapper = styled.div`
     display: flex;
     align-items: center;
     margin-bottom: 0.2rem;
+    margin-left: 2rem;
 `;
 
 const Cost = styled.div`
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
-    line-height: 1.875rem; // 한 줄의 높이
+    line-height: 1rem; // 한 줄의 높이
+    margin-top: 0.65rem;
+    margin-left: 2rem;
 `;
 
 const CanBorrowDateTime = styled.div`
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
+    margin-left: 2rem;
+    margin-top: 0.65rem;
 `;
 
+const ImageWrapper = styled.div`
+  border: 1px solid #fff;
+  width: 90px; /* 원하는 너비 */
+  height: 90px; /* 원하는 높이 */
+  overflow: hidden; /* 이미지가 컨테이너를 벗어나면 숨깁니다. */
+  img {
+    width: 100%; /* 부모 요소의 100%로 이미지 크기를 조정합니다. */
+    height: 100%; /* 부모 요소의 100%로 이미지 크기를 조정합니다. */
+    object-fit: cover; /* 이미지가 비율을 유지하면서 컨테이너를 채우도록 합니다. */
+  }
+`;

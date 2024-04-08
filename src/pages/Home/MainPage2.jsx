@@ -18,7 +18,7 @@ const MainPage2 = () => {
   const [searchedPosts, setSearchedPosts] = useState([]); // 검색된 게시글 목록
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [sort, setSort] = useState('date'); 
+  const [sort, setSort] = useState('date');
   const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
   const searchInputRef = useRef(null);
 
@@ -29,16 +29,16 @@ const MainPage2 = () => {
     let url = `/items/latest`;
 
     if (sort === 'view-counts') { //조회수 순
-        url = `/items/view-counts`;
+      url = `/items/view-counts`;
     }
 
     try {
-        const response = await apiClient.get(url);
-        const totalPosts = response.data.content;
-        setPosts(totalPosts);
-        setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE)); // 전체 게시글을 기반으로 총 페이지 수 계산
+      const response = await apiClient.get(url);
+      const totalPosts = response.data.content;
+      setPosts(totalPosts);
+      setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE)); // 전체 게시글을 기반으로 총 페이지 수 계산
     } catch (error) {
-        console.error('Error fetching posts:', error);
+      console.error('Error fetching posts:', error);
     }
   };
 
@@ -180,7 +180,7 @@ const MainPage2 = () => {
   // const goToItemDetail = (id) => {
   //   navigate(`/items/${itemId}`);
   // };
-  
+
   const handleModalOpen = () => {
     setIsModalOpen(true); // 모달 열기
   };
@@ -231,34 +231,27 @@ const MainPage2 = () => {
       <ItemTitle>최신 등록 아차! 물건 🎁</ItemTitle>
 
       <PageContainer>
-        {/* <SortButtonsContainer>
-          <SortButton onClick={() => handleSortChange('date')} active={sort === 'date'}>
-            <ButtonImage src={sort == 'date' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
-            최근 작성순
-          </SortButton>
-          <SortButton onClick={() => handleSortChange('view-counts')} active={sort === 'view-counts'}>
-            <ButtonImage src={sort == 'view-counts' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
-            조회수 순
-          </SortButton>
-        </SortButtonsContainer> */}
         <PostList>
           {displayedPosts.map((post) => (
             <PostItem key={post.id}>
-              <TitleWrapper>
-                {post.title}
-              </TitleWrapper>
-              <Cost>
-                비용 : {post.pricePerHour}원
-              </Cost>
-              <CanBorrowDateTime>
-                대여 가능 시간 : {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
-              </CanBorrowDateTime>
-              {/* <Details>
-                조회수: {post.viewCount}
-              </Details> */}
+              <ImageWrapper>
+                <img src={post.imageUrls[0]} alt="Item" /> {/* 이미지 렌더링 */}
+              </ImageWrapper>
+              <ContentWrapper>
+                <TitleWrapper>
+                  {post.title}
+                </TitleWrapper>
+                <Cost>
+                  비용 : {post.pricePerHour}원
+                </Cost>
+                <CanBorrowDateTime>
+                  대여 가능 시간 : {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
+                </CanBorrowDateTime>
+              </ContentWrapper>
             </PostItem>
           ))}
         </PostList>
+        
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -389,35 +382,16 @@ const ItemTitle = styled.div`
   font-weight: 700;
 `;
 
-const SortButtonsContainer = styled.div`
-    display: flex;
-    margin-left: 50rem;
-    margin-top: -2rem;
-`;
-const SortButton = styled.button`
-    background-color: transparent;
-    border: none;
-    margin-right: 2rem;
-    cursor:pointer;
-    color: ${props => props.active ? "#00FFE0" : "#E0E0E0"};
-    font-family: "Pretendard";
-    font-size: 0.9rem;
-    font-style: normal;
-    font-weight: 300;
-    display: flex;
-    align-items: center;
-`;
-
-const ButtonImage = styled.img`
-  width: ${({ src }) => (src.includes('Check.png') ? '1.2rem' : '0.3rem')};
-  height: ${({ src }) => (src.includes('Check.png') ? '1rem' : '0.3rem')};
-  margin-right: 0.5rem;
-`;
-
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+`;
+
+const ContentWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    margin-left: 1rem;
 `;
 
 const PostList = styled.div`
@@ -432,6 +406,7 @@ const PostList = styled.div`
 `;
 
 const PostItem = styled.div`
+    display: flex;
     padding: 1rem;
     border: 1px solid #FFF;
     cursor: pointer;
@@ -446,17 +421,34 @@ const TitleWrapper = styled.div`
     display: flex;
     align-items: center;
     margin-bottom: 0.2rem;
+    margin-left: 2rem;
 `;
 
 const Cost = styled.div`
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
-    line-height: 1.875rem; // 한 줄의 높이
+    line-height: 1rem; // 한 줄의 높이
+    margin-top: 0.65rem;
+    margin-left: 2rem;
 `;
 
 const CanBorrowDateTime = styled.div`
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
+    margin-left: 2rem;
+    margin-top: 0.65rem;
+`;
+
+const ImageWrapper = styled.div`
+  border: 1px solid #fff;
+  width: 90px; /* 원하는 너비 */
+  height: 90px; /* 원하는 높이 */
+  overflow: hidden; /* 이미지가 컨테이너를 벗어나면 숨깁니다. */
+  img {
+    width: 100%; /* 부모 요소의 100%로 이미지 크기를 조정합니다. */
+    height: 100%; /* 부모 요소의 100%로 이미지 크기를 조정합니다. */
+    object-fit: cover; /* 이미지가 비율을 유지하면서 컨테이너를 채우도록 합니다. */
+  }
 `;
