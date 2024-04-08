@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from "../Pagination";
 import apiClient from "../../path/apiClient";
 
-//최신등록 아이템 page, 메인페이지2
+//대여물품 메인페이지
 const RentMainPage = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
