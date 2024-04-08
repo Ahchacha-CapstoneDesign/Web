@@ -16,6 +16,7 @@ import MypageMain from './pages/Mypage/MypageMain';
 import PasswordCheck from './pages/Mypage/MyAccount/PasswordCheck';
 import AccountSettings from './pages/Mypage/MyAccount/AccountSettings';
 import CommunityMain from './pages/Community/CommunityMain';
+import PostCreationPage from './pages/Community/Posting.jsx';
 
 
 function App() {
@@ -51,10 +52,18 @@ function App() {
           />
           {/* 커뮤니티 */}
           <Route 
-            path="/communitymain" 
+            path="/community/main" 
             element={
             <>
               <Header /> <CommunityMain />
+            </>
+            }
+          />
+          <Route 
+            path="/community/posting" 
+            element={
+            <>
+              <Header /> <PostCreationPage />
             </>
             }
           />
