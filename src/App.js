@@ -21,6 +21,7 @@ import PersonReservationPage from "./pages/Reservation/PersonReservationPage";
 import PersonReservationDetailsPage from "./pages/Reservation/PersonReservationDetailsPage";
 import OfficialReservationDetailsPage from "./pages/Reservation/OfficialReservationDetailsPage";
 import OfficialReservationPage from "./pages/Reservation/OfficialReservationPage";
+import PostCreationPage from './pages/Community/Posting.jsx';
 
 function App() {
   return (
@@ -58,10 +59,18 @@ function App() {
           <Route path="/rent/mainpage" element={<> <Header /> <RentMainPage /> </>}/>
           {/* 커뮤니티 */}
           <Route 
-            path="/communitymain" 
+            path="/community/main" 
             element={
             <>
               <Header /> <CommunityMain />
+            </>
+            }
+          />
+          <Route 
+            path="/community/main" 
+            element={
+            <>
+              <Header /> <PostCreationPage />
             </>
             }
           />
