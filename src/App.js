@@ -67,7 +67,7 @@ function App() {
             }
           />
           <Route 
-            path="/community/main" 
+            path="/community/posting" 
             element={
             <>
               <Header /> <PostCreationPage />
