@@ -275,10 +275,10 @@ const RentMainPage = () => {
               <CanBorrowDateTime>
                 {post.reservation === 'YES' ? <ReservationAvailable>예약 가능</ReservationAvailable> : <ReservationUnavailable>예약 불가</ReservationUnavailable>}
               </CanBorrowDateTime>
-              {/* <Details>
-                조회수: {post.viewCount}
-              </Details> */}
               </div>
+              <Details>
+                조회수 {post.viewCount}
+              </Details>
             </PostItem>
           ))}
         </PostList>
@@ -408,6 +408,13 @@ const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+`;
+
+const Details = styled.div`
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    margin-left: 5rem;
 `;
 
 const PostList = styled.div`
