@@ -235,7 +235,8 @@ const MainPage2 = () => {
           {displayedPosts.map((post) => (
             <PostItem key={post.id}>
               <ImageWrapper>
-                <img src={post.imageUrls[0]} alt="Item" /> {/* 이미지 렌더링 */}
+                <img src={post.imageUrls[0]} alt="Item" />
+                {post.reservation === 'NO' && <RentingImage src={"/assets/img/renting.png"} alt="Renting" />} {/* 조건부 렌더링 */}
               </ImageWrapper>
               <ContentWrapper>
                 <TitleWrapper>
@@ -251,7 +252,7 @@ const MainPage2 = () => {
             </PostItem>
           ))}
         </PostList>
-        
+
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -442,6 +443,7 @@ const CanBorrowDateTime = styled.div`
 `;
 
 const ImageWrapper = styled.div`
+  position: relative;
   border: 1px solid #fff;
   width: 90px; /* 원하는 너비 */
   height: 90px; /* 원하는 높이 */
@@ -451,4 +453,11 @@ const ImageWrapper = styled.div`
     height: 100%; /* 부모 요소의 100%로 이미지 크기를 조정합니다. */
     object-fit: cover; /* 이미지가 비율을 유지하면서 컨테이너를 채우도록 합니다. */
   }
+`;
+
+const RentingImage = styled.img`
+  position: absolute; /* 이미지를 부모 요소를 기준으로 위치시키기 위해 절대 위치를 설정합니다. */
+  top: 0; /* 부모 요소의 맨 위에 이미지를 배치합니다. */
+  left: 0; /* 부모 요소의 맨 왼쪽에 이미지를 배치합니다. */
+  z-index: 2; /* 다른 요소 위에 이미지를 배치하기 위해 z-index 값을 설정합니다. */
 `;
