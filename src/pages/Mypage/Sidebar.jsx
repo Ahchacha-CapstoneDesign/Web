@@ -22,6 +22,7 @@ const Sidebar = () => {
       // 로그아웃 요청을 서버로 보냅니다.
       const response = await apiClient.get('/users/logout');
       if (response.status === 200) {
+        console.log("로그아웃 성공");
         localStorage.clear(); // 로컬 스토리지 클리어
         navigate('/'); // 홈페이지 혹은 로그인 페이지로 이동
       }

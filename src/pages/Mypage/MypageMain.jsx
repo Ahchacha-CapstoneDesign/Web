@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const MypageMain = () => {
   const [userName, setUserName] = useState('');
   const [userNickname, setUserNickname] = useState('');
+  const [profileImage, setProfileImage] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,6 +15,13 @@ const MypageMain = () => {
     setUserName(name);
     const nickname = localStorage.getItem('userNickname');
     setUserNickname(nickname);
+    const storedProfileImage = localStorage.getItem('profileImageUrl');
+    if (storedProfileImage) {
+      setProfileImage(storedProfileImage);
+    } else {
+      // 저장된 이미지가 없을 경우 기본 이미지 경로 설정
+      setProfileImage('/assets/img/Profile.png');
+    }
   });
 
   const handlePageChange = (path) => {
@@ -26,7 +34,7 @@ const MypageMain = () => {
             <Container>
                 <ProfileContainer>
                   <ProfileInfo>
-                      <Avatar src="/assets/img/Profile.png" alt="Profile" />
+                    <Avatar src={profileImage || "/assets/img/Profile.png"} alt="Profile" />
                       <ProfileDetails>
                         <NameAndRating>
                           <Name>{userName}</Name>
@@ -111,6 +119,7 @@ const Avatar = styled.img`
   width: 4.6875rem;
   height: 4.6875rem;
   margin-left: 2rem;
+  border-radius: 50%;
 `;
 
 const ProfileDetails = styled.div`

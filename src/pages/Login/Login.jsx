@@ -33,6 +33,7 @@ const Login = () => {
       localStorage.setItem('userID', response.data.id);
       localStorage.setItem('userGrade', response.data.grade);
       localStorage.setItem('userStatus', response.data.status);
+      localStorage.setItem('profileImageUrl', response.data.defaultProfile);
 
       // 로그인 후 처리 로직
       if (!response.data.nickname) {

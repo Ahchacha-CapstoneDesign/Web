@@ -14,6 +14,7 @@ const CommunityMain = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [sort, setSort] = useState('date'); 
     const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
+    const [profileImage, setProfileImage] = useState('');
     const searchInputRef = useRef(null);
 
     const ITEMS_PER_PAGE = 4;
@@ -127,29 +128,7 @@ const CommunityMain = () => {
         );
         setDisplayedPosts(newDisplayedPosts);
         setTotalPages(Math.ceil(postsToUpdate.length / ITEMS_PER_PAGE));
-    };
-
-    function isSortedByLikes(posts) {
-        for (let i = 0; i < posts.length - 1; i++) {
-          if (posts[i].likeCount < posts[i + 1].likeCount) {
-            // 좋아요 순이 아니라면 false 반환
-            return false;
-          }
-        }
-        // 모든 검사를 통과했다면 true 반환
-        return true;
-      }
-
-      function isSortedByDate(posts) {
-        for (let i = 0; i < posts.length - 1; i++) {
-          if (new Date(posts[i].createdAt) < new Date(posts[i + 1].createdAt)) {
-            // 최근 작성순이 아니라면 false 반환
-            return false;
-          }
-        }
-        // 모든 검사를 통과했다면 true 반환
-        return true;
-      }
+    };  
 
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage);
@@ -162,11 +141,21 @@ const CommunityMain = () => {
 
     const handleSearchInputClick = () => {
         searchInputRef.current.focus(); // SearchInput에 포커스
-      };
+    };
+
+    useEffect(() => {
+        const storedProfileImage = localStorage.getItem('profileImageUrl');
+        if (storedProfileImage) {
+          setProfileImage(storedProfileImage);
+        } else {
+          // 저장된 이미지가 없을 경우 기본 이미지 경로 설정
+          setProfileImage('/assets/img/Profile.png');
+        }
+    });
 
     // 글 작성 페이지로 이동
     const goToWritePost = () => {
-        navigate('/write');
+        navigate('/community/posting');
     };
 
     // 글 상세 페이지로 이동
@@ -177,8 +166,8 @@ const CommunityMain = () => {
   const WritingArea = () => {
       return (
         <WritingContainer onClick={goToWritePost}>
-        <img src="/assets/img/Profile.png" alt="Profile Icon" 
-            style={{ marginRight: '1.5rem', width: '70px', height: '70px' }} />
+        <img src={profileImage || "/assets/img/Profile.png"} alt="Profile"
+            style={{ marginRight: '1.5rem', width: '70px', height: '70px', borderRadius: '50%'}} />
           <WritingBox>
             질문을 남겨 보세요.
           </WritingBox>
@@ -328,15 +317,14 @@ const MainContainer = styled.div`
 
 const SortButtonsContainer = styled.div`
     display: flex;
-    margin-left: 30rem;
+    margin-left: 32rem;
     margin-top: -2rem;
-    
 `;
 
 const SortButton = styled.button`
     background-color: transparent;
     border: none;
-    margin-right: 2rem;
+    margin-right: 1.5rem;
     cursor:pointer;
     color: ${props => props.active ? "#00FFE0" : "#E0E0E0"};
     font-family: "Pretendard";

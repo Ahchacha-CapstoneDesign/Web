@@ -3,10 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login/Login';
 import SettingNickname from './pages/Login/SettingNickname';
 import Header from './pages/Header';
-
 import MainPage1 from './pages/Home/MainPage1';
 import MainPage2 from './pages/Home/MainPage2';
-import MainPage3 from './pages/Home/MainPage3.jsx';
+import MainPage3 from './pages/Home/MainPage3';
 import MainPage4 from './pages/Home/MainPage4';
 import Loading from './pages/Login/Loading';
 import Sidebar from './pages/Mypage/Sidebar';
@@ -22,7 +21,6 @@ import PersonReservationPage from "./pages/Reservation/PersonReservationPage";
 import PersonReservationDetailsPage from "./pages/Reservation/PersonReservationDetailsPage";
 import OfficialReservationDetailsPage from "./pages/Reservation/OfficialReservationDetailsPage";
 import OfficialReservationPage from "./pages/Reservation/OfficialReservationPage";
-
 
 function App() {
   return (
@@ -73,7 +71,6 @@ function App() {
           <Route path="/officialreservation" element={<> <Header /> <OfficialReservationPage /> </>}/>
           <Route path="/personreservationdetails" element={<> <Header /> <PersonReservationDetailsPage /> </>}/>
           <Route path="/officialreservationdetails" element={<> <Header /> <OfficialReservationDetailsPage /> </>}/>
-
           {/* 마이 페이지 */}
           <Route 
             path="/mypage/main" 

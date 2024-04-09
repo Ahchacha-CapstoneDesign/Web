@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 import apiClient from "../../../path/apiClient";
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 const AccountSettings = () => {
     const [userName, setUserName] = useState('');
     const [userNickname, setUserNickname] = useState('');
+    const [profileImage, setProfileImage] = useState('/assets/img/Profile.png');
     const [userTrack, setUserTrack] = useState('');
     const [userTrack2, setUserTrack2] = useState('');
     const [userPhoneNumber, setUserPhoneNumber] = useState('');
@@ -19,6 +20,8 @@ const AccountSettings = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const navigate = useNavigate();
+    const fileInputRef = useRef(null);
+    const DEFAULT_IMAGE_URL = '/assets/img/Profile.png';
 
     useEffect(() => {
         const name = localStorage.getItem('userName');
@@ -37,6 +40,10 @@ const AccountSettings = () => {
         setUserStatus(status);
         const id = localStorage.getItem('userID');
         setUserID(id);
+        const savedImageUrl = localStorage.getItem('profileImageUrl');
+        if (savedImageUrl) {
+            setProfileImage(savedImageUrl); // 저장된 이미지 URL로 상태 업데이트
+        }
 
         setNewNickname(localStorage.getItem('userNickname') || '');
       }, [userNickname]);
@@ -92,24 +99,61 @@ const AccountSettings = () => {
             }
       };
 
-      const formatPhoneNumber = (phoneNumber) => {
-        // 전화번호가 11자리인 경우 010-0000-0000 형식으로 변환
-        return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
-      };
+    const uploadImage = async (file) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await apiClient.post('/users/default-profile', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        const imageUrl = response.data; // 서버로부터 받은 이미지 URL
+        localStorage.setItem('profileImageUrl', imageUrl); // localStorage에 이미지 URL 저장
+        setProfileImage(imageUrl); // 상태 업데이트로 UI에 반영
+      } catch (error) {
+        console.error('이미지 업로드 실패:', error);
+        alert('이미지 업로드에 실패했습니다.');
+      }
+    };
+
+    const resetToDefaultImage = async () => {
+      try {
+          alert('기본 이미지로 재설정되었습니다.');
+          localStorage.removeItem('profileImageUrl'); // 로컬 스토리지에서 삭제
+      } catch (error) {
+          console.error('기본 이미지로 재설정 실패:', error);
+          alert('기본 이미지로 재설정하는 동안 오류가 발생했습니다.');
+      }
+  };
+
+
+    const formatPhoneNumber = (phoneNumber) => {
+      // 전화번호가 11자리인 경우 010-0000-0000 형식으로 변환
+      return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+    };
 
     return (
         <>
         <GlobalStyle /> 
             <AccountContainer>
             <ProfileSection>
-                <ProfilePicture src="/assets/img/Profile.png" alt="Profile" />
-                <NameAndButton>
-                    <NameAndNickname>
-                        <UserName>{userName}</UserName>
-                        <UserNickname>{userNickname}</UserNickname>
-                    </NameAndNickname>
-                    <EditButton>이미지 변경</EditButton>
-                </NameAndButton>
+              <ProfilePicture src={profileImage} alt="Profile" />
+              <input
+                type="file"
+                onChange={(e) => uploadImage(e.target.files[0])}
+                style={{ display: 'none' }}
+                ref={fileInputRef}
+              />
+              <NameAndButton>
+                  <NameAndNickname>
+                      <UserName>{userName}</UserName>
+                      <UserNickname>{userNickname}</UserNickname>
+                  </NameAndNickname>
+                  <EditButton onClick={() => fileInputRef.current.click()}>이미지 변경</EditButton>
+                  <BasicEditButton onClick={resetToDefaultImage}>기본이미지 변경</BasicEditButton>
+              </NameAndButton>
             </ProfileSection>
 
             <Divider />
@@ -196,6 +240,7 @@ const ProfilePicture = styled.img`
   width: 5.5rem;
   height: 5.5rem;
   margin-right: 20px;
+  border-radius: 50%;
 `;
 
 const NameAndButton = styled.div` 
@@ -220,6 +265,7 @@ const UserNickname = styled.div`
   font-weight: 500;
   color: #E0E0E0;
   margin-left: 1rem;
+  margin-bottom: 0.1rem;
 `;
 
 const EditButton = styled.button`
@@ -236,6 +282,24 @@ const EditButton = styled.button`
     color: #DEDEDE;
     font-family: "Pretendard";
     margin-top: 0.8rem;
+    margin-right: 1rem;
+`;
+
+const BasicEditButton = styled.button`
+    width: 7rem;
+    height: 2.0625rem;
+    background-color: #000;
+    color: #DEDEDE;
+    border-radius: 0.625rem;
+    border: 0.5px solid #DEDEDE;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-style: normal;
+    font-weight: 500;
+    color: #DEDEDE;
+    font-family: "Pretendard";
+    margin-top: 0.8rem;
+    margin-right: 1rem;
 `;
 
 const DetailsSection = styled.section`
