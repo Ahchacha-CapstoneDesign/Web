@@ -18,7 +18,7 @@ const RentMainPage = () => {
   const [searchedPosts, setSearchedPosts] = useState([]); // 검색된 게시글 목록
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [sort, setSort] = useState('date'); 
+  const [sort, setSort] = useState('date');
   const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
   const searchInputRef = useRef(null);
 
@@ -29,7 +29,7 @@ const RentMainPage = () => {
     let url = `/items/latest`;
 
     if (sort === 'view-counts') { //조회수 순
-        url = `/items/view-counts`;
+      url = `/items/view-counts`;
     }
     else if (sort === 'reservation') { //예약가능 여부 순
       url = `/items/reservation`;
@@ -39,12 +39,12 @@ const RentMainPage = () => {
     }
 
     try {
-        const response = await apiClient.get(url);
-        const totalPosts = response.data.content;
-        setPosts(totalPosts);
-        setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE)); // 전체 게시글을 기반으로 총 페이지 수 계산
+      const response = await apiClient.get(url);
+      const totalPosts = response.data.content;
+      setPosts(totalPosts);
+      setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE)); // 전체 게시글을 기반으로 총 페이지 수 계산
     } catch (error) {
-        console.error('Error fetching posts:', error);
+      console.error('Error fetching posts:', error);
     }
   };
 
@@ -80,25 +80,25 @@ const RentMainPage = () => {
         combinedResults.sort((a, b) => new Date(b.createdAt) - new Date(a.created_at));
       } else if (sort === 'reservation') {
         combinedResults.sort((a, b) => {
-            if (a.reservation === 'YES' && b.reservation === 'NO') {
-                return -1; // 'yes'가 'no'보다 우선순위를 갖도록 설정
-            } else if (a.reservation === 'NO' && b.reservation === 'YES') {
-                return 1; // 'no'가 'yes'보다 우선순위를 갖도록 설정
-            } else {
-                return 0; // 예약 가능 여부가 동일하면 순서를 유지 
-            }
+          if (a.reservation === 'YES' && b.reservation === 'NO') {
+            return -1; // 'yes'가 'no'보다 우선순위를 갖도록 설정
+          } else if (a.reservation === 'NO' && b.reservation === 'YES') {
+            return 1; // 'no'가 'yes'보다 우선순위를 갖도록 설정
+          } else {
+            return 0; // 예약 가능 여부가 동일하면 순서를 유지 
+          }
         });
-    } else if (sort === 'personOrOfficial') {
-      combinedResults.sort((a, b) => {
-        if (a.personOrOfficial === 'OFFICIAL' && b.personOrOfficial === 'PERSON') {
-          return -1; // 'OFFICIAL'이 'PERSON'보다 우선순위를 갖도록 설정
-        } else if (a.personOrOfficial === 'PERSON' && b.personOrOfficial === 'OFFICIAL') {
-          return 1; // 'PERSON'이 'OFFICIAL'보다 우선순위를 갖도록 설정
-        } else {
-          return 0;
-        }
-      });
-    }
+      } else if (sort === 'personOrOfficial') {
+        combinedResults.sort((a, b) => {
+          if (a.personOrOfficial === 'OFFICIAL' && b.personOrOfficial === 'PERSON') {
+            return -1; // 'OFFICIAL'이 'PERSON'보다 우선순위를 갖도록 설정
+          } else if (a.personOrOfficial === 'PERSON' && b.personOrOfficial === 'OFFICIAL') {
+            return 1; // 'PERSON'이 'OFFICIAL'보다 우선순위를 갖도록 설정
+          } else {
+            return 0;
+          }
+        });
+      }
 
       setTotalPages(Math.ceil(combinedResults.length / ITEMS_PER_PAGE));
       setCurrentPage(1); // 검색 결과를 보여줄 때는 첫 페이지로 설정
@@ -141,7 +141,7 @@ const RentMainPage = () => {
         sortedPosts.sort((a, b) => b.viewCount - a.viewCount);
       } else if (sort === 'date') {
         sortedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      } 
+      }
       else if (sort === 'reservation') {
         sortedPosts.sort((a, b) => {
           if (a.reservation === 'YES' && b.reservation === 'NO') {
@@ -203,7 +203,7 @@ const RentMainPage = () => {
   // const goToItemDetail = (id) => {
   //   navigate(`/items/${itemId}`);
   // };
-  
+
   const handleModalOpen = () => {
     setIsModalOpen(true); // 모달 열기
   };
@@ -257,24 +257,25 @@ const RentMainPage = () => {
             <PostItem key={post.id}>
               <ImageWrapper>
                 <img src={post.imageUrls[0]} alt="Item" />
+                {post.reservation === 'NO' && <RentingImage src={"/assets/img/renting.png"} alt="Renting" />} {/* 조건부 렌더링 */}
               </ImageWrapper>
               <div>
-              <TitleWrapper>
-                {post.title}
-              </TitleWrapper>
-              <Cost>
-                비용 {post.pricePerHour}원
-              </Cost>
-              <RentPlaceWrapper>
-                <RentPlace>대여 장소</RentPlace>
-                {post.personOrOfficial === 'OFFICIAL' ? <RentPlaceColor>{post.borrowPlace}</RentPlaceColor> : <NonColor>{post.borrowPlace}</NonColor>}
-              </RentPlaceWrapper>
-              <CanBorrowDateTime>
-                대여 가능 시간 {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
-              </CanBorrowDateTime>
-              <CanBorrowDateTime>
-                {post.reservation === 'YES' ? <ReservationAvailable>예약 가능</ReservationAvailable> : <ReservationUnavailable>예약 불가</ReservationUnavailable>}
-              </CanBorrowDateTime>
+                <TitleWrapper>
+                  {post.title}
+                </TitleWrapper>
+                <Cost>
+                  비용 {post.pricePerHour}원
+                </Cost>
+                <RentPlaceWrapper>
+                  <RentPlace>대여 장소</RentPlace>
+                  {post.personOrOfficial === 'OFFICIAL' ? <RentPlaceColor>{post.borrowPlace}</RentPlaceColor> : <NonColor>{post.borrowPlace}</NonColor>}
+                </RentPlaceWrapper>
+                <CanBorrowDateTime>
+                  대여 가능 시간 {formatTime(post.canBorrowDateTime)} ~ {formatTime(post.returnDateTime)}
+                </CanBorrowDateTime>
+                <CanBorrowDateTime>
+                  {post.reservation === 'YES' ? <ReservationAvailable>예약 가능</ReservationAvailable> : <ReservationUnavailable>예약 불가</ReservationUnavailable>}
+                </CanBorrowDateTime>
               </div>
               <Details>
                 조회수 {post.viewCount}
@@ -498,6 +499,7 @@ const ReservationUnavailable = styled.span`
 `;
 
 const ImageWrapper = styled.div`
+  position: relative;
   border: 1px solid #fff;
   width: 100px; /* 원하는 너비 */
   height: 100px; /* 원하는 높이 */
@@ -510,8 +512,8 @@ const ImageWrapper = styled.div`
 `;
 
 const RentingImage = styled.img`
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1; /* 이미지 위에 위치하도록 설정 */
+  position: absolute; /* 이미지를 부모 요소를 기준으로 위치시키기 위해 절대 위치를 설정합니다. */
+  top: 0; /* 부모 요소의 맨 위에 이미지를 배치합니다. */
+  left: 0; /* 부모 요소의 맨 왼쪽에 이미지를 배치합니다. */
+  z-index: 2; /* 다른 요소 위에 이미지를 배치하기 위해 z-index 값을 설정합니다. */
 `;
