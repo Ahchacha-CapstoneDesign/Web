@@ -26,8 +26,6 @@ const MainPage1 = () => {
     const handleWheel = (e) => {
       if (e.deltaY > 0) { // 마우스 휠을 아래로 스크롤할 경우
         navigate('/mainpage/2');
-      } else if (e.deltaY < 0) { // 마우스 휠을 위로 스크롤할 경우
-        navigate('/mainpage/4');
       }
     };
 
