@@ -19,13 +19,14 @@ const ItemDetailPage = () => {
                                     <RatingValue>4.5</RatingValue>
                                 </RatingContainer>
                             </UserInfoContainer>
-                        <ReviewContainer>
-                            <ReviewBubble>정말 친절하고 좋은 분입니다..</ReviewBubble>
-                            <ReviewBubble>횟수가 많이 남아있어요... 괜찮아요..</ReviewBubble>
+                            <ReviewBubble src="/assets/img/ReviewBubble.png" alt="Star">
+                                <ReviewText>정말 친절하고 좋은 분입니다..</ReviewText>
+                                <ReviewText>횟수가 많이 남아있어요... 괜찮아요..</ReviewText>
+                            </ReviewBubble>
                             <ButtonContainer>
                                 <MoreReviewsButton>리뷰 더 보러가기</MoreReviewsButton>
                             </ButtonContainer>
-                        </ReviewContainer>
+
                     </LeftContainer>
                     <RightContainer>
                         <ItemDetailsContainer>
@@ -36,16 +37,16 @@ const ItemDetailPage = () => {
                                 </TitleSection>
                                 <InformationSection>
                                     <InfoItem>
-                                        <InfoTitle>수량</InfoTitle>
-                                        <InfoContent>1</InfoContent>
-                                    </InfoItem>
-                                    <InfoItem>
                                         <InfoTitle>대여 비용</InfoTitle>
                                         <InfoContent>2000원(시간당)</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
-                                        <InfoTitle>대여 가능 요일 및 시간</InfoTitle>
-                                        <InfoContent>월 ~ 금 / 10:00 ~ 17:00</InfoContent>
+                                        <InfoTitle>대여 가능 요일</InfoTitle>
+                                        <InfoContent>월 ~ 금</InfoContent>
+                                    </InfoItem>
+                                    <InfoItem>
+                                        <InfoTitle>대여 및 반납 가능 시간</InfoTitle>
+                                        <InfoContent>10:00 ~ 17:00</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
                                         <InfoTitle>대여 위치</InfoTitle>
@@ -135,7 +136,6 @@ const ItemDetailsContainer = styled.div`
 const ButtonsContainer = styled.div`
   display: flex;
   width: 100%;
-  justify-content: space-between; // 버튼을 양쪽으로 분배
 `;
 
 const DescriptionText = styled.p`
@@ -229,7 +229,10 @@ const InfoItem = styled.div`
 `;
 
 const InfoTitle = styled.div`
-  font-weight: bold;
+  font-size: 1.5625rem;
+  font-style: normal;
+  font-weight: 650;
+  line-height: normal;
   margin-right: 1rem;
 `;
 
@@ -254,41 +257,41 @@ const ReviewContainer = styled.div`
   align-items: flex-start; // 자식 요소들을 왼쪽으로 정렬
 `;
 
+const ReviewText = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: normal;
+  margin-top: 2rem;
+  margin-bottom: 4.4rem;
+  //7.62rem
+`;
+
 // 채팅 말풍선 스타일
-const ReviewBubble = styled.img`
+const ReviewBubble = styled.div`
   position: relative;
-  width: 20.75rem;
-  height: 16.26119rem;
+  width: 19.5rem;
+  height: 18.25rem;
   font-size: 1.125rem;
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  background-color: transparent; // 배경색을 투명하게 설정합니다.
-  border: 2px solid #00FFE0; // 테두리 색상을 지정합니다.
-  border-radius: 20px; // 둥근 테두리 반경을 지정합니다.
-  padding: 1rem;
-  margin-bottom: 1rem;
+  background-image: url('/assets/img/ReviewBubble.png'); // 배경 이미지로 말풍선 이미지를 설정
+  background-size: 18.75rem 16.26119rem;// 배경 이미지가 div 크기에 맞게 조정되도록 설정
+  background-repeat: no-repeat; // 이미지가 반복되지 않도록 설정
+  background-position: center; // 이미지가 컨테이너의 중앙에 위치하도록 설정
   color: #fff; // 말풍선 내 텍스트 색상을 지정합니다.
-  align-self: flex-start;
-  text-align: center;
+  display: flex; // Flexbox 사용
+  align-items: center; // 텍스트를 수직 중앙에 배치
+  justify-content: center; // 텍스트를 수평 중앙에 배치
+  flex-direction: column;
+  text-align: center; // 텍스트를 중앙 정렬
   word-wrap: break-word;
-
-  &::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    width: 0;
-    height: 0;
-    border: 10px solid transparent; // 투명한 테두리를 만듭니다.
-    border-top-color: #00bfa5; // 위쪽 테두리 색상을 말풍선 테두리 색상과 동일하게 합니다.
-    transform: translateX(-50%) translateY(100%); // 위치를 조정합니다.
-    transform-origin: 0 0;
+  
   }
 
-  &:last-child {
-    margin-bottom: 0;
-  }
 `;
 
 const ButtonContainer = styled.div`
@@ -361,7 +364,7 @@ const ActionButton = styled.button`
   width: 19.125rem;
   height: 3.0625rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 2rem;
   font-weight: 800;
   color: #000;
   text-align: center;
@@ -369,6 +372,8 @@ const ActionButton = styled.button`
   cursor: pointer;
   margin-top: 1.37rem;
   margin-bottom: 4.31rem;
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
   &:not(:last-child) {
     margin-right: 1rem; // 마지막 버튼을 제외하고 오른쪽 마진 적용
   }
