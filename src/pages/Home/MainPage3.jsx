@@ -12,7 +12,7 @@ const MainPage3 = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-
+  const [userName, setUserName] = useState('');
   const [displayedPosts, setDisplayedPosts] = useState([]); // 현재 페이지에 표시될 포스트
   const [posts, setPosts] = useState([]);
   const [searchedPosts, setSearchedPosts] = useState([]); // 검색된 게시글 목록
@@ -23,6 +23,11 @@ const MainPage3 = () => {
   const searchInputRef = useRef(null);
 
   const ITEMS_PER_PAGE = 6;
+
+  useEffect(() => {
+    const name = localStorage.getItem('userName');
+    setUserName(name);
+  });
 
   const fetchPosts = async () => {
     // 모든 게시글을 불러오는 URL. 페이지나 사이즈 매개변수 없음
@@ -227,7 +232,7 @@ const MainPage3 = () => {
         <SearchInput />
         <SearchButton />
       </SearchSection>
-      <ItemTitle>OOO님을 위한 물건 추천 🎀</ItemTitle>
+      <ItemTitle>{userName}님을 위한 물건 추천 🎀</ItemTitle>
 
       <PageContainer>
         <PostList>
