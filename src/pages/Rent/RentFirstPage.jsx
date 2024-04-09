@@ -168,7 +168,7 @@ const CategoryGrid = styled.div`
 
 const CategoryItem = styled.div`
   color: #FFF;
-  padding: 0.9rem;
+  padding: 0.5rem;
   text-align: center;
   border: 3px solid #FF6B00;
   border-radius: 20px;
