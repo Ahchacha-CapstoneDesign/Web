@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import ko from 'date-fns/locale/ko'; // 한국어 로케일
 import styled, { createGlobalStyle } from 'styled-components';
 import {HeaderContainer} from "../Header";
 import { differenceInMinutes } from 'date-fns';
@@ -9,11 +8,9 @@ import { differenceInMinutes } from 'date-fns';
 const hourOptions = Array.from({ length: 24 }, (_, i) => (i < 10 ? `0${i}` : `${i}`));
 const minuteOptions = ['00', '30'];
 
-const PersonReservationPage = () => {
-    //const [startDate, setStartDate] = useState(new Date()); // 시작 날짜 상태
+const OfficialReservationPage = () => {
     const [startTime, setStartTime] = useState(hourOptions[0]); // 시작 시간 상태
     const [startMinutes, setStartMinutes] = useState(minuteOptions[0]); // 시작 분 상태
-    //const [endDate, setEndDate] = useState(new Date()); // 종료 날짜 상태
     const [endTime, setEndTime] = useState(hourOptions[0]); // 종료 시간 상태
     const [endMinutes, setEndMinutes] = useState(minuteOptions[0]); // 종료 분 상태
     const [dateRange, setDateRange] = useState([new Date(), new Date()]);
@@ -62,23 +59,20 @@ const PersonReservationPage = () => {
     };
     return (
         <>
-            <GlobalStyle />
             <PageLayout>
                 <ContentContainer>
                     <LeftColumn>
-
                         <DateSection>
                             <DateLabel>날짜 선택</DateLabel>
                             <RentalNotice>(주말불가능)</RentalNotice>
                         </DateSection>
-
                         <StyledDatePicker
                             selectsRange={true}
                             startDate={startDate}
                             endDate={endDate}
                             onChange={handleDateChange}
                             inline
-                            locale="ko"
+                            locale= "ko"
                             filterDate={isWeekday}
                             renderCustomHeader={({
                                                      date,
@@ -152,44 +146,73 @@ const PersonReservationPage = () => {
 };
 
 const StyledDatePicker = styled(DatePicker)`
-  width: 150%; // 달력의 전체 너비를 조절합니다.
-  font-size: 1.2rem; // 모든 글자의 기본 크기를 조절합니다.
+  .react-datepicker {
+    border: none;
 
-  // 달력 내부의 날짜 셀(cell)에 대한 스타일을 추가합니다.
-  .react-datepicker__day, .react-datepicker__day-name {
-    width: 5rem; // 날짜 셀의 너비를 조절합니다.
-    height: 5rem; // 날짜 셀의 높이를 조절합니다.
-    line-height: 5rem; // 날짜 셀 내부에서 글자의 수직 정렬을 위해 line-height를 조절합니다.
-  }
-
-  // 달력 내부의 달(month)에 대한 패딩을 조절하여 크기를 늘립니다.
-  .react-datepicker__month {
-    padding: 1rem; // 달력 내부의 달(month) 주변 패딩을 추가합니다.
-  }
-
-  .react-datepicker__header {
-    position: relative; // Set position for the pseudo-element.
-    &:before {
-      content: ""; // Pseudo-element content should be empty.
-      position: absolute; // Position it absolutely within the header.
-      top: -10px; // Position it above the header.
-      left: 0; // Align to the left edge.
-      right: 0; // Align to the right edge.
-      height: 4px; // The height of the highlight line.
-      background-color: #00FFE0; // Highlight line color.
-      border-radius: 1px; // Rounded corners for the highlight line.
+    // 달력 컨테이너의 배경색을 검은색으로 설정합니다.
+    &__month-container {
+      background-color: #000;
     }
-  }
 
-  // 추가적인 스타일링...
+    // 달력의 헤더 부분의 배경색과 글자색을 설정합니다.
+    &__header {
+      background-color: #000;
+      color: #fff;
+      border-bottom: 1px solid #333;
+    }
+
+    // 날짜 부분의 글자색을 설정합니다.
+    &__day, &__day-name {
+      color: #fff;
+    }
+
+    // 오늘 날짜를 표시하는 스타일을 설정합니다.
+    &__day--today {
+      background-color: #555;
+    }
+
+    // 선택된 날짜의 스타일을 설정합니다.
+    &__day--selected {
+      background-color: #6f42c1; // 선택된 날짜의 배경색을 보라색으로 설정
+      border-radius: 0.3rem;
+    }
+
+    // 날짜에 마우스 호버 시의 배경색을 설정합니다.
+    &__day:hover {
+      background-color: #555;
+    }
+
+    // 네비게이션(이전/다음 월로 이동) 아이콘의 색상을 설정합니다.
+    &__navigation {
+      &--previous, &--next {
+        color: #fff;
+        &:hover {
+          color: #ddd;
+        }
+      }
+    }
+
+    // 활성화되지 않은 범위의 날짜 스타일을 설정합니다.
+    &__day--disabled {
+      color: #555;
+    }
+
+    // 다른 달의 날짜 스타일을 설정합니다.
+    &__day--outside-month {
+      color: #555;
+    }
+
+    // 추가적으로 필요한 스타일을 여기에 작성합니다.
+  }
 `;
+
 const StartDateTimeDisplay = styled.div`
-    color: #fff;
-    font-size: 0.8rem;
-    text-align:left;
-    margin-bottom: 0;
-    font-weight:bold;
-    position: relative; // 가상 요소를 위한 상대적 위치 설정
+  color: #fff;
+  font-size: 0.8rem;
+  text-align:left;
+  margin-bottom: 0;
+  font-weight:bold;
+  position: relative; // 가상 요소를 위한 상대적 위치 설정
 
   &::before {
     content: ''; // 가상 요소에는 content 속성이 필수입니다.
@@ -203,15 +226,12 @@ const StartDateTimeDisplay = styled.div`
   }
 `;
 const EndDateTimeDisplay = styled.div`
-    color: #fff;
-    text-align: right;
-    font-size: 0.8rem;
-    font-weight:bold;
-    margin-top:0;
-    position: relative; // 가상 요소를 위한 상대적 위치 설정
-
-  
-
+  color: #fff;
+  text-align: right;
+  font-size: 0.8rem;
+  font-weight:bold;
+  margin-top:0;
+  position: relative; // 가상 요소를 위한 상대적 위치 설정
 \`
 `;
 
@@ -223,72 +243,24 @@ const ContentContainer = styled.div`
 `;
 
 const LeftColumn = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 10px; // 세로로 묶인 요소들 사이의 간격 설정
+  display: flex;
+  flex-direction: column;
+  margin-right: 4rem;
+  gap: 10px; // 세로로 묶인 요소들 사이의 간격 설정
 `;
 
 const RightColumn = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 10px; // 세로로 묶인 요소들 사이의 간격 설정
+  display: flex;
+  flex-direction: column;
+  margin-left: 4rem;
+  gap: 10px; // 세로로 묶인 요소들 사이의 간격 설정
 `;
 
-const GlobalStyle = createGlobalStyle`
-  .react-datepicker {
-    font-family: 'Pretendard', sans-serif;
-    &__header {
-      background-color: #000; // 헤더의 배경색을 검은색으로 변경
-      border-bottom: 1px solid #333; // 테두리 색상 조정
-      .react-datepicker__current-month,
-      .react-datepicker__day-name {
-        color: #fff; // 헤더 내부의 글자 색상을 흰색으로 변경
-      }
-    }
-    &__month-container {
-      background-color: transparent; // 달력 배경 투명 처리
-    }
-    &__day {
-      color: #fff; // 날짜 글자 색상을 흰색으로 변경
-      &:hover {
-        background-color: #555; // 날짜에 마우스를 올렸을 때의 배경색 변경
-      }
-    }
-    &__day--selected {
-      background-color: #00bfa5; // 선택된 날짜의 배경색 변경
-      border-radius: 0.2rem; // 선택된 날짜의 둥근 모서리 처리
-    }
-    &__day--keyboard-selected {
-      border: 1px solid #00bfa5; // 키보드로 선택된 날짜의 테두리 색상 변경
-    }
-    &__day--outside-month {
-      color: #555; // 다른 달의 날짜 색상 변경
-    }
-    &__navigation {
-      top: 10px;
-      &--previous,
-      &--next {
-        color: #fff; // 화살표 색상을 흰색으로 변경
-        &:hover {
-          color: #00bfa5; // 화살표에 마우스를 올렸을 때의 색상 변경
-        }
-      }
-    }
-  }
-`;
-
-const TotalTimeDisplay = styled.div`
-  color: #fff;
-  font-size: 1rem;
-  font-weight:bold;
-  text-align: center;
-  margin: 10px 0;
-`;
 
 const PageLayout = styled.div`
   background-color: #000;
   color: #fff;
-  font-family: 'Pretendard', sans-serif;
+  font-family: 'Pretendard';
   padding: 2rem;
   height: 100vh;
 `;
@@ -296,10 +268,10 @@ const PageLayout = styled.div`
 const DateSection = styled.section`
   text-align: left;
   font-weight: bold;
-  color: #fff; 
-  margin-bottom: 3px; 
-  position: relative; 
-  
+  color: #fff;
+  margin-bottom: 3px;
+  position: relative;
+
   &:after {
     content: ''; // 가상 요소에는 반드시 content가 필요합니다.
     position: absolute; // 부모 요소(DateSection)에 대해 절대 위치
@@ -349,7 +321,7 @@ const TimeSection = styled.section`
     content: ''; // 필수 속성, 비워진 상태로 둡니다.
     position: absolute; // 절대 위치
     bottom: -10px; // 줄의 위치를 TimeSection 하단에서 조금 더 아래로 설정
-    left: 10; // 왼쪽으로부터의 위치
+    //left: 10; // 왼쪽으로부터의 위치
     width: 150%; // TimeSection의 전체 너비
     height: 4px; // 줄의 높이
     background-color: #00FFE0; // 형광색, 줄의 배경색 지정
@@ -363,14 +335,16 @@ const TimeLabel = styled.label`
 `;
 
 const DateLabel = styled.label`
+  font-size:1.4rem;
   margin-right: 3px;
   font-weight: bold;
   color: #fff;
 `;
 
 const TimeSelect = styled.select`
-  padding: 10px;
+  padding: 15px;
   font-weight: bold;
+  font-size:1.2rem;
   border-radius: 5px;
   border: 1px solid #333;
   color: #000;
@@ -397,8 +371,6 @@ const ConfirmButton = styled.button`
   color: #000; // 글자색
   border: none; // 테두리 없음
   border-radius: 20px; // 둥근 모서리
-  padding: 12px 30px; // 패딩 설정
-  font-size: 1rem; // 폰트 크기
   font-weight: bold; // 글자 두께
   cursor: pointer; // 커서 포인터 모양
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); // 버튼에 그림자 추가
@@ -407,10 +379,12 @@ const ConfirmButton = styled.button`
   margin: 2rem auto; // 위아래 마진 설정, 좌우 마진은 자동으로 설정하여 중앙 정렬
   width: 80%; // 버튼의 너비를 80%로 설정
   max-width: 300px; // 최대 너비 설정
+  padding: 15px 40px; // 버튼 내부 패딩 증가
+  font-size: 1.2rem; // 폰트 크기 증가
 
   &:hover {
     background-color: #009688; // 호버 시 버튼 배경색 변경
   }
 `;
 
-export default PersonReservationPage;
+export default OfficialReservationPage;
