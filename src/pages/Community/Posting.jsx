@@ -242,10 +242,6 @@ useEffect(() => {
             ({contentLength}/{maxContentLength}자)
             </ContentCounter>
           </ContentContainer>
-          <SaveCancelButtonContainer>
-            <Button  type="button" onClick={handleCancel}>작성 취소</Button>
-            <Button  type="button">임시저장</Button>
-          </SaveCancelButtonContainer>
           <ButtonContainer>
             <SubmitButton type="submit">작성 완료</SubmitButton>
           </ButtonContainer>
@@ -463,44 +459,7 @@ const ContentCounter = styled.div`
   font-size: 1.0625rem;
   font-weight: 700;
 `;
-const SaveCancelButtonContainer = styled.div`
-  position: relative;
-  margin-top: 1.69rem;
-  margin-left:62.4rem; 
-  width: 16rem; 
-  height: auto;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  & > button {
-    margin-right: 1rem; 
-  }
 
-  & > button:last-child {
-    margin-right: 0;
-  }
-`;
-const Button = styled.button`
-  background-color: transparent; 
-  color: #00FFE0; 
-  border: 2px solid #A1A1A1;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  font-family: 'Pretendard';
-  font-size: 1.25rem;
-  font-weight: 700;
-  border-radius: 0.625rem;
-  transition: background-color 0.2s;
-  width: 7.5rem;
-  height: 3.375rem;
-
-  &:hover {
-    background-color: rgba(128, 128, 128, 0.2); 
-  }
-  &:active {
-    transform: scale(0.95); 
-  }
-`;
 const BackButton = styled.div`
   display: flex;
   cursor: pointer;

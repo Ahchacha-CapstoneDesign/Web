@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login/Login';
 import SettingNickname from './pages/Login/SettingNickname';
 import Header from './pages/Header';
-
 import MainPage2 from './pages/Home/MainPage2'; import MainPage3 from './pages/Home/MainPage3.jsx';
 
 
@@ -20,6 +19,8 @@ import PersonReservationPage from "./pages/Reservation/PersonReservationPage";
 import PersonReservationDetailsPage from "./pages/Reservation/PersonReservationDetailsPage";
 import OfficialReservationDetailsPage from "./pages/Reservation/OfficialReservationDetailsPage";
 import OfficialReservationPage from "./pages/Reservation/OfficialReservationPage";
+import CommunityMain from './pages/Community/CommunityMain';
+import PostCreationPage from './pages/Community/Posting.jsx';
 
 function App() {
   return (
@@ -57,6 +58,24 @@ function App() {
           <Route path="/officialreservation" element={<> <Header /> <OfficialReservationPage /> </>}/>
           <Route path="/personreservationdetails" element={<> <Header /> <PersonReservationDetailsPage /> </>}/>
           <Route path="/officialreservationdetails" element={<> <Header /> <OfficialReservationDetailsPage /> </>}/>
+
+          {/* 커뮤니티 페이지 */}
+          <Route 
+            path="/community/main" 
+            element={
+            <>
+              <Header /> <CommunityMain />
+            </>
+            }
+          />
+          <Route 
+            path="/community/posting" 
+            element={
+            <>
+              <Header /> <PostCreationPage />
+            </>
+            }
+          />
           {/* 마이 페이지 */}
           <Route 
             path="/mypage/main" 
