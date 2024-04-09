@@ -3,13 +3,14 @@ import ReactPaginate from 'react-paginate';
 import ReactModal from 'react-modal';
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Pagination from "../Pagination";
 import apiClient from "../../path/apiClient";
 
 //대여물품 메인페이지
 const RentMainPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -48,66 +49,50 @@ const RentMainPage = () => {
     }
   };
 
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
   const executeSearch = async () => {
     if (!searchTerm.trim()) {
-      // 검색어가 비어있으면 기존 게시글 목록을 다시 불러옵니다.
-      fetchPosts();
-      setSearchedPosts([]);
-      return; // 함수 종료
+      alert('검색어를 입력하세요.');
+      return;
     }
-    // searchTerm 상태를 직접 사용합니다.
-    // 제목으로 검색
-    const searchTitleUrl = `/items/search-title?title=${encodeURIComponent(searchTerm)}&page=1`;
-    // 카테고리로 검색
-    const searchCategoryUrl = `/items/search-category?category=${encodeURIComponent(searchTerm)}&page=1`;
-
+  
     try {
-      const [titleResponse, categoryResponse] = await Promise.all([
-        apiClient.get(searchTitleUrl),
-        apiClient.get(searchCategoryUrl)
-      ]);
-
-      let combinedResults = [...titleResponse.data.content, ...categoryResponse.data.content];
-
-      // 중복 제거
-      combinedResults = Array.from(new Map(combinedResults.map(post => [post.id, post])).values());
-
-      // '조회수 순' 선택 시 결과를 조회수 수에 따라 정렬
-      if (sort === 'view-counts') {
-        combinedResults.sort((a, b) => b.viewCount - a.viewCount);
-      } else if (sort === 'date') {
-        // '최근 작성순' 선택 시 결과를 생성 날짜에 따라 내림차순 정렬
-        combinedResults.sort((a, b) => new Date(b.createdAt) - new Date(a.created_at));
-      } else if (sort === 'reservation') {
-        combinedResults.sort((a, b) => {
-          if (a.reservation === 'YES' && b.reservation === 'NO') {
-            return -1; // 'yes'가 'no'보다 우선순위를 갖도록 설정
-          } else if (a.reservation === 'NO' && b.reservation === 'YES') {
-            return 1; // 'no'가 'yes'보다 우선순위를 갖도록 설정
-          } else {
-            return 0; // 예약 가능 여부가 동일하면 순서를 유지 
-          }
-        });
-      } else if (sort === 'personOrOfficial') {
-        combinedResults.sort((a, b) => {
-          if (a.personOrOfficial === 'OFFICIAL' && b.personOrOfficial === 'PERSON') {
-            return -1; // 'OFFICIAL'이 'PERSON'보다 우선순위를 갖도록 설정
-          } else if (a.personOrOfficial === 'PERSON' && b.personOrOfficial === 'OFFICIAL') {
-            return 1; // 'PERSON'이 'OFFICIAL'보다 우선순위를 갖도록 설정
-          } else {
-            return 0;
-          }
-        });
+      const response = await apiClient.get(`/items/search-title?title=${encodeURIComponent(searchTerm)}&page=${currentPage}`);
+      const { content } = response.data;
+      if (content.length > 0) {
+        setPosts(content); // 검색 결과로 포스트 상태 업데이트
+        setDisplayedPosts(content.slice(0, ITEMS_PER_PAGE)); // 첫 페이지에 표시될 검색 결과 설정
+        setTotalPages(Math.ceil(content.length / ITEMS_PER_PAGE)); // 페이지 수 계산
+      } else {
+        alert('검색 결과가 없습니다.');
+        setDisplayedPosts([]); // 검색 결과가 없을 경우 displayedPosts를 비워 UI에 반영
       }
-
-      setTotalPages(Math.ceil(combinedResults.length / ITEMS_PER_PAGE));
       setCurrentPage(1); // 검색 결과를 보여줄 때는 첫 페이지로 설정
-      setSearchedPosts(combinedResults); // 검색된 게시글 목록 업데이트
-      updateDisplayedAndPagination(combinedResults); // 화면에 표시될 게시글 목록 업데이트
     } catch (error) {
-      console.error('Error searching posts:', error);
+      console.error('검색 중 오류 발생:', error);
+      alert('검색 중 오류가 발생했습니다.');
     }
   };
+
+  useEffect(() => {
+    // MainPage1에서 전달된 검색어 상태를 확인하고 설정
+    if (location.state && location.state.searchTerm) {
+      const initialSearchTerm = location.state.searchTerm;
+      setSearchTerm(initialSearchTerm);
+      // 전달된 검색어로 검색 실행
+      executeSearch(initialSearchTerm);
+    }
+  }, [location]);
+
+  // 검색어가 변경되었을 때 검색을 재실행
+  useEffect(() => {
+    if (searchTerm) {
+      executeSearch(searchTerm);
+    }
+  }, [searchTerm]);
 
   // 처음 렌더링될 때와 sort 상태가 변경될 때 전체 게시글 불러오기
   useEffect(() => {
@@ -228,8 +213,13 @@ const RentMainPage = () => {
       <SearchSection>
         <SearchText>물건 검색</SearchText>
         <VerticalLine />
-        <SearchInput />
-        <SearchButton />
+        <SearchInput 
+          type="text"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          placeholder="검색어를 입력하세요"
+        />
+        <SearchButton onClick={executeSearch}/>
       </SearchSection>
       <ItemTitle>000 검색결과 (총 숫자 연동)</ItemTitle>
 
