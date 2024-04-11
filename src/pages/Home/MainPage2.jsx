@@ -42,48 +42,6 @@ const MainPage2 = () => {
     }
   };
 
-  const executeSearch = async () => {
-    if (!searchTerm.trim()) {
-      // 검색어가 비어있으면 기존 게시글 목록을 다시 불러옵니다.
-      fetchPosts();
-      setSearchedPosts([]);
-      return; // 함수 종료
-    }
-    // searchTerm 상태를 직접 사용합니다.
-    // 제목으로 검색
-    const searchTitleUrl = `/items/search-title?title=${encodeURIComponent(searchTerm)}&page=1`;
-    // 카테고리로 검색
-    const searchCategoryUrl = `/items/search-category?category=${encodeURIComponent(searchTerm)}&page=1`;
-
-    try {
-      const [titleResponse, categoryResponse] = await Promise.all([
-        apiClient.get(searchTitleUrl),
-        apiClient.get(searchCategoryUrl)
-      ]);
-
-      let combinedResults = [...titleResponse.data.content, ...categoryResponse.data.content];
-
-      // 중복 제거
-      combinedResults = Array.from(new Map(combinedResults.map(post => [post.id, post])).values());
-
-      // '조회수 순' 선택 시 결과를 조회수 수에 따라 정렬
-      if (sort === 'view-counts') {
-        combinedResults.sort((a, b) => b.viewCount - a.viewCount);
-      } else if (sort === 'date') {
-        // '최근 작성순' 선택 시 결과를 생성 날짜에 따라 내림차순 정렬
-        combinedResults.sort((a, b) => new Date(b.createdAt) - new Date(a.created_at));
-      }
-      //TODO: 예약가능, 개인학교 순 추가해야됨
-
-      setTotalPages(Math.ceil(combinedResults.length / ITEMS_PER_PAGE));
-      setCurrentPage(1); // 검색 결과를 보여줄 때는 첫 페이지로 설정
-      setSearchedPosts(combinedResults); // 검색된 게시글 목록 업데이트
-      updateDisplayedAndPagination(combinedResults); // 화면에 표시될 게시글 목록 업데이트
-    } catch (error) {
-      console.error('Error searching posts:', error);
-    }
-  };
-
   // 처음 렌더링될 때와 sort 상태가 변경될 때 전체 게시글 불러오기
   useEffect(() => {
     fetchPosts();
@@ -136,39 +94,8 @@ const MainPage2 = () => {
     setTotalPages(Math.ceil(postsToUpdate.length / ITEMS_PER_PAGE));
   };
 
-  function isSortedByViews(posts) {
-    for (let i = 0; i < posts.length - 1; i++) {
-      if (posts[i].viewCount < posts[i + 1].viewCount) {
-        // 조회수 순이 아니라면 false 반환
-        return false;
-      }
-    }
-    // 모든 검사를 통과했다면 true 반환
-    return true;
-  }
-
-  function isSortedByDate(posts) {
-    for (let i = 0; i < posts.length - 1; i++) {
-      if (new Date(posts[i].createdAt) < new Date(posts[i + 1].createdAt)) {
-        // 최근 작성순이 아니라면 false 반환
-        return false;
-      }
-    }
-    // 모든 검사를 통과했다면 true 반환
-    return true;
-  }
-
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-  };
-
-  const handleSortChange = (newSort) => {
-    setSort(newSort);
-    setCurrentPage(1); // 정렬 방식 변경 시 첫 페이지로 이동
-  };
-
-  const handleSearchInputClick = () => {
-    searchInputRef.current.focus(); // SearchInput에 포커스
   };
 
   // 아이템 작성 페이지로 이동
@@ -212,6 +139,15 @@ const MainPage2 = () => {
     return `${hours}:${minutes}`;
   }
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearch = () => {
+    // 검색어를 RentMainPage로 전달
+    navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
+  };
+
   return (
     <>
       <GlobalStyle />
@@ -225,8 +161,11 @@ const MainPage2 = () => {
       <SearchSection>
         <SearchText>물건 검색</SearchText>
         <VerticalLine />
-        <SearchInput />
-        <SearchButton />
+        <SearchInput
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+        <SearchButton onClick={handleSearch}/>
       </SearchSection>
       <ItemTitle>최신 등록 아차! 물건 🎁</ItemTitle>
 
@@ -396,7 +335,7 @@ const ContentWrapper = styled.div`
 `;
 
 const PostList = styled.div`
-    background-color: black;
+    background-color: transparent;
     color: #FFF;
     display: grid;
     grid-template-columns: repeat(2, 1fr);

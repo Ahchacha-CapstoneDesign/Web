@@ -216,6 +216,15 @@ const MainPage3 = () => {
     return `${hours}:${minutes}`;
   }
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearch = () => {
+    // 검색어를 RentMainPage로 전달
+    navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
+  };
+
   return (
     <>
       <GlobalStyle />
@@ -229,8 +238,11 @@ const MainPage3 = () => {
       <SearchSection>
         <SearchText>물건 검색</SearchText>
         <VerticalLine />
-        <SearchInput />
-        <SearchButton />
+        <SearchInput
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+        <SearchButton onClick={handleSearch}/>
       </SearchSection>
       <ItemTitle>{userName}님을 위한 물건 추천 🎀</ItemTitle>
 
@@ -400,7 +412,7 @@ const ContentWrapper = styled.div`
 `;
 
 const PostList = styled.div`
-    background-color: black;
+    background-color: background: transparent;;
     color: #FFF;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
