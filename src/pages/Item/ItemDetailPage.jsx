@@ -1,8 +1,45 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
+import {useParams} from "react-router-dom";
+import apiClient from "../../path/apiClient";
 
 const ItemDetailPage = () => {
+    const { itemId } = useParams();
+    const [itemDetails, setItemDetails] = useState(null);
+
+    useEffect(() => {
+        const fetchItemDetails = async () => {
+            try {
+                const response = await apiClient.get(`/items/${itemId}`);
+                setItemDetails(response.data);
+            } catch (error) {
+                console.error('Failed to fetch item details:', error);
+            }
+        };
+            fetchItemDetails();
+    }, [itemId]);
+
+    if (!itemDetails) {
+        return <div>Loading...</div>;
+    }
+
+    function getDayOfWeek(dateString) {
+        const date = new Date(dateString);
+        const formatter = new Intl.DateTimeFormat('ko-KR', { weekday: 'long' });
+        return formatter.format(date).slice(0, 1); // '금요일'을 '금'으로 표시하려면 .slice(0, 1)을 사용합니다.
+    }
+
+// 날짜 문자열에서 시간만 추출하는 함수
+    function getTime(dateString) {
+        const date = new Date(dateString);
+        const formatter = new Intl.DateTimeFormat('ko-KR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false // 24시간제를 사용하려면 false로 설정합니다.
+        });
+        return formatter.format(date);
+    }
 
 
     return (
@@ -10,7 +47,7 @@ const ItemDetailPage = () => {
             <GlobalStyle/>
                 <MainContainer>
                     <LeftContainer>
-                            <ItemImage>이미지 자리</ItemImage>
+                            <ItemImage src={itemDetails.imageUrls[0]} alt={itemDetails.title} />
                             <UserInfoContainer>
                                 <Icon src="/assets/img/Profile.png" alt="Profile"/>
                                 <Username>아차차</Username>
@@ -32,29 +69,29 @@ const ItemDetailPage = () => {
                         <ItemDetailsContainer>
                             <ItemDetails>
                                 <TitleSection>
-                                    <Title>C타입 충전기</Title>
-                                    <SubTitle>충전기</SubTitle>
+                                    <Title>{itemDetails.title}</Title>
+                                    <SubTitle>{itemDetails.category}</SubTitle>
                                 </TitleSection>
                                 <InformationSection>
                                     <InfoItem>
                                         <InfoTitle>대여 비용</InfoTitle>
-                                        <InfoContent>2000원(시간당)</InfoContent>
+                                        <InfoContent>{itemDetails.pricePerHour}</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
                                         <InfoTitle>대여 가능 요일</InfoTitle>
-                                        <InfoContent>월 ~ 금</InfoContent>
+                                        <InfoContent>{getDayOfWeek(itemDetails.canBorrowDateTime)} ~ {getDayOfWeek(itemDetails.returnDateTime)}</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
                                         <InfoTitle>대여 및 반납 가능 시간</InfoTitle>
-                                        <InfoContent>10:00 ~ 17:00</InfoContent>
+                                        <InfoContent>{getTime(itemDetails.canBorrowDateTime)} ~ {getTime(itemDetails.returnDateTime)}</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
                                         <InfoTitle>대여 위치</InfoTitle>
-                                        <InfoContent>상상관 1층</InfoContent>
+                                        <InfoContent>{itemDetails.borrowPlace}</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
                                         <InfoTitle>반납 위치</InfoTitle>
-                                        <InfoContent>상상관 1층</InfoContent>
+                                        <InfoContent>{itemDetails.returnPlace}</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
                                         <InfoTitle>상품 상태</InfoTitle>
@@ -64,7 +101,7 @@ const ItemDetailPage = () => {
                             </ItemDetails>
                         </ItemDetailsContainer>
                         <ProductDescription>
-                            <DescriptionText>삼성 정품 충전기</DescriptionText>
+                            <DescriptionText>{itemDetails.introduction}</DescriptionText>
                             <DescriptionText>구매한지 1년</DescriptionText>
                             <DescriptionText>대여3회</DescriptionText>
                             <DescriptionText>저도 사용하는 제품입니다! 말 다했죠?</DescriptionText>
@@ -165,10 +202,10 @@ const ProductDescription = styled.div`
     }
 `;
 
-const ItemImage = styled.div`
+const ItemImage = styled.img`
   width: 18.75rem;
   height: 18.75rem;
-  background-color: #ddd; // 임시 배경색, 실제 이미지로 대체할 것
+  object-fit: cover; // 이미지가 컨테이너를 가득 채우도록 설정
   margin-top:3rem;
   margin-bottom: 2rem;
 `;
