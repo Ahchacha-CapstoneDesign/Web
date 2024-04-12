@@ -143,6 +143,12 @@ const MainPage2 = () => {
     setSearchTerm(e.target.value);
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(); // 사용자가 Enter 키를 누르면 검색 실행
+    }
+  };
+
   const handleSearch = () => {
     // 검색어를 RentMainPage로 전달
     navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
@@ -164,6 +170,7 @@ const MainPage2 = () => {
         <SearchInput
           value={searchTerm}
           onChange={handleSearchChange}
+          onKeyPress={handleKeyPress}
         />
         <SearchButton onClick={handleSearch}/>
       </SearchSection>
@@ -315,7 +322,7 @@ const ItemTitle = styled.div`
   color: #FFF;
   margin-top: 4rem;
   text-align: left;
-  margin-left: 28rem;
+  margin-left: 22rem;
   font-family: "Pretendard";
   font-size: 1.5625rem;
   font-style: normal;

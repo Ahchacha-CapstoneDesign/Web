@@ -139,6 +139,12 @@ const RentMainPage = () => {
     await fetchPosts(tempSearchTerm, currentPage, sort); // 검색 실행
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(); // 사용자가 Enter 키를 누르면 검색 실행
+    }
+  };
+
   //아이템 작성 페이지로 이동
   const goToItemPost = () => {
     navigate('/items');
@@ -178,6 +184,7 @@ const RentMainPage = () => {
           value={tempSearchTerm}
           onChange={(e) => setTempSearchTerm(e.target.value)}
           placeholder="검색어를 입력하세요"
+          onKeyPress={handleKeyPress}
         />
         <SearchButton onClick={handleSearch}/>
       </SearchSection>
@@ -397,11 +404,11 @@ const TitleWrapper = styled.div`
     font-family: "Pretendard";
     font-size: 1.1rem;
     font-style: normal;
-    font-weight: 600; 
+    font-weight: 800; 
     display: flex;
     align-items: center;
     margin-bottom: 0.2rem;
-    
+    margin-left: 2rem;
 `;
 
 const Cost = styled.div`

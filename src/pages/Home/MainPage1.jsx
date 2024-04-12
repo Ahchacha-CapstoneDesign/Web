@@ -27,6 +27,12 @@ const MainPage1 = () => {
     setSearchTerm(e.target.value);
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(); // 사용자가 Enter 키를 누르면 검색 실행
+    }
+  };
+
   const handleSearch = () => {
     // 검색어를 RentMainPage로 전달
     navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
@@ -54,6 +60,7 @@ const MainPage1 = () => {
         <SearchInput
           value={searchTerm}
           onChange={handleSearchChange}
+          onKeyPress={handleKeyPress}
         />
         <SearchButton onClick={handleSearch}/>
       </SearchSection>
