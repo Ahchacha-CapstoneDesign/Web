@@ -4,41 +4,41 @@ import styled from 'styled-components';
 const PersonReservationDetailsPage = () => {
 
     const [fee, setFee] = useState('5000원'); // 사용료
+    const [imageUrl, setImageUrl] = useState('/assets/img/unChecked.PNG');
 
     // 체크박스 변경을 다루는 함수
     const [consents, setConsents] = useState({
         personalInfoConsent: false,
-        lossOrDamageConsent: false,
         severeDamageConsent: false
     });
 
-    // 체크박스 변경을 다루는 함수
-    const handleCheckboxChange = (e) => {
+
+    const handleImageClick = (consentName) => {
+        const newConsentValue = !consents[consentName];
         setConsents({
             ...consents,
-            [e.target.name]: e.target.checked
+            [consentName]: newConsentValue
         });
-    };
-
-    // 결제하기 버튼 클릭 처리 함수
-    const handleSubmit = () => {
-        // 모든 체크박스가 체크되었는지 확인
-        if (Object.values(consents).every(Boolean)) {
-            // 여기에 예약 처리 로직을 구현합니다.
-            console.log('예약 처리 로직');
-        } else {
-            alert('모든 항목의 동의가 필요합니다.');
-        }
     };
 
     const handleGoBack = () => {
         console.log('돌아가기 버튼 클릭');
     };
 
+    // 결제하기 버튼 클릭 처리 함수
+    const handleSubmit = () => {
+        if (consents.personalInfoConsent && consents.severeDamageConsent) {
+            console.log('예약 처리 로직');
+        } else {
+            alert('모든 항목의 동의가 필요합니다.');
+        }
+    };
+
+
     return (
         <PageWrapper>
             <TitleBar>
-                <BackButton onClick={handleGoBack}>&larr;</BackButton>
+                <BackButton src="/assets/img/BackArrow.png" alt="Back" onClick={handleGoBack} />
                 <Title>예약자 확인</Title>
             </TitleBar>
             <FormItem>
@@ -65,35 +65,20 @@ const PersonReservationDetailsPage = () => {
                 <Label>반납 위치</Label>
                 <Value>상상관 1층</Value>
             </FormItem>
-            <CheckboxWrapper>
+            <Line/>
                 <CheckboxLabel>
                     <TextLabel>예약자 본인 정보와 일치하신가요?</TextLabel>
-                    <Checkbox
-                        type="checkbox"
-                        name="personalInfoConsent" // 체크박스 구별을 위한 name 속성 추가
-                        checked={consents.personalInfoConsent}
-                        onChange={handleCheckboxChange}
-                    />
-                </CheckboxLabel>
-                <CheckboxLabel>
-                    <TextLabel>물건을 분실하거나 훼손 상태로 반납 시 보증금을 돌려 받지 못할 수 있습니다. 이에 동의하십니까?</TextLabel>
-                    <Checkbox
-                        type="checkbox"
-                        name="lossOrDamageConsent" // 체크박스 구별을 위한 name 속성 추가
-                        checked={consents.lossOrDamageConsent}
-                        onChange={handleCheckboxChange}
-                    />
+                    <Image src={consents.personalInfoConsent ? '/assets/img/Check.PNG' : '/assets/img/unChecked.PNG'}
+                           alt="Personal Info Consent"
+                           onClick={() => handleImageClick('personalInfoConsent')} />
                 </CheckboxLabel>
                 <CheckboxLabel>
                     <TextLabel>훼손 상태가 심각하거나 사용하지 못하는 상태로 반납시 손해 배상이 청구될 수 있습니다. 이에 동의하십니까?</TextLabel>
-                    <Checkbox
-                        type="checkbox"
-                        name="severeDamageConsent" // 체크박스 구별을 위한 name 속성 추가
-                        checked={consents.severeDamageConsent}
-                        onChange={handleCheckboxChange}
-                    />
+                    <Image src={consents.severeDamageConsent ? '/assets/img/Check.PNG' : '/assets/img/unChecked.PNG'}
+                           alt="Severe Damage Consent"
+                           onClick={() => handleImageClick('severeDamageConsent')} />
                 </CheckboxLabel>
-            </CheckboxWrapper>
+
 
             {/* 사용료 및 결제하기 버튼 */}
             <FeeWrapper>
@@ -101,7 +86,7 @@ const PersonReservationDetailsPage = () => {
                     <FeeLabel>결제 금액 </FeeLabel>
                     <FeeValue>{fee}</FeeValue>
                 </FeeLabelValueWrapper>
-                <ConfirmButton onClick={handleSubmit}>결제하기</ConfirmButton>
+                <ConfirmButton onClick={handleSubmit} >결제하기</ConfirmButton>
             </FeeWrapper>
         </PageWrapper>
     );
@@ -128,85 +113,85 @@ const TitleBar = styled.div`
   width: 60%; // 전체 너비 사용
 `;
 
-const BackButton = styled.button`
-  background-color: transparent;
-  border: none;
-  color: #00FFE0;
-  font-size: 1.5rem;
-  cursor: pointer;
-  margin-right: 1rem; // 타이틀과의 간격 조정
+const BackButton = styled.img`
+  width: 3.0625rem;
+  height: 3.0625rem;
+  margin-right:5.66rem;
 `;
 
 // 페이지 제목
 const Title = styled.h1`
   color: #fff;
-  margin-left: 3.5rem; // 기본 마진 제거
-  padding: 0 2rem; // 좌우 패딩
+  font-size: 1.875rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: normal;
 `;
 
+const Line = styled.span`
+  display: block; // span은 기본적으로 inline 요소이므로, 너비와 높이를 적용하기 위해 block으로 변경
+  width: 70.125rem; // 줄의 너비
+  height: 0.2rem; // 줄의 높이
+  margin-left:2rem;
+  margin-top: 2.81rem;
+  margin-bottom: 1.87rem;
+  background-color: #00FFE0; // 형광색 배경색 설정
+`;
 // 폼 아이템을 감싸는 컴포넌트
 const FormItem = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: left;
-  margin-bottom: 1rem;
-  margin-top: 1rem;
-  margin-left: 18rem;
-  width: 60%; // 부모의 전체 너비를 사용하도록 설정
+  width: 34.125rem;
+  height: 2.875rem;
+  margin-top: 1.12rem;
+  margin-right: 25rem;
+ 
 `;
 
 const Label = styled.div`
   color: #fff;
-  min-width: 150px; // 레이블 최소 너비 설정
+  width: 8rem;
+  height: 1.875rem;
+  font-size: 1.5625rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-right:4.13rem;
 `;
 
 const Value = styled.div`
   color: #00FFE0;
-  
-  font-weight: bold;
+  font-size: 1.5625rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
 `;
-
-// 체크박스와 관련된 스타일
-const CheckboxWrapper = styled.div`
-  position: relative; // 가상 요소의 위치 기준점을 설정합니다.
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 60%;
-  margin: 2rem 0;
-
-  &::before { // 형광색 줄을 위한 가상 요소
-    content: ''; // 가상 요소의 내용을 비워둡니다.
-    position: absolute; // 페이지 내에서 절대 위치로 설정합니다.
-    top: -20px; // 상단에서부터의 거리를 설정합니다.
-    left: 0; // 왼쪽 정렬을 위해 0으로 설정합니다.
-    width: 100%; // 줄의 너비를 부모 요소의 100%로 설정합니다.
-    height: 4px; // 줄의 높이 설정
-    background-color: #00FFE0; // 형광색 색상 코드
-  }
-`;
-
 
 const CheckboxLabel = styled.label`
+  width: 100%;
+  height: 1.875rem;
   display: flex;
-  justify-content: space-between; // 내용을 양 끝으로 분산시킴
-  align-items: center;
-  width: 100%; // 부모의 전체 너비를 차지하도록 설정
-  color: #fff;
-  margin-bottom: 0.5rem; // 필요에 따라 조정
-  cursor: pointer;
+  margin-bottom: 1.44rem;
 `;
 
 const TextLabel = styled.span`
-  flex: 1; // 체크박스와 텍스트 사이의 간격을 유지하기 위해
-  font-weight: bold;
-  margin-left:9rem;
+  width: 65.0625rem;
+  height: 1.875rem;
+  font-size: 1.25rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: normal;
+  margin-left: 37rem;
   text-align: left; // 텍스트를 왼쪽 정렬
+`;
+
+const Image = styled.img`
+  width: 1.875rem;
+  height: 1.875rem;
 `;
 
 
 const Checkbox = styled.input`
-  margin-right: 1rem; // 체크박스와 텍스트 사이 간격
+    
 `;
 
 // 사용료 및 결제하기 버튼을 감싸는 컴포넌트
@@ -222,19 +207,22 @@ const FeeLabelValueWrapper = styled.div`
   display: flex;
   justify-content: center; // 금액 레이블과 값을 오른쪽으로 정렬
   width: 60%; // 전체 너비 사용
-  margin-bottom: -1rem; 
+  margin-top:5rem;
+  margin-bottom: -1rem;
+  margin-right:3rem;
+  font-size: 1.875rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: normal;
 `;
 
 const FeeLabel = styled.span`
   color: #fff;
-  font-weight: bold;
-  font-size: 1.2rem;
   margin-right: 1.5rem;
 `;
 
 const FeeValue = styled.span`
   color: #fff;
-  font-size: 1.2rem;
   font-weight: bold;
 `;
 
@@ -244,14 +232,17 @@ const ConfirmButton = styled.button`
   color: #000;
   border: none;
   border-radius: 20px;
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  font-weight: bold;
+  text-align: center;
+  font-size: 1.5rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: normal;
   cursor: pointer;
   align-self: flex-end; // 버튼을 오른쪽으로 정렬
-  width:15%;
+  width: 19.125rem;
+  height: 3.0625rem;
   margin-top: 2rem; // 여백 조정
-  margin-right: 24rem;
+  margin-right: 34.5rem;
 `;
 
 // 이제 모든 스타일 컴포넌트가 왼쪽으로 정렬되어 표시됩니다.
