@@ -3,13 +3,14 @@ import ReactPaginate from 'react-paginate';
 import ReactModal from 'react-modal';
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Pagination from "../Pagination";
 import apiClient from "../../path/apiClient";
 
 //대여물품 메인페이지
 const RentMainPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -20,122 +21,66 @@ const RentMainPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [sort, setSort] = useState('date');
   const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
+  const [tempSearchTerm, setTempSearchTerm] = useState(''); // 임시 검색어 상태
   const searchInputRef = useRef(null);
 
   const ITEMS_PER_PAGE = 6;
+  
 
-  const fetchPosts = async () => {
-    // 모든 게시글을 불러오는 URL. 페이지나 사이즈 매개변수 없음
-    let url = `/items/latest`;
-
-    if (sort === 'view-counts') { //조회수 순
-      url = `/items/view-counts`;
+  const fetchPosts = async (search = searchTerm, page = currentPage, sortOrder = sort) => {
+    const validPage = Number.isNaN(page) ? 1 : page;
+    let url = search ? `/items/search-title` : '/items/latest';
+    const params = new URLSearchParams({
+      page: validPage.toString(),
+      sort: sortOrder !== 'date' ? sortOrder : '',
+    });
+  
+    if (search) {
+      params.append("title", search);
     }
-    else if (sort === 'reservation') { //예약가능 여부 순
-      url = `/items/reservation`;
-    }
-    else if (sort === 'personOrOfficial') { //개인 or 학교 여부 순
-      url = `/items/personOrOfficial`;
-    }
-
+  
+    const finalURL = `${url}?${params.toString()}`;
+  
     try {
-      const response = await apiClient.get(url);
+      const response = await apiClient.get(finalURL);
       const totalPosts = response.data.content;
+      // 성공적으로 데이터를 가져왔을 때만 상태 업데이트
       setPosts(totalPosts);
-      setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE)); // 전체 게시글을 기반으로 총 페이지 수 계산
+      setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE));
+      // `displayedPosts` 상태 업데이트는 별도의 useEffect에서 처리
+      const newDisplayedPosts = totalPosts.slice(0, ITEMS_PER_PAGE);
+    setDisplayedPosts(newDisplayedPosts);
     } catch (error) {
       console.error('Error fetching posts:', error);
     }
   };
-
-  const executeSearch = async () => {
-    if (!searchTerm.trim()) {
-      // 검색어가 비어있으면 기존 게시글 목록을 다시 불러옵니다.
-      fetchPosts();
-      setSearchedPosts([]);
-      return; // 함수 종료
-    }
-    // searchTerm 상태를 직접 사용합니다.
-    // 제목으로 검색
-    const searchTitleUrl = `/items/search-title?title=${encodeURIComponent(searchTerm)}&page=1`;
-    // 카테고리로 검색
-    const searchCategoryUrl = `/items/search-category?category=${encodeURIComponent(searchTerm)}&page=1`;
-
-    try {
-      const [titleResponse, categoryResponse] = await Promise.all([
-        apiClient.get(searchTitleUrl),
-        apiClient.get(searchCategoryUrl)
-      ]);
-
-      let combinedResults = [...titleResponse.data.content, ...categoryResponse.data.content];
-
-      // 중복 제거
-      combinedResults = Array.from(new Map(combinedResults.map(post => [post.id, post])).values());
-
-      // '조회수 순' 선택 시 결과를 조회수 수에 따라 정렬
-      if (sort === 'view-counts') {
-        combinedResults.sort((a, b) => b.viewCount - a.viewCount);
-      } else if (sort === 'date') {
-        // '최근 작성순' 선택 시 결과를 생성 날짜에 따라 내림차순 정렬
-        combinedResults.sort((a, b) => new Date(b.createdAt) - new Date(a.created_at));
-      } else if (sort === 'reservation') {
-        combinedResults.sort((a, b) => {
-          if (a.reservation === 'YES' && b.reservation === 'NO') {
-            return -1; // 'yes'가 'no'보다 우선순위를 갖도록 설정
-          } else if (a.reservation === 'NO' && b.reservation === 'YES') {
-            return 1; // 'no'가 'yes'보다 우선순위를 갖도록 설정
-          } else {
-            return 0; // 예약 가능 여부가 동일하면 순서를 유지 
-          }
-        });
-      } else if (sort === 'personOrOfficial') {
-        combinedResults.sort((a, b) => {
-          if (a.personOrOfficial === 'OFFICIAL' && b.personOrOfficial === 'PERSON') {
-            return -1; // 'OFFICIAL'이 'PERSON'보다 우선순위를 갖도록 설정
-          } else if (a.personOrOfficial === 'PERSON' && b.personOrOfficial === 'OFFICIAL') {
-            return 1; // 'PERSON'이 'OFFICIAL'보다 우선순위를 갖도록 설정
-          } else {
-            return 0;
-          }
-        });
-      }
-
-      setTotalPages(Math.ceil(combinedResults.length / ITEMS_PER_PAGE));
-      setCurrentPage(1); // 검색 결과를 보여줄 때는 첫 페이지로 설정
-      setSearchedPosts(combinedResults); // 검색된 게시글 목록 업데이트
-      updateDisplayedAndPagination(combinedResults); // 화면에 표시될 게시글 목록 업데이트
-    } catch (error) {
-      console.error('Error searching posts:', error);
-    }
-  };
-
-  // 처음 렌더링될 때와 sort 상태가 변경될 때 전체 게시글 불러오기
+  
   useEffect(() => {
-    fetchPosts();
-  }, [sort]);
-
-  useEffect(() => {
-    const newDisplayedPosts = posts.slice(
-      (currentPage - 1) * ITEMS_PER_PAGE,
-      currentPage * ITEMS_PER_PAGE
-    );
+    // 현재 페이지에 맞는 게시글을 계산하여 displayedPosts를 업데이트
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    const newDisplayedPosts = posts.slice(start, end);
     setDisplayedPosts(newDisplayedPosts);
-  }, [currentPage, posts]);
+}, [currentPage, posts]);
 
   useEffect(() => {
-    // 검색 결과에 대한 displayedPosts 설정
-    // searchedPosts가 있을 때만 updateDisplayedAndPagination 호출
-    if (searchedPosts.length > 0) {
-      updateDisplayedAndPagination(searchedPosts);
-    } else {
-      updateDisplayedAndPagination(posts);
-    }
-  }, [currentPage, searchedPosts, posts]);
+    // 컴포넌트 마운트 시, 초기 검색어로 데이터 로딩
+    const initialSearchTerm = location.state?.searchTerm || '';
+    setTempSearchTerm(initialSearchTerm);
+    setSearchTerm(initialSearchTerm);
+    fetchPosts(initialSearchTerm, currentPage, sort);
+  }, []); // 의존성 배열을 비워 첫 마운트 시에만 실행
+
+  
+  useEffect(() => {
+    console.log("Posts: ", posts);
+    console.log("Displayed Posts: ", displayedPosts);
+    console.log("Current Page: ", currentPage);
+    // 기타 필요한 상태 로그 추가
+  }, [posts, displayedPosts, currentPage]);
 
   useEffect(() => {
-    if (searchedPosts.length > 0 || posts.length > 0) {
-      let targetPosts = searchedPosts.length > 0 ? searchedPosts : posts;
-      let sortedPosts = [...targetPosts];
+      let sortedPosts = [...posts];
 
       if (sort === 'view-counts') {
         sortedPosts.sort((a, b) => b.viewCount - a.viewCount);
@@ -165,36 +110,42 @@ const RentMainPage = () => {
       }
       if (searchedPosts.length > 0) {
         setSearchedPosts(sortedPosts);
-      } else {
+    } else {
         setPosts(sortedPosts);
-      }
-      updateDisplayedAndPagination(sortedPosts);
     }
-  }, [sort]);
+    updateDisplayedAndPagination(sortedPosts);
+    }, [sort]);
 
-  const updateDisplayedAndPagination = (postsToUpdate) => {
-    const newDisplayedPosts = postsToUpdate.slice(
-      (currentPage - 1) * ITEMS_PER_PAGE,
-      currentPage * ITEMS_PER_PAGE
-    );
-    setDisplayedPosts(newDisplayedPosts);
-    setTotalPages(Math.ceil(postsToUpdate.length / ITEMS_PER_PAGE));
-  };
+    const updateDisplayedAndPagination = (postsToUpdate) => {
+      const newDisplayedPosts = postsToUpdate.slice(
+          (currentPage - 1) * ITEMS_PER_PAGE,
+          currentPage * ITEMS_PER_PAGE
+      );
+      setDisplayedPosts(newDisplayedPosts);
+      setTotalPages(Math.ceil(postsToUpdate.length / ITEMS_PER_PAGE));
+  };  
 
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
+    const handlePageChange = (newPage) => {
+      setCurrentPage(newPage);
   };
 
   const handleSortChange = (newSort) => {
-    setSort(newSort);
-    setCurrentPage(1); // 정렬 방식 변경 시 첫 페이지로 이동
+      setSort(newSort);
+      setCurrentPage(1); // 정렬 방식 변경 시 첫 페이지로 이동
+  };
+  
+  const handleSearch = async () => {
+    setSearchTerm(tempSearchTerm); // 실제 검색어 상태 업데이트
+    await fetchPosts(tempSearchTerm, currentPage, sort); // 검색 실행
   };
 
-  const handleSearchInputClick = () => {
-    searchInputRef.current.focus(); // SearchInput에 포커스
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(); // 사용자가 Enter 키를 누르면 검색 실행
+    }
   };
 
-  // 아이템 작성 페이지로 이동
+  //아이템 작성 페이지로 이동
   const goToItemPost = () => {
     navigate('/items');
   };
@@ -228,10 +179,16 @@ const RentMainPage = () => {
       <SearchSection>
         <SearchText>물건 검색</SearchText>
         <VerticalLine />
-        <SearchInput />
-        <SearchButton />
+        <SearchInput 
+          type="text"
+          value={tempSearchTerm}
+          onChange={(e) => setTempSearchTerm(e.target.value)}
+          placeholder="검색어를 입력하세요"
+          onKeyPress={handleKeyPress}
+        />
+        <SearchButton onClick={handleSearch}/>
       </SearchSection>
-      <ItemTitle>000 검색결과 (총 숫자 연동)</ItemTitle>
+      <ItemTitle><SearchTerm>{searchTerm}</SearchTerm>검색결과 ({posts.length})</ItemTitle>
 
       <PageContainer>
         <SortButtonsContainer>
@@ -286,7 +243,7 @@ const RentMainPage = () => {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={handlePageChange}
+          onPageChange={(page) => handlePageChange(page)}
         />
       </PageContainer>
     </>
@@ -333,6 +290,11 @@ const SearchText = styled.div`
   font-weight: 700;
 `;
 
+const SearchTerm = styled.p`
+  color: #00FFE0;
+  margin-right: 1rem;
+`;
+
 const VerticalLine = styled.div`
   height: 30px; // 세로 선의 높이
   width: 1px; // 세로 선의 두께
@@ -373,17 +335,19 @@ const ItemTitle = styled.div`
   color: #FFF;
   margin-top: 2.8rem;
   text-align: left;
-  margin-left: 28rem;
+  margin-left: 25rem;
   font-family: "Pretendard";
   font-size: 1.5625rem;
   font-style: normal;
   font-weight: 700;
+  display: flex;
+  align-items: center;
 `;
 
 const SortButtonsContainer = styled.div`
     display: flex;
     margin-left: 35rem;
-    margin-top: -2rem;
+    margin-top: -1rem;
 `;
 const SortButton = styled.button`
     background-color: transparent;
@@ -423,10 +387,9 @@ const PostList = styled.div`
     color: #FFF;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-gap: 20px;
-    width:53%;
-    margin-right: 1rem;
-    margin-top: 0.5rem;
+    grid-gap: 22px;
+    width:60%;
+    margin-top: 1rem;
 `;
 
 const PostItem = styled.div`
@@ -441,7 +404,7 @@ const TitleWrapper = styled.div`
     font-family: "Pretendard";
     font-size: 1.1rem;
     font-style: normal;
-    font-weight: 600; 
+    font-weight: 800; 
     display: flex;
     align-items: center;
     margin-bottom: 0.2rem;

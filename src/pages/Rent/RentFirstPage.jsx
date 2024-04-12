@@ -35,6 +35,12 @@ const RentFirstPage = () => {
     fetchTopCategories();
   }, []);
 
+
+  const handleCategoryClick = (categoryName) => {
+    // navigate 함수를 사용하여 /rent/mainpage 경로로 이동하면서 상태 전달
+    navigate('/rent/mainpage', { state: { searchTerm: categoryName } });
+  };
+
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -51,19 +57,41 @@ const RentFirstPage = () => {
     setIsModalOpen(false); // 모달 닫기
   };
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(); // 사용자가 Enter 키를 누르면 검색 실행
+    }
+  };
+
+  const handleSearch = () => {
+    // 검색어를 RentMainPage로 전달
+    navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
+  };
+
   return (
     <>
       <GlobalStyle />
       <SearchSection>
         <SearchText>물건 검색</SearchText>
         <VerticalLine />
-        <SearchInput />
-        <SearchButton />
+        <SearchInput
+          value={searchTerm}
+          onChange={handleSearchChange}
+          onKeyPress={handleKeyPress}
+        />
+        <SearchButton onClick={handleSearch}/>
       </SearchSection>
       <ItemTitle>아차차! 집에 뭔가 놓고 온 것 같은데...</ItemTitle>
       <CategoryGrid>
         {topCategories.map((category, index) => (
-          <CategoryItem key={index}>{category.category}</CategoryItem>
+          // CategoryItem 클릭 시 handleCategoryClick 함수 호출하도록 수정
+          <CategoryItem key={index} onClick={() => handleCategoryClick(category.category)}>
+            {category.category}
+          </CategoryItem>
         ))}
       </CategoryGrid>
     </>
@@ -164,6 +192,7 @@ const CategoryGrid = styled.div`
   margin-top: 5rem;
   margin-right: 30rem;
   margin-left: 30rem;
+  cursor: pointer;
 `;
 
 const CategoryItem = styled.div`

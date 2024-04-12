@@ -216,6 +216,21 @@ const MainPage3 = () => {
     return `${hours}:${minutes}`;
   }
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+  
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(); // 사용자가 Enter 키를 누르면 검색 실행
+    }
+  };
+
+  const handleSearch = () => {
+    // 검색어를 RentMainPage로 전달
+    navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
+  };
+
   return (
     <>
       <GlobalStyle />
@@ -229,8 +244,12 @@ const MainPage3 = () => {
       <SearchSection>
         <SearchText>물건 검색</SearchText>
         <VerticalLine />
-        <SearchInput />
-        <SearchButton />
+        <SearchInput
+          value={searchTerm}
+          onChange={handleSearchChange}
+          onKeyPress={handleKeyPress}
+        />
+        <SearchButton onClick={handleSearch}/>
       </SearchSection>
       <ItemTitle>{userName}님을 위한 물건 추천 🎀</ItemTitle>
 
@@ -380,7 +399,7 @@ const ItemTitle = styled.div`
   color: #FFF;
   margin-top: 4rem;
   text-align: left;
-  margin-left: 28rem;
+  margin-left: 22rem;
   font-family: "Pretendard";
   font-size: 1.5625rem;
   font-style: normal;
@@ -400,7 +419,7 @@ const ContentWrapper = styled.div`
 `;
 
 const PostList = styled.div`
-    background-color: black;
+    background-color: background: transparent;;
     color: #FFF;
     display: grid;
     grid-template-columns: repeat(2, 1fr);

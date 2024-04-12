@@ -12,6 +12,7 @@ import 'swiper/css/pagination';
 const MainPage1 = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   const handleModalOpen = () => {
@@ -21,6 +22,22 @@ const MainPage1 = () => {
   const handleModalClose = () => {
     setIsModalOpen(false); // 모달 닫기
   };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(); // 사용자가 Enter 키를 누르면 검색 실행
+    }
+  };
+
+  const handleSearch = () => {
+    // 검색어를 RentMainPage로 전달
+    navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
+  };
+
 
   useEffect(() => {
     const handleWheel = (e) => {
@@ -40,8 +57,12 @@ const MainPage1 = () => {
       <SearchSection>
         <SearchText>물건 검색</SearchText>
         <VerticalLine />
-        <SearchInput />
-        <SearchButton />
+        <SearchInput
+          value={searchTerm}
+          onChange={handleSearchChange}
+          onKeyPress={handleKeyPress}
+        />
+        <SearchButton onClick={handleSearch}/>
       </SearchSection>
       <ItemTitle>많이 찾는 아차! 물건 🥇</ItemTitle>
       <ScrollIndicators>
