@@ -227,47 +227,34 @@ const RightColumn = styled.div`
     gap: 10px; // 세로로 묶인 요소들 사이의 간격 설정
 `;
 
+
+
 const GlobalStyle = createGlobalStyle`
-  .react-datepicker {
-    font-family: 'Pretendard', sans-serif;
-    &__header {
-      background-color: #000; // 헤더의 배경색을 검은색으로 변경
-      border-bottom: 1px solid #333; // 테두리 색상 조정
-      .react-datepicker__current-month,
-      .react-datepicker__day-name {
-        color: #fff; // 헤더 내부의 글자 색상을 흰색으로 변경
-      }
-    }
-    &__month-container {
-      background-color: transparent; // 달력 배경 투명 처리
-    }
-    &__day {
-      color: #fff; // 날짜 글자 색상을 흰색으로 변경
-      &:hover {
-        background-color: #555; // 날짜에 마우스를 올렸을 때의 배경색 변경
-      }
-    }
-    &__day--selected {
-      background-color: #00bfa5; // 선택된 날짜의 배경색 변경
-      border-radius: 0.2rem; // 선택된 날짜의 둥근 모서리 처리
-    }
-    &__day--keyboard-selected {
-      border: 1px solid #00bfa5; // 키보드로 선택된 날짜의 테두리 색상 변경
-    }
-    &__day--outside-month {
-      color: #555; // 다른 달의 날짜 색상 변경
-    }
-    &__navigation {
-      top: 10px;
-      &--previous,
-      &--next {
-        color: #fff; // 화살표 색상을 흰색으로 변경
-        &:hover {
-          color: #00bfa5; // 화살표에 마우스를 올렸을 때의 색상 변경
-        }
-      }
-    }
+  html, body, #root {
+    height: 100%; 
+    margin: 0;
+    padding: 0;
+    justify-content: center;
+    color: #fff;
+    background-color: #000; // body 전체의 배경색을 검은색으로 설정
+    font-family: "Pretendard";
   }
+
+  ::-webkit-scrollbar {
+    width: 0.5rem;
+  }
+
+  /* 스크롤바 트랙(바탕) 스타일 */
+  ::-webkit-scrollbar-track {
+    background: transparent; /* 트랙의 배경색 */
+  }
+
+  /* 스크롤바 핸들(움직이는 부분) 스타일 */
+  ::-webkit-scrollbar-thumb {
+    background: #00FFE0; /* 핸들의 배경색 */
+    border-radius: 5px;
+  }
+
 `;
 
 const TotalTimeDisplay = styled.div`

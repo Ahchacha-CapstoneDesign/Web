@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styled, {createGlobalStyle} from 'styled-components';
 
 const PersonReservationDetailsPage = () => {
 
@@ -36,6 +36,8 @@ const PersonReservationDetailsPage = () => {
 
 
     return (
+        <>
+            <GlobalStyle/>
         <PageWrapper>
             <TitleBar>
                 <BackButton src="/assets/img/BackArrow.png" alt="Back" onClick={handleGoBack} />
@@ -89,8 +91,37 @@ const PersonReservationDetailsPage = () => {
                 <ConfirmButton onClick={handleSubmit} >결제하기</ConfirmButton>
             </FeeWrapper>
         </PageWrapper>
+            </>
     );
 };
+
+const GlobalStyle = createGlobalStyle`
+  html, body, #root {
+    height: 100%; 
+    margin: 0;
+    padding: 0;
+    justify-content: center;
+    color: #fff;
+    background-color: #000; // body 전체의 배경색을 검은색으로 설정
+    font-family: "Pretendard";
+  }
+
+  ::-webkit-scrollbar {
+    width: 0.5rem;
+  }
+
+  /* 스크롤바 트랙(바탕) 스타일 */
+  ::-webkit-scrollbar-track {
+    background: transparent; /* 트랙의 배경색 */
+  }
+
+  /* 스크롤바 핸들(움직이는 부분) 스타일 */
+  ::-webkit-scrollbar-thumb {
+    background: #00FFE0; /* 핸들의 배경색 */
+    border-radius: 5px;
+  }
+
+`;
 
 // 전체 페이지를 감싸는 컴포넌트
 const PageWrapper = styled.div`
