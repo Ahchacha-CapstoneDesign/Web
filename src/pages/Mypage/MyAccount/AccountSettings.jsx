@@ -120,8 +120,8 @@ const AccountSettings = () => {
 
     const resetToDefaultImage = async () => {
       try {
-        await apiClient.delete('/users/default-profile');
-    
+        // 서버로 POST 요청을 보냅니다.
+        await apiClient.post('/users/reset-profile');
         alert('기본 이미지로 재설정되었습니다.');
         localStorage.removeItem('profileImageUrl'); // 로컬 스토리지에서 이미지 URL 삭제
         setProfileImage(DEFAULT_IMAGE_URL); // 상태 업데이트로 기본 이미지 사용

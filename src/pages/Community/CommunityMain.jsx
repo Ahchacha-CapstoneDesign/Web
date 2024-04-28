@@ -160,7 +160,7 @@ const CommunityMain = () => {
 
     // 글 상세 페이지로 이동
     const goToPostDetail = (id) => {
-        navigate(`/post/${id}`);
+        navigate(`/community/${id}`);
     };
 
   const WritingArea = () => {
@@ -220,7 +220,7 @@ const CommunityMain = () => {
 
                 <PostList>
                     {displayedPosts.map((post) => (
-                        <PostItem key={post.id}>
+                        <PostItem key={post.id} onClick={() => goToPostDetail(post.id)}>
                             <TitleWrapper>
                                 {post.title}
                             </TitleWrapper>

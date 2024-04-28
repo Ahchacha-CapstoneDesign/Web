@@ -22,6 +22,7 @@ import PersonReservationDetailsPage from "./pages/Reservation/PersonReservationD
 import OfficialReservationDetailsPage from "./pages/Reservation/OfficialReservationDetailsPage";
 import OfficialReservationPage from "./pages/Reservation/OfficialReservationPage";
 import PostCreationPage from './pages/Community/Posting.jsx';
+import CommunityDetail from './pages/Community/CommunityDetail.jsx';
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
           {/* 대여 페이지 */}
           <Route path="/rent/" element={<> <Header /> <RentFirstPage /> </>}/>
           <Route path="/rent/mainpage" element={<> <Header /> <RentMainPage /> </>}/>
+          
           {/* 커뮤니티 */}
           <Route 
             path="/community/main" 
@@ -74,6 +76,15 @@ function App() {
             </>
             }
           />
+          <Route 
+            path="/community/:id" 
+            element={
+            <>
+              <Header /> <CommunityDetail />
+            </>
+            }
+          />
+
 
           <Route path="/itemdetail" element={<> <Header /> <ItemDetailPage /> </>}/>
           <Route path="/personreservation" element={<> <Header /> <PersonReservationPage /> </>}/>

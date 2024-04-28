@@ -11,6 +11,7 @@ const Login = () => {
   const [passwordShown, setPasswordShown] = useState(false);
   const [loginFailed, setLoginFailed] = useState(false);
   const navigate = useNavigate();
+  const DEFAULT_IMAGE_URL = '/assets/img/Profile.png';
 
   const togglePasswordVisibility = () => {
     setPasswordShown(!passwordShown);
@@ -33,8 +34,9 @@ const Login = () => {
       localStorage.setItem('userID', response.data.id);
       localStorage.setItem('userGrade', response.data.grade);
       localStorage.setItem('userStatus', response.data.status);
-      localStorage.setItem('profileImageUrl', response.data.defaultProfile);
-
+      // 이미지 URL이 없거나 빈 문자열인 경우, 기본 이미지 URL을 사용
+      const imageUrl = response.data.defaultProfile || DEFAULT_IMAGE_URL;
+      localStorage.setItem('profileImageUrl', imageUrl);
       // 로그인 후 처리 로직
       if (!response.data.nickname) {
         navigate('/setting-nickname');
