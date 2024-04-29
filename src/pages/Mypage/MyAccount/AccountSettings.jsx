@@ -120,14 +120,16 @@ const AccountSettings = () => {
 
     const resetToDefaultImage = async () => {
       try {
-          alert('기본 이미지로 재설정되었습니다.');
-          localStorage.removeItem('profileImageUrl'); // 로컬 스토리지에서 삭제
+        await apiClient.delete('/users/default-profile');
+    
+        alert('기본 이미지로 재설정되었습니다.');
+        localStorage.removeItem('profileImageUrl'); // 로컬 스토리지에서 이미지 URL 삭제
+        setProfileImage(DEFAULT_IMAGE_URL); // 상태 업데이트로 기본 이미지 사용
       } catch (error) {
-          console.error('기본 이미지로 재설정 실패:', error);
-          alert('기본 이미지로 재설정하는 동안 오류가 발생했습니다.');
+        console.error('기본 이미지로 재설정 실패:', error);
+        alert('기본 이미지로 재설정하는 동안 오류가 발생했습니다.');
       }
-  };
-
+    };
 
     const formatPhoneNumber = (phoneNumber) => {
       // 전화번호가 11자리인 경우 010-0000-0000 형식으로 변환

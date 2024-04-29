@@ -10,9 +10,7 @@ const MainPage4 = () => {
 
     useEffect(() => {
         const handleWheel = (e) => {
-          if (e.deltaY > 0) { // 마우스 휠을 아래로 스크롤할 경우
-            navigate('/mainpage/1');
-          } else if (e.deltaY < 0) { // 마우스 휠을 위로 스크롤할 경우
+          if (e.deltaY < 0) { // 마우스 휠을 위로 스크롤할 경우
             navigate('/mainpage/3');
           }
         };

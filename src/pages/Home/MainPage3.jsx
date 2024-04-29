@@ -12,7 +12,7 @@ const MainPage3 = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-
+  const [userName, setUserName] = useState('');
   const [displayedPosts, setDisplayedPosts] = useState([]); // 현재 페이지에 표시될 포스트
   const [posts, setPosts] = useState([]);
   const [searchedPosts, setSearchedPosts] = useState([]); // 검색된 게시글 목록
@@ -23,6 +23,11 @@ const MainPage3 = () => {
   const searchInputRef = useRef(null);
 
   const ITEMS_PER_PAGE = 6;
+
+  useEffect(() => {
+    const name = localStorage.getItem('userName');
+    setUserName(name);
+  });
 
   const fetchPosts = async () => {
     // 모든 게시글을 불러오는 URL. 페이지나 사이즈 매개변수 없음
@@ -211,6 +216,21 @@ const MainPage3 = () => {
     return `${hours}:${minutes}`;
   }
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+  
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(); // 사용자가 Enter 키를 누르면 검색 실행
+    }
+  };
+
+  const handleSearch = () => {
+    // 검색어를 RentMainPage로 전달
+    navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
+  };
+
   return (
     <>
       <GlobalStyle />
@@ -224,10 +244,14 @@ const MainPage3 = () => {
       <SearchSection>
         <SearchText>물건 검색</SearchText>
         <VerticalLine />
-        <SearchInput />
-        <SearchButton />
+        <SearchInput
+          value={searchTerm}
+          onChange={handleSearchChange}
+          onKeyPress={handleKeyPress}
+        />
+        <SearchButton onClick={handleSearch}/>
       </SearchSection>
-      <ItemTitle>OOO님을 위한 물건 추천 🎀</ItemTitle>
+      <ItemTitle>{userName}님을 위한 물건 추천 🎀</ItemTitle>
 
       <PageContainer>
         <PostList>
@@ -375,7 +399,7 @@ const ItemTitle = styled.div`
   color: #FFF;
   margin-top: 4rem;
   text-align: left;
-  margin-left: 28rem;
+  margin-left: 22rem;
   font-family: "Pretendard";
   font-size: 1.5625rem;
   font-style: normal;
@@ -395,7 +419,7 @@ const ContentWrapper = styled.div`
 `;
 
 const PostList = styled.div`
-    background-color: black;
+    background-color: background: transparent;;
     color: #FFF;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
