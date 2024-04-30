@@ -23,6 +23,10 @@ import OfficialReservationDetailsPage from "./pages/Reservation/OfficialReservat
 import OfficialReservationPage from "./pages/Reservation/OfficialReservationPage";
 import PostCreationPage from './pages/Community/Posting.jsx';
 
+import Register1 from './pages/Register/Register1.jsx';
+import RegisterMain from './pages/Register/RegisterMain.jsx';
+
+
 function App() {
   return (
     <Router>
@@ -57,6 +61,9 @@ function App() {
           {/* 대여 페이지 */}
           <Route path="/rent/" element={<> <Header /> <RentFirstPage /> </>}/>
           <Route path="/rent/mainpage" element={<> <Header /> <RentMainPage /> </>}/>
+          {/* 등록 페이지 */}
+          <Route path="/register1" element={<> <Header /> <Register1 /> </>}/>
+          <Route path="/registerMain" element={<> <Header /> <RegisterMain /> </>}/>
           {/* 커뮤니티 */}
           <Route 
             path="/community/main" 
