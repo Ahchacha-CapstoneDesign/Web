@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled, {createGlobalStyle} from 'styled-components';
 
 const PersonReservationDetailsPage = () => {
@@ -207,6 +207,7 @@ const CheckboxLabel = styled.label`
   height: 1.875rem;
   display: flex;
   margin-bottom: 1.44rem;
+  
 `;
 
 const TextLabel = styled.span`
@@ -216,7 +217,7 @@ const TextLabel = styled.span`
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  margin-left: 37rem;
+  margin-left: 26rem;
   text-align: left; // 텍스트를 왼쪽 정렬
 `;
 
@@ -242,7 +243,7 @@ const ConfirmButton = styled.button`
   width: 19.125rem;
   height: 3.0625rem;
   margin-top: 2rem; // 여백 조정
-  margin-right: 34.5rem;
+  margin-right: 21.5rem;
 `;
 
 // 이제 모든 스타일 컴포넌트가 왼쪽으로 정렬되어 표시됩니다.
