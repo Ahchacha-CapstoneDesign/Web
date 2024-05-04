@@ -17,6 +17,7 @@
         const [newComment, setNewComment] = useState('');
         const [showCommentForm, setShowCommentForm] = useState(false);  // 댓글 입력 폼 표시 상태
         const [replyingTo, setReplyingTo] = useState(null);
+        const [isOwner, setIsOwner] = useState(false);
         const commentFormRef = useRef({});
         const inputRef = useRef({});
 
@@ -91,16 +92,31 @@
               try {
                   const postResponse = await apiClient.get(`/community/${communityId}`);
                   const commentsResponse = await apiClient.get(`/comments/community/${communityId}`);
+                  const likeStatusResponse = await apiClient.get(`/likes/community/${communityId}`);
                   const sortedComments = sortComments(commentsResponse.data); // 데이터 로드 시 댓글 정렬
       
                   // 게시글 데이터 설정
                   setPost(postResponse.data);
                   setLikeCount(postResponse.data.likeCount);
-                  setIsLiked(postResponse.data.isLiked);
+                  setIsLiked(likeStatusResponse.data); // 좋아요 상태 업데이트
       
                   // 댓글 데이터 및 댓글 수 설정
                   setComments(sortedComments);
                   setCommentCount(calculateTotalCommentsIncludingReplies(commentsResponse.data));
+
+                  // 각 댓글의 좋아요 상태를 확인하고 업데이트
+                  const commentsLikeStatus = await Promise.all(
+                    commentsResponse.data.map(async comment => {
+                      const likeStatus = await apiClient.get(`/likes/comment/${comment.id}`);
+                      return { ...comment, isLiked: likeStatus.data };
+                    })
+                  );
+                  setComments(commentsLikeStatus);
+
+                  //// localStorage에 저장된 userId와 비교
+                  const { data } = await apiClient.get(`/community/${communityId}`);
+                  setPost(data);
+                  setIsOwner(data.userId === localStorage.getItem('userId'));
       
               } catch (error) {
                   console.error('Error fetching data:', error);
@@ -108,6 +124,22 @@
           }
           fetchData();
       }, [communityId]);
+
+      const handleDelete = async () => {
+        if (window.confirm("게시글을 삭제하시겠습니까?")) {
+          try {
+            await apiClient.delete(`/community/${communityId}`);
+            navigate('/'); // 삭제 후 이동할 경로
+          } catch (error) {
+            console.error('Error deleting post:', error);
+          }
+        }
+      };
+      
+      // 수정 버튼 클릭 핸들러
+      const handleEdit = () => {
+        navigate(`/posting/${communityId}`); // 수정 페이지로 이동
+      };
       
       const handleLike = async () => {
         try {

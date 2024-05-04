@@ -174,17 +174,6 @@ import apiClient from '../../path/apiClient';
 
     return new Blob([u8arr], {type: mime});
   }
-
-  const handleCancel = () => {
-    setTitle('');
-    setContent('');
-    setImageUrls([]);
-  
-    localStorage.removeItem(TEMP_DATA_KEY);
-  
-    navigate(-1);
-    alert("작성 내용이 초기화되었으며, 이전 페이지로 돌아갑니다.");
-  };
   
 const location = useLocation();
 

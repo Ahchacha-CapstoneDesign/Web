@@ -210,11 +210,11 @@ const CommunityMain = () => {
 
                 <SortButtonsContainer>
                     <SortButton onClick={() => handleSortChange('date')} active={sort === 'date'}>
-                    <ButtonImage src={sort == 'date'  ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image"/>
+                    <ButtonImage src={sort == 'date'  ? "/assets/img/FilterCheck.png" : "/assets/img/Ellipse.png"} alt="button image"/>
                     최근 작성순
                     </SortButton>
                     <SortButton onClick={() => handleSortChange('like-counts')} active={sort === 'like-counts'}>
-                    <ButtonImage src={sort == 'like-counts'  ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image"/>
+                    <ButtonImage src={sort == 'like-counts'  ? "/assets/img/FilterCheck.png" : "/assets/img/Ellipse.png"} alt="button image"/>
                     좋아요순
                     </SortButton>
                 </SortButtonsContainer>

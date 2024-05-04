@@ -193,19 +193,19 @@ const RentMainPage = () => {
       <PageContainer>
         <SortButtonsContainer>
           <SortButton onClick={() => handleSortChange('date')} active={sort === 'date'}>
-            <ButtonImage src={sort == 'date' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+            <ButtonImage src={sort == 'date' ? "/assets/img/FilterCheck.png" : "/assets/img/Ellipse.png"} alt="button image" />
             최근 작성순
           </SortButton>
           <SortButton onClick={() => handleSortChange('view-counts')} active={sort === 'view-counts'}>
-            <ButtonImage src={sort == 'view-counts' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+            <ButtonImage src={sort == 'view-counts' ? "/assets/img/FilterCheck.png" : "/assets/img/Ellipse.png"} alt="button image" />
             조회수 순
           </SortButton>
           <SortButton onClick={() => handleSortChange('reservation')} active={sort === 'reservation'}>
-            <ButtonImage src={sort == 'reservation' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+            <ButtonImage src={sort == 'reservation' ? "/assets/img/FilterCheck.png" : "/assets/img/Ellipse.png"} alt="button image" />
             예약 가능
           </SortButton>
           <SortButton onClick={() => handleSortChange('personOrOfficial')} active={sort === 'personOrOfficial'}>
-            <ButtonImage src={sort == 'personOrOfficial' ? "/assets/img/Check.png" : "/assets/img/Ellipse.png"} alt="button image" />
+            <ButtonImage src={sort == 'personOrOfficial' ? "/assets/img/FilterCheck.png" : "/assets/img/Ellipse.png"} alt="button image" />
             학교 대여
           </SortButton>
         </SortButtonsContainer>
