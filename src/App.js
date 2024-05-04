@@ -55,7 +55,7 @@ function App() {
             }
           />
           {/* 대여 페이지 */}
-          <Route path="/rent/" element={<> <Header /> <RentFirstPage /> </>}/>
+          <Route path="/rent" element={<> <Header /> <RentFirstPage /> </>}/>
           <Route path="/rent/mainpage" element={<> <Header /> <RentMainPage /> </>}/>
           {/* 커뮤니티 */}
           <Route 
