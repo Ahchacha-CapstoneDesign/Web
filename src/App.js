@@ -77,7 +77,7 @@ function App() {
             }
           />
           <Route 
-            path="/community/:id" 
+            path="/community/:communityId" 
             element={
             <>
               <Header /> <CommunityDetail />
