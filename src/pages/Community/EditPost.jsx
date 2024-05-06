@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import ReactQuill, { Quill } from 'react-quill'; //npm install react-quill 필수
 import 'react-quill/dist/quill.snow.css'; // Quill 에디터의 스타일시트
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { createGlobalStyle } from 'styled-components';
 import { useLocation } from 'react-router-dom';
@@ -11,22 +11,37 @@ import apiClient from '../../path/apiClient';
  const TEMP_DATA_KEY = "temporaryData";
 
 
- const EditPostPage = () => {
+ const PostCreationPage = () => {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const { communityId } = useParams(); 
   const [titleLength, setTitleLength] = useState(0);
   const maxTitleLength = 30;
   const [contentLength, setContentLength] = useState(0);
   const maxContentLength = 500;
   const quillRef = useRef(null);
-  const [posts, setPosts] = useState([]); // 글 목록 상태 추가
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isVerified, setIsVerified] = useState(false); // 현직자 인증 상태
   const [hasDeferredModal, setHasDeferredModal] = useState(false);
   const [imageUrls, setImageUrls] = useState([]);
   const [tempSavedPostId, setTempSavedPostId] = useState(null);
 
+
+  useEffect(() => {
+    // 게시글 데이터를 불러오는 함수
+    const fetchPostData = async () => {
+      try {
+        const response = await apiClient.get(`/community/${communityId}`);
+        setTitle(response.data.title);
+        setContent(response.data.content);
+      } catch (error) {
+        console.error('게시글 데이터를 불러오는 중 에러가 발생했습니다:', error);
+      }
+    };
+
+    if (communityId) {
+      fetchPostData();
+    }
+  }, [communityId]);
 
   useEffect(() => {
     // 컴포넌트가 마운트될 때 로컬 스토리지에서 hasDeferredModal 상태를 불러옴
@@ -115,48 +130,45 @@ import apiClient from '../../path/apiClient';
   };
   
   const handleTitleChange = (e) => {
-    e.preventDefault();
-    if (e.target.value.length <= maxTitleLength) {
-      setTitle(e.target.value);
-    }  };
+    setTitle(e.target.value);
+    setTitleLength(e.target.value.length);
+  };
+
+  const handleContentChange = (value) => {
+    setContent(value);
+    const text = value.replace(/<[^>]*>?/gm, '');
+    setContentLength(text.length);
+  };
 
    const accessToken = localStorage.getItem('accessToken'); // 로컬 스토리지에서 토큰 가져오기
 
    const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!title.trim() || !content.trim()) {
-      alert('제목과 내용을 입력해주세요.');
+      alert('제목과 내용을 모두 입력해주세요.');
       return;
     }
-  
-    // FormData 객체 생성 및 필드 추가
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('content', content);
-  
-    imageUrls.forEach((url, index) => {
-      const blob = dataURLtoBlob(url); // Data URL을 Blob으로 변환
-      const file = new File([blob], `image-${index}.jpg`, { type: 'image/jpeg' });
-      formData.append('file', file); // 파일 추가
-    });
-  
+
     try {
-      // apiClient를 사용하여 서버에 데이터 전송
-      const response = await apiClient.post('/community/create', formData, {
+      // 게시글을 업데이트하는 API 엔드포인트로 수정하세요
+      const response = await apiClient.post(`/community/update/${communityId}`, formData, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`, // 액세스 토큰 사용
-          'Content-Type': 'multipart/form-data', // Content-Type 설정
+          'Content-Type': 'multipart/form-data',
         },
       });
-  
-      if (response.status === 200 || response.status === 201) {
-        alert('글이 성공적으로 등록되었습니다.');
-        navigate(`/community/main`); // 글이 성공적으로 등록된 후 이동할 페이지
+
+      if (response.status === 200) {
+        alert('게시글이 성공적으로 수정되었습니다.');
+        navigate(`/community/${communityId}`); // 수정된 게시글 보기 페이지로 리다이렉트
       }
     } catch (error) {
-      console.error('글 등록 중 오류 발생:', error);
-      alert('글 등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.error('게시글 수정 중 오류 발생:', error);
+      alert('게시글 수정 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
     
@@ -221,7 +233,7 @@ useEffect(() => {
                 ref={quillRef}
                 theme="snow"
                 value={content}
-                onChange={setContent}
+                onChange={handleContentChange}
               />
               <ImageButton  type="button" onClick={handleImageUpload}>
                 <img src="/assets/img/ImgSelect.png" alt="이미지 아이콘" /> 
@@ -232,14 +244,14 @@ useEffect(() => {
               </ContentCounter>
             </ContentContainer>
             <ButtonContainer>
-              <SubmitButton type="submit">작성 완료</SubmitButton>
+              <SubmitButton type="submit">수정 완료</SubmitButton>
             </ButtonContainer>
           </Form>
       </PageContainer>
       </>
     );
   };
-export default EditPostPage;
+export default PostCreationPage;
 
 // Styled Components
 

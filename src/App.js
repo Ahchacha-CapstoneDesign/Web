@@ -23,6 +23,7 @@ import OfficialReservationDetailsPage from "./pages/Reservation/OfficialReservat
 import OfficialReservationPage from "./pages/Reservation/OfficialReservationPage";
 import PostCreationPage from './pages/Community/Posting.jsx';
 import CommunityDetail from './pages/Community/CommunityDetail.jsx';
+import EditPost from './pages/Community/EditPost.jsx';
 
 function App() {
   return (
@@ -77,6 +78,14 @@ function App() {
             }
           />
           <Route 
+            path="/community/editpost/:communityId" 
+            element={
+            <>
+              <Header /> <EditPost />
+            </>
+            }
+          />
+          <Route 
             path="/community/:communityId" 
             element={
             <>
@@ -86,7 +95,7 @@ function App() {
           />
 
 
-          <Route path="/itemdetail" element={<> <Header /> <ItemDetailPage /> </>}/>
+          <Route path="rent/itemdetail/:itemId" element={<> <Header /> <ItemDetailPage /> </>}/>
           <Route path="/personreservation" element={<> <Header /> <PersonReservationPage /> </>}/>
           <Route path="/officialreservation" element={<> <Header /> <OfficialReservationPage /> </>}/>
           <Route path="/personreservationdetails" element={<> <Header /> <PersonReservationDetailsPage /> </>}/>

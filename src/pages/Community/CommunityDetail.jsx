@@ -20,6 +20,7 @@
         const [isOwner, setIsOwner] = useState(false);
         const commentFormRef = useRef({});
         const inputRef = useRef({});
+        const userNickname = localStorage.getItem('userNickname'); // useEffect 밖에서 선언
 
 
         
@@ -80,7 +81,7 @@
         };
 
         const handleGoBack = () => {
-          navigate(-1); // 뒤로가기 기능 실행
+          navigate('/community/main'); // 뒤로가기 기능 실행
         };
       
         const calculateTotalCommentsIncludingReplies = (comments) => {
@@ -88,6 +89,7 @@
         };
 
         useEffect(() => {
+
           async function fetchData() {
               try {
                   const postResponse = await apiClient.get(`/community/${communityId}`);
@@ -103,20 +105,13 @@
                   // 댓글 데이터 및 댓글 수 설정
                   setComments(sortedComments);
                   setCommentCount(calculateTotalCommentsIncludingReplies(commentsResponse.data));
-
-                  // 각 댓글의 좋아요 상태를 확인하고 업데이트
-                  const commentsLikeStatus = await Promise.all(
-                    commentsResponse.data.map(async comment => {
-                      const likeStatus = await apiClient.get(`/likes/comment/${comment.id}`);
-                      return { ...comment, isLiked: likeStatus.data };
-                    })
-                  );
-                  setComments(commentsLikeStatus);
+                  
 
                   //// localStorage에 저장된 userId와 비교
+                  const userNickname = localStorage.getItem('userNickname');
+                  console.log("Local User ID:", userNickname); // localStorage에서 userId 가져오기
                   const { data } = await apiClient.get(`/community/${communityId}`);
-                  setPost(data);
-                  setIsOwner(data.userId === localStorage.getItem('userId'));
+                  setIsOwner(data.nickname === userNickname);
       
               } catch (error) {
                   console.error('Error fetching data:', error);
@@ -129,16 +124,30 @@
         if (window.confirm("게시글을 삭제하시겠습니까?")) {
           try {
             await apiClient.delete(`/community/${communityId}`);
-            navigate('/'); // 삭제 후 이동할 경로
+            handleGoBack();
           } catch (error) {
             console.error('Error deleting post:', error);
           }
         }
       };
+
+      const handleDeleteComment = async (commentId) => {
+        if (window.confirm("댓글을 삭제하시겠습니까?")) {
+            try {
+                await apiClient.delete(`/comments/${commentId}`);
+                // 삭제 성공 후 댓글 목록 갱신
+                const updatedComments = comments.filter(comment => comment.id !== commentId && comment.parentId !== commentId);
+                setComments(updatedComments);
+                setCommentCount(updatedComments.length);
+            } catch (error) {
+                console.error('Error deleting comment:', error);
+            }
+        }
+    };
       
       // 수정 버튼 클릭 핸들러
       const handleEdit = () => {
-        navigate(`/posting/${communityId}`); // 수정 페이지로 이동
+        navigate(`/community/editpost/${communityId}`); // 수정 페이지로 이동
       };
       
       const handleLike = async () => {
@@ -258,6 +267,12 @@
                   <AuthorName>{post.nickname}</AuthorName>
                   <CommentTimestamp>{formatDateTime(post.createdAt)}</CommentTimestamp>
                 </AuthorInfo>
+                {isOwner && (
+                  <OwnerActions>
+                    <ActionButton onClick={handleEdit}>수정</ActionButton>
+                    <ActionButton onClick={handleDelete}>삭제</ActionButton>
+                  </OwnerActions>
+                )}
                 <LikeAndCommentSection>
                     <LikeButton
                         src={isLiked ? '/assets/img/CheckGoodIcon.png' : '/assets/img/GoodIcon.png'}
@@ -303,6 +318,9 @@
                                 <span>{comment.replyCount}</span>
                               </React.Fragment>
                             )}
+                            {comment.nickname === userNickname && (
+                                <ActionButton onClick={() => handleDeleteComment(comment.id)}>삭제</ActionButton>
+                          )}
                           </LikeAndCommentSection>
                         </CommentFooter>
                       </CommentItem>
@@ -585,3 +603,22 @@
       width: 1.8125rem;
       height: 1.8125rem;
     `;
+
+    const OwnerActions = styled.div`
+      display: flex;
+      align-items: center;
+      justify-content: flex-end; /* 항목들을 컨테이너의 오른쪽 끝으로 정렬 */
+      gap: 1rem;
+      margin-top: 1rem;
+  `;
+
+const ActionButton = styled.button`
+  background-color: transparent;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid white;
+  font-family: 'Pretendard';
+`;

@@ -193,6 +193,10 @@ const MainPage3 = () => {
     setIsModalOpen(false); // 모달 닫기
   };
 
+  const goToItemDetail = (itemId) => {
+    navigate(`/rent/itemdetail/${itemId}`);
+  };
+
   useEffect(() => {
     const handleWheel = (e) => {
       if (e.deltaY > 0) { // 마우스 휠을 아래로 스크롤할 경우
@@ -256,7 +260,7 @@ const MainPage3 = () => {
       <PageContainer>
         <PostList>
           {displayedPosts.map((post) => (
-            <PostItem key={post.id}>
+            <PostItem key={post.id} onClick={() => goToItemDetail(post.id)}>
               <ImageWrapper>
                 <img src={post.imageUrls[0]} alt="Item" />
                 {post.reservation === 'NO' && <RentingImage src={"/assets/img/renting.png"} alt="Renting" />} {/* 조건부 렌더링 */}

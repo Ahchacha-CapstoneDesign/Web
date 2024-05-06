@@ -154,6 +154,10 @@ const MainPage2 = () => {
     navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
   };
 
+  const goToItemDetail = (itemId) => {
+    navigate(`/rent/itemdetail/${itemId}`);
+  };
+
   return (
     <>
       <GlobalStyle />
@@ -179,7 +183,7 @@ const MainPage2 = () => {
       <PageContainer>
         <PostList>
           {displayedPosts.map((post) => (
-            <PostItem key={post.id}>
+            <PostItem key={post.id} onClick={() => goToItemDetail(post.id)}>
               <ImageWrapper>
                 <img src={post.imageUrls[0]} alt="Item" />
                 {post.reservation === 'NO' && <RentingImage src={"/assets/img/renting.png"} alt="Renting" />} {/* 조건부 렌더링 */}
