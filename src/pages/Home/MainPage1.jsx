@@ -4,6 +4,7 @@ import { createGlobalStyle } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from "swiper/react"; // Import Swiper React components
 import { EffectCoverflow, Pagination,Navigation } from "swiper"; // Swiper에서 가져올 모듈들
+import apiClient from "../../path/apiClient";
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -14,6 +15,20 @@ const MainPage1 = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+  const [items, setItems] = useState([]); // 아이템을 저장할 상태
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await apiClient.get('/items/view-counts');
+        setItems(response.data.content); // 응답에서 'content' 필드를 가정하여 아이템을 설정
+      } catch (error) {
+        console.error('아이템을 가져오는데 실패했습니다:', error);
+      }
+    };
+
+    fetchItems();
+  }, []);
 
   const handleModalOpen = () => {
     setIsModalOpen(true); // 모달 열기
@@ -50,6 +65,16 @@ const MainPage1 = () => {
 
     return () => window.removeEventListener('wheel', handleWheel);
   }, [navigate]);
+
+  function getTime(dateString) {
+    const date = new Date(dateString);
+    const formatter = new Intl.DateTimeFormat('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false // 24시간제를 사용하려면 false로 설정합니다.
+    });
+    return formatter.format(date);
+}
 
   return (
     <>
@@ -90,13 +115,23 @@ const MainPage1 = () => {
             modules={[EffectCoverflow, Pagination, Navigation]}
             className="mySwiper"
             >
-            {/* 10개의 네모칸 슬라이드를 만듭니다 */}
-            {[...Array(10).keys()].map((index) => (
-                <SwiperSlide key={index}>
-                <SlideBox>Slide {index + 1}</SlideBox>
-                </SwiperSlide>
-            ))}
-        </Swiper>
+            {items.map((item, index) => (
+            <SwiperSlide key={index} onClick={() => navigate(`/rent/itemdetail/${item.id}`)}>
+              <SlideBox>
+                <ItemImage src={item.imageUrls[0]} alt="Item" />
+                <ItemDetail>
+                  <ItemDetailTitle>{item.title}</ItemDetailTitle>
+                  <ItemPrice>비용: {item.pricePerHour}원 / 시간</ItemPrice>
+                  <ItemTime>
+                    대여 가능 시간: 
+                    <br />
+                    {getTime(item.canBorrowDateTime)} ~ {getTime(item.returnDateTime)}
+                  </ItemTime>
+                </ItemDetail>
+              </SlideBox>
+            </SwiperSlide>
+          ))}
+          </Swiper>
       </SwiperContainer>
     </>
   );
@@ -195,7 +230,7 @@ const ItemTitle = styled.div`
 `;
 
 const SwiperContainer = styled.div`
-width: 78rem; // 또는 필요한 대로 조정
+width: 80rem;
 margin: auto; 
 margin-top: 2rem;
 
@@ -209,7 +244,7 @@ margin-top: 2rem;
   background-position: center;
   background-size: cover;
   width: 300px;
-  height: 300px;
+  height: 27rem;
   border-radius: 10px;
 }
 
@@ -220,16 +255,19 @@ margin-top: 2rem;
 `;
 
 const SlideBox = styled.div`
-  height: 300px; // 슬라이드 높이 설정
-  background-color: #fff; // 슬라이드 배경색 설정
+  height: 29rem; // 슬라이드 높이 설정
+  background-color: transparent; // 슬라이드 배경색 설정
   display: flex;
+  flex-direction: column; // 요소들을 세로로 배열
   justify-content: center;
   align-items: center;
+  font-family: 'Pretendard';
   font-size: 1.5rem;
   border-radius: 20px; // 슬라이드 모서리 둥글게 설정
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // 슬라이드 그림자 설정
-  color: #000; // 슬라이드 텍스트 색상 설정
+  color: white; // 슬라이드 텍스트 색상 설정
   transform: scale(0.8); // 초기 크기를 줄여서 중앙 슬라이드가 활성화될 때 더 크게 보이게 합니다.
+  border: 1px solid #00FFE0;
 `;
 
 const ScrollIndicators = styled.div`
@@ -260,4 +298,33 @@ const Scroll = styled.div`
   background-position: center; // 배경 이미지 위치
   margin-left: -2.2rem;
   margin-top: 0.5rem;
+`;
+
+const ItemImage = styled.img`
+  width: 14rem;
+  height: 15rem;
+  border: 1px solid #00FFE0;
+  border-radius: 10%;
+`;
+
+const ItemDetail = styled.div`
+  font-family: "Pretendard";
+  font-size: 1.5rem;
+  font-style: normal;
+  font-weight: 500;
+  margin-left: -2rem;
+`;
+
+const ItemDetailTitle = styled.div`
+  color: #FFF;
+  text-align: flex-start;
+  margin-top: 1.44rem;
+`;
+
+const ItemPrice = styled.div`
+
+`;
+
+const ItemTime = styled.div`
+
 `;

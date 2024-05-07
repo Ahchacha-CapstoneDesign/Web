@@ -49,8 +49,8 @@ const ItemDetailPage = () => {
                     <LeftContainer>
                             <ItemImage src={itemDetails.imageUrls[0]} alt={itemDetails.title} />
                             <UserInfoContainer>
-                                <Icon src="/assets/img/Profile.png" alt="Profile"/>
-                                <Username>아차차</Username>
+                                <Icon src={itemDetails.userProfile || '/assets/img/Profile.png'} alt="Profile"/>
+                                <Username>{itemDetails.userNickName}</Username>
                                 <RatingContainer>
                                     <StarIcon src="/assets/img/Star.png" alt="Star"/>
                                     <RatingValue>4.5</RatingValue>
@@ -387,6 +387,7 @@ const Icon = styled.img`
   margin-right:1.38rem;
   width: 3.125rem;
   height: 3.125rem;
+  border-radius: 50%;
 `;
 const Username = styled.h2`
   font-size: 1.5rem;
