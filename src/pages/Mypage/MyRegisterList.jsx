@@ -5,7 +5,7 @@ import { createGlobalStyle } from 'styled-components';
 import apiClient from "../../path/apiClient";
 import { useNavigate } from 'react-router-dom';
 
-const MypageMain = () => {
+const MyRegisterList = () => {
   const [userName, setUserName] = useState('');
   const [userNickname, setUserNickname] = useState('');
   const [profileImage, setProfileImage] = useState('');
@@ -49,26 +49,6 @@ const MypageMain = () => {
                     계정 관리
                   </Editbutton>
                 </ProfileContainer>
-
-                <RentingTitleContainer>
-                  <RentingTitle>대여 내역</RentingTitle>
-                  <MoreView>더보기&gt;</MoreView>
-                </RentingTitleContainer>
-                
-                <RentingInfoBox>
-                  <Reserved>예약 완료<Break/>0</Reserved>
-                  <Renting>대여중<Break/>0</Renting>
-                  <Returned>반납 완료<Break/>0</Returned>
-                </RentingInfoBox>
-
-                <ItemContainer>
-                  <ItemImage/>
-                  <ItemTitle>제목</ItemTitle>
-                  <ItemPrice>0000원</ItemPrice>
-                  <ItemStatus>대여중</ItemStatus>
-                </ItemContainer>
-
-                {/* 하단부터 등록내역 */}
                 
                 <RentingTitleContainer>
                   <RentingTitle>등록 내역</RentingTitle>
@@ -76,6 +56,7 @@ const MypageMain = () => {
                 </RentingTitleContainer>
                 
                 <RentingInfoBox>
+                  <ReservationYes>대여 가능<Break/>0</ReservationYes>
                   <Reserved>예약 완료<Break/>0</Reserved>
                   <Renting>대여중<Break/>0</Renting>
                   <Returned>반납 완료<Break/>0</Returned>
@@ -92,7 +73,7 @@ const MypageMain = () => {
     );
   };
   
-  export default MypageMain;
+  export default MyRegisterList;
 
 export const GlobalStyle = createGlobalStyle`
   html, body, #root {
@@ -178,6 +159,15 @@ const RentingInfoBox = styled.div`
   margin-left: 15rem;
   align-items: center;
   border-radius: 12px;
+`;
+
+const ReservationYes = styled.div`
+  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border-right: 1px solid #FFF;
 `;
 
 const Reserved = styled.div`

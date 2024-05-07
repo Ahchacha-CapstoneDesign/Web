@@ -12,6 +12,8 @@ import Sidebar from './pages/Mypage/Sidebar';
 import MypageMain from './pages/Mypage/MypageMain';
 import PasswordCheck from './pages/Mypage/MyAccount/PasswordCheck';
 import AccountSettings from './pages/Mypage/MyAccount/AccountSettings';
+import MyRegister from './pages/Mypage/MyRegisterList.jsx';
+import MyRentingList from './pages/Mypage/MyRentingList.jsx';
 
 import CommunityMain from './pages/Community/CommunityMain';
 import RentMainPage from './pages/Rent/RentMainPage.jsx';
@@ -109,6 +111,8 @@ function App() {
             </>
             }
           />
+          <Route path="/mypage/registerlist" element={<> <Header /> <Sidebar /> <MyRegister /> </>}/>
+          <Route path="/mypage/rentinglist" element={<> <Header /> <Sidebar /> <MyRentingList /> </>}/>
           <Route 
             path="/mypage/passwordcheck" 
             element={

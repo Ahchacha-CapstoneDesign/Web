@@ -40,8 +40,8 @@ const Sidebar = () => {
         마이 페이지
       </MenuTitle>
       <ItemTitle>아차! 정보</ItemTitle>
-      <MenuItem>대여 내역</MenuItem>
-      <MenuItem>등록 내역</MenuItem>
+      <MenuItem active={activePage === '/mypage/rentinglist'} onClick={() => handlePageChange('/mypage/rentinglist')}>대여 내역</MenuItem>
+      <MenuItem active={activePage === '/mypage/registerlist'} onClick={() => handlePageChange('/mypage/registerlist')}>등록 내역</MenuItem>
       <ItemTitle>나의 정보</ItemTitle>
       <MenuItem 
         active={activePage === '/mypage/passwordcheck' || activePage === '/mypage/accountsettings'}
