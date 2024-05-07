@@ -16,6 +16,7 @@ const MainPage1 = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const [items, setItems] = useState([]); // 아이템을 저장할 상태
+  
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -98,6 +99,7 @@ const MainPage1 = () => {
         <Scroll />
       </ScrollIndicators>
       <SwiperContainer>
+      {items.length > 0 && (
         <Swiper
             grabCursor={true}
             centeredSlides={true}
@@ -132,6 +134,7 @@ const MainPage1 = () => {
             </SwiperSlide>
           ))}
           </Swiper>
+      )}
       </SwiperContainer>
     </>
   );
@@ -264,7 +267,6 @@ const SlideBox = styled.div`
   font-family: 'Pretendard';
   font-size: 1.5rem;
   border-radius: 20px; // 슬라이드 모서리 둥글게 설정
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // 슬라이드 그림자 설정
   color: white; // 슬라이드 텍스트 색상 설정
   transform: scale(0.8); // 초기 크기를 줄여서 중앙 슬라이드가 활성화될 때 더 크게 보이게 합니다.
   border: 1px solid #00FFE0;
