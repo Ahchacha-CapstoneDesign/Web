@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useState, useEffect } from "react";
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
@@ -48,13 +49,24 @@ const MyRentingList = () => {
                     계정 관리
                   </Editbutton>
                 </ProfileContainer>
-                
-                <HistoryContainer>
-                <Title>MyRentingList</Title>
-                
-                </HistoryContainer>
 
+                <RentingTitleContainer>
+                  <RentingTitle>대여 내역</RentingTitle>
+                  <MoreView>더보기&gt;</MoreView>
+                </RentingTitleContainer>
                 
+                <RentingInfoBox>
+                  <Reserved>예약 완료<Break/>0</Reserved>
+                  <Renting>대여중<Break/>0</Renting>
+                  <Returned>반납 완료<Break/>0</Returned>
+                </RentingInfoBox>
+
+                <ItemContainer>
+                  <ItemImage/>
+                  <ItemTitle>제목</ItemTitle>
+                  <ItemPrice>0000원</ItemPrice>
+                  <ItemStatus>대여중</ItemStatus>
+                </ItemContainer>
             </Container>
       </ >
     );
@@ -71,6 +83,107 @@ export const GlobalStyle = createGlobalStyle`
       flex-direction: column;
       background-color: #000; // body 전체의 배경색을 검은색으로 설정
   }
+`;
+
+const ItemContainer = styled.div`
+  display: flex;
+  width: 59.5rem;
+  height: 6rem;
+  margin-top: 1rem;
+  margin-left: 15rem;
+  border-bottom: 0.5px solid #FFF;
+`;
+
+
+
+const ItemImage = styled.img`
+  width: 100px; /* 원하는 이미지 너비로 조정 */
+  height: auto; /* 높이 자동 조정 */
+  margin-right: 1rem; /* 이미지와 제목 사이 여백 조정 */
+`;
+
+const ItemTitle = styled.div`
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1.2rem;
+`;
+
+const ItemPrice = styled.div`
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  margin-left: 1rem; /* 가격과 상태 사이 여백 조정 */
+`;
+
+const ItemStatus = styled.div`
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  font-weight: 700;
+`;
+
+const RentingTitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 2rem;
+  margin-left: 14rem;
+`;
+
+const RentingTitle = styled.div`
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1.5rem;
+  font-style: normal;
+  font-weight: 700;
+`;
+
+const MoreView = styled.div`
+  color: gray;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 48rem;
+  padding-top: 0.5rem;
+`;
+
+const RentingInfoBox = styled.div`
+  background: #343434;
+  display: flex;
+  justify-content: space-between;
+  width: 59.5rem;
+  height: 8.5rem;
+  margin-top: 1rem;
+  margin-left: 15rem;
+  align-items: center;
+  border-radius: 12px;
+`;
+
+const Reserved = styled.div`
+  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border-right: 1px solid #FFF;
+`;
+
+const Renting = styled.div`
+  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border-right: 1px solid #FFF;
+`;
+
+const Returned = styled.div`
+  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
 `;
 
 const Container = styled.div`
@@ -91,18 +204,6 @@ const ProfileContainer = styled.div`
   margin-top: 4rem;
   margin-left: 15rem;
   align-items: center;
-`;
-
-const HistoryContainer = styled.div`
-  padding: 15px;
-  margin-bottom: 15px;
-`;
-
-const Title = styled.h2`
-  color: white;
-  margin: 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eaeaea;
 `;
 
 const ProfileInfo = styled.div`
@@ -181,17 +282,6 @@ const Editbutton = styled.button`
     margin-left: 30rem;
 `;
 
-const HistoryList = styled.ul`
-  color: white;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-`;
-
-const HistoryItem = styled.li`
-  padding: 10px 0;
-  border-bottom: 1px solid #eaeaea;
-  &:last-child {
-    border-bottom: none;
-  }
+const Break = styled.div`
+  margin-bottom: 0.75rem; /* 원하는 간격 조정 */
 `;
