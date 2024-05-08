@@ -14,6 +14,7 @@ import PasswordCheck from './pages/Mypage/MyAccount/PasswordCheck';
 import AccountSettings from './pages/Mypage/MyAccount/AccountSettings';
 import MyRegister from './pages/Mypage/MyRegisterList.jsx';
 import MyRentingList from './pages/Mypage/MyRentingList.jsx';
+import MyReview from './pages/Mypage/MyReview.jsx';
 
 import CommunityMain from './pages/Community/CommunityMain';
 import RentMainPage from './pages/Rent/RentMainPage.jsx';
@@ -129,6 +130,7 @@ function App() {
             </>
             }
           />
+          <Route path="/mypage/review" element={<> <Header /> <Sidebar /> <MyReview /> </>}/>
         </Routes>
       </div>
     </Router>
