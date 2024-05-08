@@ -26,6 +26,8 @@ import OfficialReservationPage from "./pages/Reservation/OfficialReservationPage
 import PostCreationPage from './pages/Community/Posting.jsx';
 import CommunityDetail from './pages/Community/CommunityDetail.jsx';
 import EditPost from './pages/Community/EditPost.jsx';
+import Register1 from './pages/Register/Register1.jsx';
+
 
 function App() {
   return (
@@ -96,12 +98,17 @@ function App() {
             }
           />
 
-
+            {/* 대여 페이지 */}
           <Route path="rent/itemdetail/:itemId" element={<> <Header /> <ItemDetailPage /> </>}/>
           <Route path="rent/personreservation/:itemId" element={<> <Header /> <PersonReservationPage /> </>}/>
           <Route path="rent/officialreservation/:itemId" element={<> <Header /> <OfficialReservationPage /> </>}/>
           <Route path="rent/personreservationdetails/:itemId" element={<> <Header /> <PersonReservationDetailsPage /> </>}/>
           <Route path="rent/officialreservationdetails/:itemId" element={<> <Header /> <OfficialReservationDetailsPage /> </>}/>
+
+            {/* 등록 페이지 */}
+          <Route path="/register" element={<> <Header /> <Register1 /> </>}/>
+          <Route path="/register/personregisterdetails" element={<> <Header /> <PersonReservationDetailsPage /> </>}/>
+
           {/* 마이 페이지 */}
           <Route 
             path="/mypage/main" 
