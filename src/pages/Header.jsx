@@ -43,7 +43,7 @@ const Header = () => {
             onClick={() => handlePageChange('/mainpage/1')}>홈</NavItem>
           <NavItem active={activePage.startsWith('/rent/')}
             onClick={() => handlePageChange('/rent/')}>아차! 대여</NavItem>
-          <NavItem active={activePage === '/register'}
+          <NavItem active={activePage.startsWith('/register/')}
             onClick={() => handlePageChange('/register')}>아차! 등록</NavItem>
           <NavItem active={activePage === '/talk'}
             onClick={() => handlePageChange('/talk')}>아차! 톡</NavItem>
