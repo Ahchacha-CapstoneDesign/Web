@@ -98,10 +98,10 @@ function App() {
 
 
           <Route path="rent/itemdetail/:itemId" element={<> <Header /> <ItemDetailPage /> </>}/>
-          <Route path="rent/personreservation" element={<> <Header /> <PersonReservationPage /> </>}/>
-          <Route path="rent/officialreservation" element={<> <Header /> <OfficialReservationPage /> </>}/>
-          <Route path="rent/personreservationdetails" element={<> <Header /> <PersonReservationDetailsPage /> </>}/>
-          <Route path="rent/officialreservationdetails" element={<> <Header /> <OfficialReservationDetailsPage /> </>}/>
+          <Route path="rent/personreservation/:itemId" element={<> <Header /> <PersonReservationPage /> </>}/>
+          <Route path="rent/officialreservation/:itemId" element={<> <Header /> <OfficialReservationPage /> </>}/>
+          <Route path="rent/personreservationdetails/:itemId" element={<> <Header /> <PersonReservationDetailsPage /> </>}/>
+          <Route path="rent/officialreservationdetails/:itemId" element={<> <Header /> <OfficialReservationDetailsPage /> </>}/>
           {/* 마이 페이지 */}
           <Route 
             path="/mypage/main" 

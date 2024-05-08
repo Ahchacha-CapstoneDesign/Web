@@ -1,10 +1,14 @@
 import React, {useState} from 'react';
 import styled, {createGlobalStyle} from 'styled-components';
+import {useNavigate} from 'react-router-dom';
+
 
 const PersonReservationDetailsPage = () => {
 
     const [fee, setFee] = useState('5000원'); // 사용료
     const [imageUrl, setImageUrl] = useState('/assets/img/unChecked.PNG');
+    const navigate = useNavigate();
+
 
     // 체크박스 변경을 다루는 함수
     const [consents, setConsents] = useState({
@@ -22,7 +26,8 @@ const PersonReservationDetailsPage = () => {
     };
 
     const handleGoBack = () => {
-        console.log('돌아가기 버튼 클릭');
+      console.log('돌아가기 버튼 클릭');
+      navigate(-1);
     };
 
     // 결제하기 버튼 클릭 처리 함수

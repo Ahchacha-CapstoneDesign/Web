@@ -4,6 +4,7 @@ import styled, {createGlobalStyle} from 'styled-components';
 import {differenceInMinutes} from 'date-fns';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import {useNavigate} from 'react-router-dom';
 
 const hourOptions = Array.from({ length: 24 }, (_, i) => (i < 10 ? `0${i}` : `${i}`));
 const minuteOptions = ['00', '30'];
@@ -18,7 +19,7 @@ const PersonReservationPage = () => {
     const [value, onChange] = useState(new Date());
     const [dateRange, setDateRange] = useState([new Date(), new Date()]);
     const [startDate, endDate] = dateRange;
-
+    const navigate = useNavigate();
 
     const handleDateChange = dates => {
         setDateRange(dates);
@@ -26,6 +27,7 @@ const PersonReservationPage = () => {
 
     const handleGoBack = () => {
         console.log('돌아가기 버튼 클릭');
+        navigate(-1);
     };
 
     const calculateTotalTime = () => {
