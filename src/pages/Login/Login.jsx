@@ -34,6 +34,7 @@ const Login = () => {
       localStorage.setItem('userID', response.data.id);
       localStorage.setItem('userGrade', response.data.grade);
       localStorage.setItem('userStatus', response.data.status);
+      localStorage.setItem('personOrOfficial', response.data.personOrOfficial);
       // 이미지 URL이 없거나 빈 문자열인 경우, 기본 이미지 URL을 사용
       const imageUrl = response.data.defaultProfile || DEFAULT_IMAGE_URL;
       localStorage.setItem('profileImageUrl', imageUrl);
