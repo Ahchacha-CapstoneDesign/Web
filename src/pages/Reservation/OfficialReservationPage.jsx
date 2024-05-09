@@ -206,10 +206,7 @@ const EndDateTimeDisplay = styled.div`
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-
   
-
-\`
 `;
 
 const ContentContainer = styled.div`

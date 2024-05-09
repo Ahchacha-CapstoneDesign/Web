@@ -120,7 +120,13 @@ const MainPage1 = () => {
             {items.map((item, index) => (
             <SwiperSlide key={index} onClick={() => navigate(`/rent/itemdetail/${item.id}`)}>
               <SlideBox>
-                <ItemImage src={item.imageUrls[0]} alt="Item" />
+
+                {item.imageUrls && item.imageUrls.length > 0 ? (
+                    <ItemImage src={item.imageUrls[0]} alt="Item" />
+                ) : (
+                    // 기본 이미지를 불러오는 경우
+                    <ItemImage src="/assets/img/ItemDefault.png" alt="Item" />
+                )}
                 <ItemDetail>
                   <ItemDetailTitle>{item.title}</ItemDetailTitle>
                   <ItemPrice>비용: {item.pricePerHour}원 / 시간</ItemPrice>

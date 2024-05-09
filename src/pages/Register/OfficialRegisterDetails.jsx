@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 
 
-const PersonRegisterDetails = (props) => {
+const OfficialRegisterDetails = (props) => {
     const location = useLocation(); // location 객체를 통해 현재 위치의 정보를 얻음
     const selectedItem = location.state?.item; // Register1에서 전달된 selectedItem 값을 가져옴
     const [startTime, setStartTime] = useState('');
@@ -25,7 +25,7 @@ const PersonRegisterDetails = (props) => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        price: '',
+        price: '0',
         returnPlace:'',
         borrowPlace:'',
     });
@@ -171,15 +171,6 @@ const PersonRegisterDetails = (props) => {
                             placeholder="상품명을 입력해주세요" />
                     </FormGroup>
                     <FormGroup>
-                        <Label>가격
-                            <RequiredIndicator>*</RequiredIndicator>
-                        </Label>
-                        <pre>시간 당 <FeeInput
-                            value={formData.price}
-                            onChange={(e) => handleInputChange(e, 'price')}
-                            placeholder="가격을 입력해주세요" /> 원 </pre>
-                    </FormGroup>
-                    <FormGroup>
                         <Label>상품 상태
                             <RequiredIndicator>*</RequiredIndicator>
                         </Label>
@@ -310,8 +301,8 @@ const PersonRegisterDetails = (props) => {
                     {modalOpen && (
                         <ModalOverlay>
                             <Modal>
-                                    <ModalTitle>아이템 등록 성공</ModalTitle>
-                                    <ModalButton onClick={handleModalConfirm}>확인</ModalButton>
+                                <ModalTitle>아이템 등록 성공</ModalTitle>
+                                <ModalButton onClick={handleModalConfirm}>확인</ModalButton>
                             </Modal>
                         </ModalOverlay>
                     )}
@@ -373,7 +364,7 @@ const FormGroup = styled.div`
   font-style:normal;
   font-weight:600;
   line-height:normal;
-  
+
 `;
 
 const Line = styled.span`
@@ -424,7 +415,7 @@ const DateTimeDisplay = styled.div`
   font-weight: 800;
   line-height: normal;
   margin-bottom: 0.5rem;
-  
+
 `;
 
 const RequiredIndicator1 = styled.span`
@@ -440,17 +431,17 @@ const ImageInput = styled.input`
   //border: solid #00FFE0;
   background-color: #000;
   border-radius: 0.5rem;
-  background-size: cover; 
-  background-position: center; 
-  background-repeat: no-repeat; 
-  color: transparent; 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: transparent;
   cursor: pointer;
   outline: none;
 `;
 
 const ImageInputButton = styled.label`
   background-color: #00FFE0;
-  color: #000;  
+  color: #000;
   padding: 8px 16px;
   border: none;
   border-radius: 8px;
@@ -465,7 +456,7 @@ const ItemInput = styled.input`
   height:2.25rem;
   border-color: #00FFE0;
   background-color: #000;
- 
+
   color: white;
 `;
 
@@ -474,7 +465,7 @@ const BorrowPlaceInput = styled.input`
   height:2.25rem;
   border-color: #00FFE0;
   background-color: #000;
- 
+
   color: white;
 `;
 
@@ -483,7 +474,7 @@ const ReturnPlaceInput = styled.input`
   height:2.25rem;
   border-color: #00FFE0;
   background-color: #000;
- 
+
   color: white;
 `;
 
@@ -545,7 +536,7 @@ const TimeSelectWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  
+
   margin-top :4rem;
 `;
 
@@ -692,4 +683,4 @@ const ModalButton = styled.button`
 
 
 
-export default PersonRegisterDetails;
+export default OfficialRegisterDetails;
