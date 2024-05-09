@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 
 
-const PersonRegisterDetails = (props) => {
+const OfficialRegisterDetails = (props) => {
     const location = useLocation(); // location 객체를 통해 현재 위치의 정보를 얻음
     const selectedItem = location.state?.item; // Register1에서 전달된 selectedItem 값을 가져옴
     const [startTime, setStartTime] = useState('');
@@ -22,7 +22,7 @@ const PersonRegisterDetails = (props) => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        price: '',
+        price: '0',
         returnPlace:'',
         borrowPlace:'',
     });
@@ -147,15 +147,6 @@ const PersonRegisterDetails = (props) => {
                             value={formData.title}
                             onChange={(e) => handleInputChange(e, 'title')}
                             placeholder="상품명을 입력해주세요" />
-                    </FormGroup>
-                    <FormGroup>
-                        <Label>가격
-                            <RequiredIndicator>*</RequiredIndicator>
-                        </Label>
-                        <pre>시간 당 <FeeInput
-                            value={formData.price}
-                            onChange={(e) => handleInputChange(e, 'price')}
-                            placeholder="가격을 입력해주세요" /> 원 </pre>
                     </FormGroup>
                     <FormGroup>
                         <Label>상품 상태
@@ -578,4 +569,4 @@ const Button = styled.button`
   margin-top: 2rem;
 `;
 
-export default PersonRegisterDetails;
+export default OfficialRegisterDetails;
