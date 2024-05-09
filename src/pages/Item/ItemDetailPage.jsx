@@ -1,12 +1,24 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
-import {useParams} from "react-router-dom";
+import {useParams, useNavigate} from "react-router-dom";
 import apiClient from "../../path/apiClient";
 
 const ItemDetailPage = () => {
     const { itemId } = useParams();
     const [itemDetails, setItemDetails] = useState(null);
+    const navigate = useNavigate();
+
+    const handleReserve = () => {
+        if (!itemDetails) return;
+
+        // 아이템의 소유자 유형을 확인하고 해당하는 경로로 이동
+        if (itemDetails.personOrOfficial === 'OFFICIAL') {
+            navigate(`/rent/officialreservation/${itemDetails.id}`);
+        } else if (itemDetails.personOrOfficial === 'PERSON') {
+            navigate(`/rent/personreservation/${itemDetails.id}`);
+        }
+    };
 
     useEffect(() => {
         const fetchItemDetails = async () => {
@@ -108,7 +120,7 @@ const ItemDetailPage = () => {
                         </ProductDescription>
                         <ButtonsContainer>
                             <ActionButton>채팅하기</ActionButton>
-                            <ActionButton>예약하기</ActionButton>
+                            <ActionButton onClick={handleReserve}>예약하기</ActionButton>
                         </ButtonsContainer>
                     </RightContainer>
                 </MainContainer>
