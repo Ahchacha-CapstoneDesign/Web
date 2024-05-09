@@ -18,6 +18,9 @@ const OfficialRegisterDetails = (props) => {
     const [startDate, endDate] = dateRange;
     const navigate = useNavigate();
     const [imageFiles, setImageFiles] = useState([]);
+    const minuteOptions = [0, 30];
+    const [modalOpen, setModalOpen] = useState(false);
+
 
     const [formData, setFormData] = useState({
         title: '',
@@ -54,6 +57,23 @@ const OfficialRegisterDetails = (props) => {
         setFormData(prevState => ({ ...prevState, [fieldName]: value }));
     };
 
+    const formatDate = (date, hour, minute) => {
+        return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()} ${hour}시 ${minute}분`;
+    };
+
+    const openModal = () => {
+        setModalOpen(true);
+    };
+
+    // 모달 닫기
+    const closeModal = () => {
+        setModalOpen(false);
+    };
+    const handleModalConfirm = () => {
+        // 여기에 페이지 이동 처리 로직 추가
+        navigate('/rent/mainpage');
+    };
+
 
 
     const handleSubmit = async (e) => {
@@ -74,6 +94,7 @@ const OfficialRegisterDetails = (props) => {
         formDataToSend.append('introduction', formData.description);
         formDataToSend.append('itemStatus', formData.status);
         formDataToSend.append('category', selectedItem);
+
         for (let i = 0; i < imageFiles.length; i++) {
             formDataToSend.append('file', imageFiles[i], imageFiles[i].name); // 파일 이름을 지정하여 추가
         }
@@ -88,10 +109,11 @@ const OfficialRegisterDetails = (props) => {
             }
             // 성공 시 처리
             console.log('상품 등록 성공');
-            navigate('/register');
+            setModalOpen(true);
         } catch (error) {
             // 에러 처리
             console.error('상품 등록 에러:', error.message);
+            setModalOpen(true);
         }
     };
     // Here you would typically handle the submission, e.g., posting to an API
@@ -230,8 +252,8 @@ const OfficialRegisterDetails = (props) => {
                                 </TimeSelect> 시
                                 <TimeSelect id="time-start-minute-select" value={startMinutes} onChange={handleStartMinutesChange}>
                                     {/* 0부터 59까지의 분을 표시 */}
-                                    {Array.from({ length: 60 }, (_, i) => (
-                                        <option key={i} value={i}>{i}</option>
+                                    {minuteOptions.map((minute) => (
+                                        <option key={minute} value={minute}>{minute}</option>
                                     ))}
                                 </TimeSelect> 분 ~
 
@@ -242,12 +264,20 @@ const OfficialRegisterDetails = (props) => {
                                 </TimeSelect> 시
                                 <TimeSelect id="time-end-minute-select" value={endMinutes} onChange={handleEndMinutesChange}>
                                     {/* 0부터 59까지의 분을 표시 */}
-                                    {Array.from({ length: 60 }, (_, i) => (
-                                        <option key={i} value={i}>{i}</option>
+                                    {minuteOptions.map((minute) => (
+                                        <option key={minute} value={minute}>{minute}</option>
                                     ))}
                                 </TimeSelect> 분
                             </TimeBlockWrapper>
                         </TimeSelectWrapper>
+                    </FormGroup>
+                    <FormGroup>
+                        <Label>선택 시간 확인</Label>
+                        <DateTimeDisplay>
+                            {startDate && <span>{formatDate(startDate, startTime, startMinutes)}</span>}
+                            {endDate && <span> ~ {formatDate(endDate, endTime, endMinutes)}</span>}
+                            <br/>
+                        </DateTimeDisplay>
                     </FormGroup>
                     <FormGroup>
                         <Label>대여 위치
@@ -268,6 +298,14 @@ const OfficialRegisterDetails = (props) => {
                             placeholder="반납위치를 입력해주세요(ex.상상관 1층)"/>
                     </FormGroup>
                     <Button onClick={handleSubmit}>등록하기</Button>
+                    {modalOpen && (
+                        <ModalOverlay>
+                            <Modal>
+                                <ModalTitle>아이템 등록 성공</ModalTitle>
+                                <ModalButton onClick={handleModalConfirm}>확인</ModalButton>
+                            </Modal>
+                        </ModalOverlay>
+                    )}
                 </Form>
             </Container>
         </>
@@ -285,6 +323,22 @@ const GlobalStyle = createGlobalStyle`
 
   input, select, button {
     font-family: inherit;
+  }
+
+  /* 스크롤바 전체 스타일 */
+  ::-webkit-scrollbar {
+    width: 0.5rem;
+  }
+
+  /* 스크롤바 트랙(바탕) 스타일 */
+  ::-webkit-scrollbar-track {
+    background: transparent; /* 트랙의 배경색 */
+  }
+
+  /* 스크롤바 핸들(움직이는 부분) 스타일 */
+  ::-webkit-scrollbar-thumb {
+    background: #00FFE0; /* 핸들의 배경색 */
+    border-radius: 5px;
   }
 `;
 
@@ -310,7 +364,7 @@ const FormGroup = styled.div`
   font-style:normal;
   font-weight:600;
   line-height:normal;
-  
+
 `;
 
 const Line = styled.span`
@@ -350,6 +404,20 @@ const RequiredIndicator = styled.span`
   vertical-align: top;
 `;
 
+const DateTimeDisplay = styled.div`
+  color: #fff;
+  width: 40.5rem;
+  height: 1.5625rem;
+  text-align:left;
+  position: relative;
+  font-size: 1.25rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: normal;
+  margin-bottom: 0.5rem;
+
+`;
+
 const RequiredIndicator1 = styled.span`
   color: red;
   font-size: 1rem;
@@ -363,17 +431,17 @@ const ImageInput = styled.input`
   //border: solid #00FFE0;
   background-color: #000;
   border-radius: 0.5rem;
-  background-size: cover; 
-  background-position: center; 
-  background-repeat: no-repeat; 
-  color: transparent; 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: transparent;
   cursor: pointer;
   outline: none;
 `;
 
 const ImageInputButton = styled.label`
   background-color: #00FFE0;
-  color: #000;  
+  color: #000;
   padding: 8px 16px;
   border: none;
   border-radius: 8px;
@@ -388,7 +456,7 @@ const ItemInput = styled.input`
   height:2.25rem;
   border-color: #00FFE0;
   background-color: #000;
- 
+
   color: white;
 `;
 
@@ -397,7 +465,7 @@ const BorrowPlaceInput = styled.input`
   height:2.25rem;
   border-color: #00FFE0;
   background-color: #000;
- 
+
   color: white;
 `;
 
@@ -406,7 +474,7 @@ const ReturnPlaceInput = styled.input`
   height:2.25rem;
   border-color: #00FFE0;
   background-color: #000;
- 
+
   color: white;
 `;
 
@@ -468,7 +536,7 @@ const TimeSelectWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  
+
   margin-top :4rem;
 `;
 
@@ -568,5 +636,51 @@ const Button = styled.button`
   margin-left: 50rem;
   margin-top: 2rem;
 `;
+
+// 모달 스타일 컴포넌트
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Modal = styled.div`
+  display: flex;
+  width:20rem;
+  height: 10rem;
+  flex-direction: column;
+  justify-content: center; 
+  align-items: center;
+  background-color: #000;
+  
+`;
+
+
+
+const ModalTitle = styled.h3`
+  font-size:1.25rem;
+  font-style:normal;
+  font-weight:600;
+  line-height:normal;
+  margin-right: 2rem;
+  color:#fff;
+`;
+
+const ModalButton = styled.button`
+  width: 8rem;
+  height:2rem;
+  background: #00FFE0;
+  border-color: #fff;
+  border-radius: 2rem;
+`;
+
+
+
 
 export default OfficialRegisterDetails;
