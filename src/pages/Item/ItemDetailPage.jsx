@@ -114,9 +114,6 @@ const ItemDetailPage = () => {
                         </ItemDetailsContainer>
                         <ProductDescription>
                             <DescriptionText>{itemDetails.introduction}</DescriptionText>
-                            <DescriptionText>구매한지 1년</DescriptionText>
-                            <DescriptionText>대여3회</DescriptionText>
-                            <DescriptionText>저도 사용하는 제품입니다! 말 다했죠?</DescriptionText>
                         </ProductDescription>
                         <ButtonsContainer>
                             <ActionButton>채팅하기</ActionButton>

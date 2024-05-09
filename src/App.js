@@ -28,6 +28,7 @@ import PostCreationPage from './pages/Community/Posting.jsx';
 import CommunityDetail from './pages/Community/CommunityDetail.jsx';
 import EditPost from './pages/Community/EditPost.jsx';
 import Register1 from './pages/Register/Register1.jsx';
+import PeronRegisterDetails from './pages/Register/PersonRegisterDetails.jsx';
 
 
 function App() {
@@ -108,7 +109,7 @@ function App() {
 
             {/* 등록 페이지 */}
           <Route path="/register" element={<> <Header /> <Register1 /> </>}/>
-          <Route path="/register/personregisterdetails" element={<> <Header /> <PersonReservationDetailsPage /> </>}/>
+          <Route path="/register/personregisterdetails" element={<> <Header /> <PeronRegisterDetails /> </>}/>
 
           {/* 마이 페이지 */}
           <Route 
