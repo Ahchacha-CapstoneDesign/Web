@@ -229,7 +229,10 @@ const CommunityMain = () => {
                                 {(post.content && post.content.replace(/<img[^>]*>/g, "").replace(/<[^>]*>?/gm, "")) || "내용이 없습니다."}
                             </Content>
                             <Details>
-                                좋아요: {post.likeCount} | 댓글: {post.totalCommentsCount} | 조회수: {post.viewCount/2}
+
+                                좋아요: {post.likeCount} | 댓글: {post.totalCommentsCount} | 조회수: {post.viewCount}
+                                좋아요: {post.likeCount} | 댓글: {post.commentCount + post.replyCount} | 조회수: {post.viewCount}
+
                             </Details>
                         </PostItem>
                     ))}

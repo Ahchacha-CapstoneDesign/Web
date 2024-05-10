@@ -4,7 +4,8 @@ import styled, {createGlobalStyle} from 'styled-components';
 import {differenceInMinutes} from 'date-fns';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useParams,useNavigate} from 'react-router-dom';
+import apiClient from '../../path/apiClient';
 
 const hourOptions = Array.from({ length: 24 }, (_, i) => (i < 10 ? `0${i}` : `${i}`));
 const minuteOptions = ['00', '30'];
@@ -19,16 +20,20 @@ const PersonReservationPage = () => {
     const [value, onChange] = useState(new Date());
     const [dateRange, setDateRange] = useState([new Date(), new Date()]);
     const [startDate, endDate] = dateRange;
+    const { itemId } = useParams();
+    const location = useLocation();
+    const itemDetails = location.state?.itemDetails;
     const navigate = useNavigate();
 
     const handleDateChange = dates => {
-        setDateRange(dates);
+      setDateRange(dates);
     };
 
     const handleGoBack = () => {
         console.log('돌아가기 버튼 클릭');
         navigate(-1);
     };
+
 
     const calculateTotalTime = () => {
         if (!endDate) return null;
@@ -53,6 +58,32 @@ const PersonReservationPage = () => {
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()} ${hour}시 ${minute}분`;
     };
 
+    const handleNextPage = () => {
+      const startDateTime = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), parseInt(startTime), parseInt(startMinutes));
+      const endDateTime = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), parseInt(endTime), parseInt(endMinutes));
+
+      // 시간 차이를 분 단위로 계산
+      const diffMinutes = differenceInMinutes(endDateTime, startDateTime);
+
+      const hours = diffMinutes / 60;
+
+      // 총 요금 계산
+      const totalFee = Math.round(hours * itemDetails.pricePerHour);
+  
+      const reservationDetails = {
+        itemId: itemDetails.id,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        borrowPlace: itemDetails.borrowPlace,
+        returnPlace: itemDetails.returnPlace,
+        pricePerHour: itemDetails.pricePerHour,
+        totalFee: `${totalFee}원` // 통화 추가
+    };
+
+    navigate(`/rent/personreservationdetails/${itemDetails.id}`, { state: reservationDetails });
+  };
+
+    
     return (
         <>
         <GlobalStyle />
@@ -114,7 +145,7 @@ const PersonReservationPage = () => {
                             총 {totalTime}
                         </TotalTimeDisplay>
                     )}
-                    <ConfirmButton>예약하기</ConfirmButton>
+                    <ConfirmButton onClick={handleNextPage}>예약하기</ConfirmButton>
                 </RightColumn>
             </ContentContainer>
         </>

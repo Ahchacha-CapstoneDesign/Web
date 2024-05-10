@@ -76,9 +76,10 @@
           }
       };
 
-        const handleChange = (commentId, value) => {
-          setNewComment(prev => ({ ...prev, [commentId]: value }));
-        };
+      const handleChange = (commentId, value) => {
+        console.log(`Updating comment ${commentId}: ${value}`);  // 로그 추가
+        setNewComment(prev => ({ ...prev, [commentId]: value }));
+    };
 
         const handleGoBack = () => {
           navigate('/community/main'); // 뒤로가기 기능 실행
@@ -164,33 +165,32 @@
             console.error('Error processing like:', error);
         }
     };
-          const submitComment = async (e, commentId) => {
-            e.preventDefault();
-            const content = newComment[commentId] || '';
-            const payload = {
-              communityId,
-              content,
-              ...(commentId !== 'main' && { parentId: commentId })
-            };
-          
-            try {
-              const response = await apiClient.post(commentId !== 'main' ? '/comments/reply' : '/comments', payload);
-              if (response.status === 200) {
-                const newCommentData = response.data;
-                // 여기에서 authorPhotoUrl이 포함되어 있는지 확인
-                if (!newCommentData.profileUrl) {
-                  newCommentData.profileUrl = '/assets/img/Profile.png'; // 기본 이미지 경로
-                }
-                const updatedComments = sortComments([...comments, newCommentData]);
-                setComments(updatedComments);
-                setCommentCount(updatedComments.length);
-                setNewComment(prev => ({ ...prev, [commentId]: '' })); // 입력 필드 초기화
-                setReplyingTo(null);
-              }
-            } catch (error) {
-              console.error('Error submitting comment:', error);
-            }
-          };
+    
+    const submitComment = async (e, commentId) => {
+      const content = newComment[commentId] || '';
+      const payload = {
+          communityId,
+          content,
+          ...(commentId !== 'main' && { parentId: commentId })
+      };
+  
+      try {
+          const response = await apiClient.post(commentId !== 'main' ? '/comments/reply' : '/comments', payload);
+          console.log('Response data:', response.data);  // 이 부분에서 데이터 로그를 출력
+          if (response.status === 200) {
+              const newCommentData = {
+                  ...response.data, // 여기서 response.data 구조가 바뀌었는지 확인
+                  createdAt: new Date().toISOString(),
+                  profileUrl: response.data.profileUrl || '/assets/img/Profile.png'
+              };
+              setComments(prevComments => [...prevComments, newCommentData]);
+              setCommentCount(prevCount => prevCount + 1);
+              setNewComment(prev => ({ ...prev, [commentId]: '' }));
+          }
+      } catch (error) {
+          console.error('Error submitting comment:', error);
+      }
+  };
         
         const sortComments = (comments) => {
           let commentMap = new Map();
@@ -249,6 +249,14 @@
             console.error('Error processing comment like:', error);
         }
     };
+
+    useEffect(() => {
+      console.log('Comments updated:', comments);
+    }, [comments]);
+    
+    useEffect(() => {
+      console.log('New comment state:', newComment);
+    }, [newComment]);
       
         if (!post) return <div>Loading...</div>;
 

@@ -17,7 +17,7 @@ const ItemDetailPage = () => {
         if (itemDetails.personOrOfficial === 'OFFICIAL') {
             navigate(`/rent/officialreservation/${itemDetails.id}`);
         } else if (itemDetails.personOrOfficial === 'PERSON') {
-            navigate(`/rent/personreservation/${itemDetails.id}`);
+            navigate(`/rent/personreservation/${itemDetails.id}`, { state: { itemDetails } });
         }
     };
 
@@ -125,7 +125,7 @@ const ItemDetailPage = () => {
                                 <InformationSection>
                                     <InfoItem>
                                         <InfoTitle>대여 비용</InfoTitle>
-                                        <InfoContent>{itemDetails.pricePerHour}</InfoContent>
+                                        <InfoContent>{itemDetails.pricePerHour}원(1시간)</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
                                         <InfoTitle>대여 가능 요일</InfoTitle>
