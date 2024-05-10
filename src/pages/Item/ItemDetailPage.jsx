@@ -159,7 +159,12 @@ const ItemDetailPage = () => {
                         </ProductDescription>
                         <ButtonsContainer>
                             <ActionButton>채팅하기</ActionButton>
-                            <ActionButton onClick={handleReserve}>예약하기</ActionButton>
+                            <ReservationButton 
+                              reservation={itemDetails.reservation} 
+                              onClick={itemDetails.reservation !== 'NO' ? handleReserve : undefined}
+                            >
+                              {itemDetails.reservation === 'NO' ? '예약불가' : '예약하기'}
+                            </ReservationButton>
                         </ButtonsContainer>
                     </RightContainer>
                 </MainContainer>
@@ -472,6 +477,22 @@ const ActionButton = styled.button`
   text-align: center;
   font-size: 1.3rem;
   cursor: pointer;
+  margin-top: 2.5rem;
+  margin-bottom: 4.31rem;
+`;
+
+const ReservationButton = styled.button`
+  background: ${props => props.reservation === 'NO' ? '#FF0000' : '#00FFE0'};
+  width: 18rem;
+  height: 3.0625rem;
+  border: none;
+  border-radius: 2rem;
+  font-weight: 700;
+  color: #000;
+  text-align: center;
+  font-size: 1.3rem;
+  cursor: ${props => props.reservation === 'NO' ? 'not-allowed' : 'pointer'};
+  opacity: ${props => props.reservation === 'NO' ? 0.5 : 1};
   margin-top: 2.5rem;
   margin-bottom: 4.31rem;
 `;
