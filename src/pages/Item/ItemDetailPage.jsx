@@ -37,11 +37,15 @@ const ItemDetailPage = () => {
         return <div>Loading...</div>;
     }
 
-    function getDayOfWeek(dateString) {
-        const date = new Date(dateString);
-        const formatter = new Intl.DateTimeFormat('ko-KR', { weekday: 'long' });
-        return formatter.format(date).slice(0, 1); // '금요일'을 '금'으로 표시하려면 .slice(0, 1)을 사용합니다.
-    }
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const formatter = new Intl.DateTimeFormat('ko-KR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+      });
+      return formatter.format(date); // 예: '2024년 5월 17일'
+  }
 
     // 날짜 문자열에서 시간만 추출하는 함수
     function getTime(dateString) {
@@ -128,8 +132,8 @@ const ItemDetailPage = () => {
                                         <InfoContent>{itemDetails.pricePerHour}원(1시간)</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
-                                        <InfoTitle>대여 가능 요일</InfoTitle>
-                                        <InfoContent>{getDayOfWeek(itemDetails.canBorrowDateTime)} ~ {getDayOfWeek(itemDetails.returnDateTime)}</InfoContent>
+                                        <InfoTitle>대여 가능 날짜</InfoTitle>
+                                        <InfoContent>{formatDate(itemDetails.canBorrowDateTime)} ~ {formatDate(itemDetails.returnDateTime)}</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
                                         <InfoTitle>대여 및 반납 가능 시간</InfoTitle>
@@ -155,7 +159,12 @@ const ItemDetailPage = () => {
                         </ProductDescription>
                         <ButtonsContainer>
                             <ActionButton>채팅하기</ActionButton>
-                            <ActionButton onClick={handleReserve}>예약하기</ActionButton>
+                            <ReservationButton 
+                              reservation={itemDetails.reservation} 
+                              onClick={itemDetails.reservation !== 'NO' ? handleReserve : undefined}
+                            >
+                              {itemDetails.reservation === 'NO' ? '예약불가' : '예약하기'}
+                            </ReservationButton>
                         </ButtonsContainer>
                     </RightContainer>
                 </MainContainer>
@@ -468,6 +477,22 @@ const ActionButton = styled.button`
   text-align: center;
   font-size: 1.3rem;
   cursor: pointer;
+  margin-top: 2.5rem;
+  margin-bottom: 4.31rem;
+`;
+
+const ReservationButton = styled.button`
+  background: ${props => props.reservation === 'NO' ? '#FF0000' : '#00FFE0'};
+  width: 18rem;
+  height: 3.0625rem;
+  border: none;
+  border-radius: 2rem;
+  font-weight: 700;
+  color: #000;
+  text-align: center;
+  font-size: 1.3rem;
+  cursor: ${props => props.reservation === 'NO' ? 'not-allowed' : 'pointer'};
+  opacity: ${props => props.reservation === 'NO' ? 0.5 : 1};
   margin-top: 2.5rem;
   margin-bottom: 4.31rem;
 `;
