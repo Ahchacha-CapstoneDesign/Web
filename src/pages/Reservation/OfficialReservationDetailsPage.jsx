@@ -155,8 +155,9 @@ const TitleBar = styled.div`
 `;
 
 const BackButton = styled.img`
-  width: 3.0625rem;
-  height: 3.0625rem;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
   margin-right:5.66rem;
 `;
 
