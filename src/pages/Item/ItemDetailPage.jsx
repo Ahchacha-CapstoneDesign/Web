@@ -37,11 +37,15 @@ const ItemDetailPage = () => {
         return <div>Loading...</div>;
     }
 
-    function getDayOfWeek(dateString) {
-        const date = new Date(dateString);
-        const formatter = new Intl.DateTimeFormat('ko-KR', { weekday: 'long' });
-        return formatter.format(date).slice(0, 1); // '금요일'을 '금'으로 표시하려면 .slice(0, 1)을 사용합니다.
-    }
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const formatter = new Intl.DateTimeFormat('ko-KR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+      });
+      return formatter.format(date); // 예: '2024년 5월 17일'
+  }
 
     // 날짜 문자열에서 시간만 추출하는 함수
     function getTime(dateString) {
@@ -128,8 +132,8 @@ const ItemDetailPage = () => {
                                         <InfoContent>{itemDetails.pricePerHour}원(1시간)</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
-                                        <InfoTitle>대여 가능 요일</InfoTitle>
-                                        <InfoContent>{getDayOfWeek(itemDetails.canBorrowDateTime)} ~ {getDayOfWeek(itemDetails.returnDateTime)}</InfoContent>
+                                        <InfoTitle>대여 가능 날짜</InfoTitle>
+                                        <InfoContent>{formatDate(itemDetails.canBorrowDateTime)} ~ {formatDate(itemDetails.returnDateTime)}</InfoContent>
                                     </InfoItem>
                                     <InfoItem>
                                         <InfoTitle>대여 및 반납 가능 시간</InfoTitle>

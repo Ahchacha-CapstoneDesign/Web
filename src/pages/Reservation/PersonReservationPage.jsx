@@ -67,13 +67,16 @@ const PersonReservationPage = () => {
 
       const hours = diffMinutes / 60;
 
+      const borrowDateTime = startDate.toISOString().split('T')[0] + "T" + startTime.padStart(2,'0') + ":" + startMinutes.padStart(2, '0') + ":00";
+      const returnDateTime = endDate.toISOString().split('T')[0] + "T" + endTime.padStart(2, '0') + ":" + endMinutes.padStart(2, '0') + ":00";
+
       // 총 요금 계산
       const totalFee = Math.round(hours * itemDetails.pricePerHour);
   
       const reservationDetails = {
         itemId: itemDetails.id,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        borrowTime: borrowDateTime,
+        returnTime: returnDateTime,
         borrowPlace: itemDetails.borrowPlace,
         returnPlace: itemDetails.returnPlace,
         pricePerHour: itemDetails.pricePerHour,

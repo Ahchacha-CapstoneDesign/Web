@@ -224,6 +224,7 @@ const RentMainPage = () => {
               // 기본 이미지를 불러오는 경우
               <ImageWrapper>
                 <img src="/assets/img/ItemDefault.png" alt="Default" />
+                {post.reservation === 'NO' && <RentingImage src={"/assets/img/renting.png"} alt="Renting" />}
               </ImageWrapper>
               )}
               <div>
