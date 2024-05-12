@@ -14,6 +14,7 @@ import PasswordCheck from './pages/Mypage/MyAccount/PasswordCheck';
 import AccountSettings from './pages/Mypage/MyAccount/AccountSettings';
 import MyRegister from './pages/Mypage/MyRegisterList.jsx';
 import MyRentingList from './pages/Mypage/MyRentingList.jsx';
+import MyReview from './pages/Mypage/MyReview.jsx';
 
 import CommunityMain from './pages/Community/CommunityMain';
 import RentMainPage from './pages/Rent/RentMainPage.jsx';
@@ -110,8 +111,7 @@ function App() {
             {/* 등록 페이지 */}
             <Route path="/register" element={<> <Header /> <Register1 /> </>}/>
             <Route path="/register/personregisterdetails" element={<> <Header /> <PersonRegisterDetails /> </>}/>
-              <Route path="/register/officialregisterdetails" element={<> <Header /> <OfficialRegisterDetails /> </>}/>
-
+            <Route path="/register/officialregisterdetails" element={<> <Header /> <OfficialRegisterDetails /> </>}/>
             {/* 마이 페이지 */}
             <Route
                 path="/mypage/main"
