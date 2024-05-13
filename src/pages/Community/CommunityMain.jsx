@@ -230,6 +230,7 @@ const CommunityMain = () => {
                             </Content>
                             <Details>
                                 좋아요: {post.likeCount} | 댓글: {post.commentCount + post.replyCount} | 조회수: {post.viewCount}
+
                             </Details>
                         </PostItem>
                     ))}
