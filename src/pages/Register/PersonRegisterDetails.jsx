@@ -4,8 +4,7 @@ import { createGlobalStyle } from 'styled-components';
 import Calendar from "react-calendar";
 import apiClient from "../../path/apiClient";
 import { useLocation, useNavigate } from 'react-router-dom';
-
-
+import ConfirmOrCancleModal from '../ConfirmOrCancleModal';
 
 const PersonRegisterDetails = (props) => {
     const location = useLocation(); // location 객체를 통해 현재 위치의 정보를 얻음
@@ -20,6 +19,7 @@ const PersonRegisterDetails = (props) => {
     const [imageFiles, setImageFiles] = useState([]);
     const minuteOptions = [0, 30];
     const [modalOpen, setModalOpen] = useState(false);
+    const [modalClose, setModalClose] = useState(false);
 
 
     const [formData, setFormData] = useState({
@@ -308,12 +308,12 @@ const PersonRegisterDetails = (props) => {
                     </FormGroup>
                     <Button onClick={handleSubmit}>등록하기</Button>
                     {modalOpen && (
-                        <ModalOverlay>
-                            <Modal>
-                                    <ModalTitle>아이템 등록 성공</ModalTitle>
-                                    <ModalButton onClick={handleModalConfirm}>확인</ModalButton>
-                            </Modal>
-                        </ModalOverlay>
+                      <ConfirmOrCancleModal
+                          message="물건을 등록하시겠습니까?"
+                          isOpen={modalOpen}
+                          setIsOpen={setModalOpen}
+                          onConfirm={handleModalConfirm}
+                      />
                     )}
                 </Form>
             </Container>
@@ -325,13 +325,13 @@ const GlobalStyle = createGlobalStyle`
   body {
     background-color: #000;
     color: white;
-    font-family: 'Arial', sans-serif;
+    font-family: 'Pretendard';
     margin: 0;
     padding: 0;
   }
 
   input, select, button {
-    font-family: inherit;
+    font-family: 'Pretendard';
   }
 
   /* 스크롤바 전체 스타일 */

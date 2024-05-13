@@ -52,7 +52,6 @@ const MyRentingList = () => {
 
                 <RentingTitleContainer>
                   <RentingTitle>대여 내역</RentingTitle>
-                  <MoreView>더보기&gt;</MoreView>
                 </RentingTitleContainer>
                 
                 <RentingInfoBox>
@@ -97,8 +96,9 @@ const ItemContainer = styled.div`
 
 
 const ItemImage = styled.img`
-  width: 100px; /* 원하는 이미지 너비로 조정 */
-  height: auto; /* 높이 자동 조정 */
+  width: 5rem;
+  height: 5rem;
+  border-radius: 5px; 
   margin-right: 1rem; /* 이미지와 제목 사이 여백 조정 */
 `;
 
