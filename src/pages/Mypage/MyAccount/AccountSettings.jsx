@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 import apiClient from "../../../path/apiClient";
 import { useNavigate } from 'react-router-dom';
+import ConfirmModal from "../../ConfirmModal";
 
 
 // 가정: 사용자 정보는 서버에서 가져온 후 state에 저장합니다.
@@ -19,6 +20,7 @@ const AccountSettings = () => {
     const [newNickname, setNewNickname] = useState(userNickname);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
     const DEFAULT_IMAGE_URL = '/assets/img/Profile.png';
@@ -112,6 +114,7 @@ const AccountSettings = () => {
         const imageUrl = response.data; // 서버로부터 받은 이미지 URL
         localStorage.setItem('profileImageUrl', imageUrl); // localStorage에 이미지 URL 저장
         setProfileImage(imageUrl); // 상태 업데이트로 UI에 반영
+        setShowSuccessModal(true); // 성공 모달을 표시
       } catch (error) {
         console.error('이미지 업로드 실패:', error);
         alert('이미지 업로드에 실패했습니다.');
@@ -122,7 +125,7 @@ const AccountSettings = () => {
       try {
         // 서버로 POST 요청을 보냅니다.
         await apiClient.post('/users/reset-profile');
-        alert('기본 이미지로 재설정되었습니다.');
+        setShowSuccessModal(true); // 성공 모달을 표시
         localStorage.removeItem('profileImageUrl'); // 로컬 스토리지에서 이미지 URL 삭제
         setProfileImage(DEFAULT_IMAGE_URL); // 상태 업데이트로 기본 이미지 사용
       } catch (error) {
@@ -135,6 +138,9 @@ const AccountSettings = () => {
       // 전화번호가 11자리인 경우 010-0000-0000 형식으로 변환
       return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
     };
+    const handleModalClose = () => {
+      setShowSuccessModal(false);
+    }
 
     return (
         <>
@@ -154,7 +160,23 @@ const AccountSettings = () => {
                       <UserNickname>{userNickname}</UserNickname>
                   </NameAndNickname>
                   <EditButton onClick={() => fileInputRef.current.click()}>이미지 변경</EditButton>
+                  {showSuccessModal && (
+                    <ConfirmModal
+                      message="이미지 변경이 완료되었습니다!"
+                      isOpen={showSuccessModal}
+                      setIsOpen={setShowSuccessModal}
+                      onConfirm={handleModalClose}
+                    />
+                  )}
                   <BasicEditButton onClick={resetToDefaultImage}>기본이미지 변경</BasicEditButton>
+                  {showSuccessModal && (
+                    <ConfirmModal
+                      message="이미지 변경이 완료되었습니다!"
+                      isOpen={showSuccessModal}
+                      setIsOpen={setShowSuccessModal}
+                      onConfirm={handleModalClose}
+                    />
+                  )}
               </NameAndButton>
             </ProfileSection>
 

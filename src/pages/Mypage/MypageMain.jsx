@@ -10,6 +10,58 @@ const MypageMain = () => {
   const [userNickname, setUserNickname] = useState('');
   const [profileImage, setProfileImage] = useState('');
   const navigate = useNavigate();
+  const [rentData, setRentData] = useState({ reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
+  const [registerData, setRegisterData] = useState({ reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
+
+  useEffect(() => {
+    setUserName(localStorage.getItem('userName'));
+    setUserNickname(localStorage.getItem('userNickname'));
+    setProfileImage(localStorage.getItem('profileImageUrl') || '/assets/img/Profile.png');
+    fetchRentData();
+    fetchRegisterData();
+  }, []);
+
+  const fetchRentData = async () => {
+    try {
+      const response = await apiClient.get('/reservation/myItems');
+      const data = response.data.content;
+      setRentData({
+        reservedCount: data.filter(item => item.rentingStatus === 'RESERVED').length,
+        rentingCount: data.filter(item => item.rentingStatus === 'RENTING').length,
+        returnedCount: data.filter(item => item.rentingStatus === 'RETURNED').length,
+        items: data.slice(0, 3)
+      });
+    } catch (error) {
+      console.error('Failed to fetch rent data:', error);
+    }
+  };
+
+  const fetchRegisterData = async () => {
+    try {
+      const response = await apiClient.get('/items/myItems');
+      const data = response.data.content;
+      setRegisterData({
+        reservedCount: data.filter(item => item.rentingStatus === 'RESERVED').length,
+        rentingCount: data.filter(item => item.rentingStatus === 'RENTING').length,
+        returnedCount: data.filter(item => item.rentingStatus === 'RETURNED').length,
+        items: data.slice(0, 3)
+      });
+    } catch (error) {
+      console.error('Failed to fetch register data:', error);
+    }
+  };
+  
+  const statusColors = {
+    NONE: { text: "대여 가능", color: "white" },
+    RESERVED: { text: "예약 완료", color: "#00FFF0" },
+    RENTING: { text: "대여중", color: "#52FF00" },
+    RETURNED: { text: "반납완료", color: "#F00" }
+  };
+  
+  const getStatusStyle = (status) => ({
+    color: statusColors[status]?.color || "white",
+  });
+
 
   useEffect(() => {
     const name = localStorage.getItem('userName');
@@ -24,6 +76,7 @@ const MypageMain = () => {
       setProfileImage('/assets/img/Profile.png');
     }
   });
+
 
   const handlePageChange = (path) => {
     navigate(path);
@@ -52,41 +105,43 @@ const MypageMain = () => {
 
                 <RentingTitleContainer>
                   <RentingTitle>대여 내역</RentingTitle>
-                  <MoreView>더보기&gt;</MoreView>
+                  <MoreView onClick={() => handlePageChange('/mypage/rentinglist')}>더보기&gt;</MoreView>
                 </RentingTitleContainer>
                 
                 <RentingInfoBox>
-                  <Reserved>예약 완료<Break/>0</Reserved>
-                  <Renting>대여중<Break/>0</Renting>
-                  <Returned>반납 완료<Break/>0</Returned>
+                  <Reserved>예약 완료<Break/>{rentData.reservedCount}</Reserved>
+                  <Renting>대여중<Break/>{rentData.rentingCount}</Renting>
+                  <Returned>반납 완료<Break/>{rentData.returnedCount}</Returned>
                 </RentingInfoBox>
 
-                <ItemContainer>
-                  <ItemImage/>
-                  <ItemTitle>제목</ItemTitle>
-                  <ItemPrice>0000원</ItemPrice>
-                  <ItemStatus>대여중</ItemStatus>
-                </ItemContainer>
+                {rentData.items.map(item => (
+                  <ItemContainer key={item.id}>
+                    <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
+                    <ItemTitle>{item.title}</ItemTitle>
+                    <ItemPrice>{item.totalPrice}원</ItemPrice>
+                    <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
+                  </ItemContainer>
+                ))}
 
-                {/* 하단부터 등록내역 */}
-                
                 <RentingTitleContainer>
                   <RentingTitle>등록 내역</RentingTitle>
-                  <MoreView>더보기&gt;</MoreView>
+                  <MoreView onClick={() => handlePageChange('/mypage/registerlist')}>더보기&gt;</MoreView>
                 </RentingTitleContainer>
                 
                 <RentingInfoBox>
-                  <Reserved>예약 완료<Break/>0</Reserved>
-                  <Renting>대여중<Break/>0</Renting>
-                  <Returned>반납 완료<Break/>0</Returned>
+                  <Reserved>예약 완료<Break/>{registerData.reservedCount}</Reserved>
+                  <Renting>대여중<Break/>{registerData.rentingCount}</Renting>
+                  <Returned>반납 완료<Break/>{registerData.returnedCount}</Returned>
                 </RentingInfoBox>
 
-                <ItemContainer>
-                  <ItemImage/>
-                  <ItemTitle>제목</ItemTitle>
-                  <ItemPrice>0000원</ItemPrice>
-                  <ItemStatus>대여중</ItemStatus>
-                </ItemContainer>
+                {registerData.items.map(item => (
+                  <ItemContainer key={item.id}>
+                    <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
+                    <ItemTitle>{item.title}</ItemTitle>
+                    <ItemPrice>{item.pricePerHour}원/시간</ItemPrice>
+                    <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
+                  </ItemContainer>
+                ))}
             </Container>
       </ >
     );
@@ -103,43 +158,67 @@ export const GlobalStyle = createGlobalStyle`
       flex-direction: column;
       background-color: #000; // body 전체의 배경색을 검은색으로 설정
   }
+
+  /* 스크롤바 전체 스타일 */
+  ::-webkit-scrollbar {
+    width: 0.5rem;
+  }
+
+  /* 스크롤바 트랙(바탕) 스타일 */
+  ::-webkit-scrollbar-track {
+    background: transparent; /* 트랙의 배경색 */
+  }
+
+  /* 스크롤바 핸들(움직이는 부분) 스타일 */
+  ::-webkit-scrollbar-thumb {
+    background: #00FFE0; /* 핸들의 배경색 */
+    border-radius: 5px;
+  }
 `;
 
 const ItemContainer = styled.div`
   display: flex;
   width: 59.5rem;
-  height: 6rem;
+  height: 7rem;
   margin-top: 1rem;
   margin-left: 15rem;
   border-bottom: 0.5px solid #FFF;
+  align-items: center;
 `;
 
-
-
 const ItemImage = styled.img`
-  width: 100px; /* 원하는 이미지 너비로 조정 */
-  height: auto; /* 높이 자동 조정 */
-  margin-right: 1rem; /* 이미지와 제목 사이 여백 조정 */
+  width: 5rem;
+  height: 5rem;
+  border-radius: 20px;
+  border: 1px solid white;
+  margin-left: 2rem;
 `;
 
 const ItemTitle = styled.div`
   color: white;
   font-family: "Pretendard";
   font-size: 1.2rem;
+  font-weight: 500;
+  width: 15.875rem;
+  margin-left: 2rem;
 `;
 
 const ItemPrice = styled.div`
+  width: 6rem;
   color: white;
   font-family: "Pretendard";
   font-size: 1rem;
-  margin-left: 1rem; /* 가격과 상태 사이 여백 조정 */
+  font-weight: 500;
+  margin-left: 13rem;
 `;
 
 const ItemStatus = styled.div`
-  color: white;
-  font-family: "Pretendard";
+  font-family: 'Pretendard';
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
+  padding: 0.5rem;
+  margin-left: 8rem;
+  ${(props) => `color: ${props.color}; background-color: ${props.backgroundColor};`}
 `;
 
 const RentingTitleContainer = styled.div`
@@ -173,7 +252,7 @@ const RentingInfoBox = styled.div`
   display: flex;
   justify-content: space-between;
   width: 59.5rem;
-  height: 8.5rem;
+  height: 7rem;
   margin-top: 1rem;
   margin-left: 15rem;
   align-items: center;
@@ -290,8 +369,8 @@ const Editbutton = styled.button`
     height: 2.1875rem;
     background-color: #000;
     color: #00FFE0;
-    border-radius: 0.625rem;
-    border: 0.5px solid #00FFE0;
+    border-radius: 10px;
+    border: 1px solid #00FFE0;
     cursor: pointer;
     font-size: 1rem;
     font-style: normal;
