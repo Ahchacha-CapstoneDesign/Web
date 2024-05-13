@@ -9,7 +9,8 @@ const Register1 = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
-    const userstatus = localStorage.getItem('personOrOfficial')
+    const [selectedPage, setSelectedPage] = useState('register'); // 새로운 state 추가
+    const userstatus = localStorage.getItem('personOrOfficial');
 
     const handleCategoryClick = (category) => {
         setSelectedCategory(category);
@@ -19,12 +20,12 @@ const Register1 = () => {
     const handleRegisterClick = () => {
         // 등록하기 버튼 클릭 시 선택한 카테고리와 아이템 데이터를 다음 페이지로 전달
         if (selectedItem) {
-            if(userstatus == "PERSON"){
+            if(userstatus === "PERSON"){
                 navigate('/register/personregisterdetails', {
                     state: {item: selectedItem}
                 });
             }
-            else if(userstatus == "OFFICIAL"){
+            else if(userstatus === "OFFICIAL"){
                 navigate('/register/officialregisterdetails', {
                     state: {item: selectedItem}
                 });
@@ -41,36 +42,56 @@ const Register1 = () => {
         setSelectedItem(item === selectedItem ? null : item); // 아이템 선택 토글
     };
 
+    // 새로운 페이지 선택을 처리하는 함수
+    const handlePageSelect = (page) => {
+        setSelectedPage(page);
+    };
+
     return (
         <>
             <GlobalStyle />
-            <ItemTitle>카테고리<Span>*필수항목</Span></ItemTitle>
+            {/* 물품 등록과 물품 관리를 선택할 수 있는 버튼들 */}
+            <ButtonWrapper>
+                <Button onClick={() => handlePageSelect('register')} selected={selectedPage === 'register'}>물품 등록</Button>
+                |
+                <Button onClick={() => handlePageSelect('manage')} selected={selectedPage === 'manage'}>물품 관리</Button>
+            </ButtonWrapper>
 
-            <CategoryWrapper>
-                <CategoryList>
-                    {categories.map(category => (
-                        <CategoryItem key={category.id} onClick={() => handleCategoryClick(category)}>
-                            {category.name}
-                        </CategoryItem>
-                    ))}
-                </CategoryList>
-                <ItemList>
-                    {selectedCategory && selectedCategory.items.map(item => (
-                        <Item
-                            key={item}
-                            onClick={() => handleItemClick(item)} // 클릭 핸들러 추가
-                            selected={selectedItem === item} // 선택된 아이템인 경우에 배경색 변경
-                        >
-                            {item}
-                        </Item>
-                    ))}
-                </ItemList>
-            </CategoryWrapper>
+            {/* 카테고리 및 아이템 목록 */}
+            {selectedPage === 'register' && (
+                <>
+                    <ItemTitle>카테고리<Span>*필수항목</Span></ItemTitle>
+                    <CategoryWrapper>
+                        <CategoryList>
+                            {categories.map(category => (
+                                <CategoryItem key={category.id} onClick={() => handleCategoryClick(category)}>
+                                    {category.name}
+                                </CategoryItem>
+                            ))}
+                        </CategoryList>
+                        <ItemList>
+                            {selectedCategory && selectedCategory.items.map(item => (
+                                <Item
+                                    key={item}
+                                    onClick={() => handleItemClick(item)} // 클릭 핸들러 추가
+                                    selected={selectedItem === item} // 선택된 아이템인 경우에 배경색 변경
+                                >
+                                    {item}
+                                </Item>
+                            ))}
+                        </ItemList>
+                    </CategoryWrapper>
+                </>
+            )}
 
-            <RegisterButton onClick={handleRegisterClick}>등록하기</RegisterButton>
+            {/* 등록하기 버튼 */}
+            {selectedPage === 'register' && (
+                <RegisterButton onClick={handleRegisterClick}>등록하기</RegisterButton>
+            )}
         </>
     );
 };
+
 
 const categories = [
     {
@@ -135,6 +156,27 @@ html, body, #root {
   background-position: center;
 }
 `;
+
+const ButtonWrapper = styled.div`
+  color:#fff;
+  background-color: #000;
+  font-size: 1.25rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: normal;
+  margin-left: 25rem;
+`
+const Button = styled.button`
+  color:#fff;
+  background-color: #000;
+  font-size: 1.25rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: normal;
+  margin-left:0.5rem;
+  margin-right:0.5rem;
+  border: none;
+`
 
 const ItemTitle = styled.div` 
   color: #FFF;

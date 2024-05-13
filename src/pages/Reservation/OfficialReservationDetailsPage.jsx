@@ -1,14 +1,42 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled, {createGlobalStyle} from 'styled-components';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
+import apiClient from "../../path/apiClient";
 
 
-const PersonReservationDetailsPage = () => {
-
+const OfficialReservationDetailsPage = () => {
+    const location = useLocation();
     const [fee, setFee] = useState('5000원'); // 사용료
     const [imageUrl, setImageUrl] = useState('/assets/img/unChecked.PNG');
+    const [userNickname, setUserNickname] = useState('');
+    const [userName, setUserName] = useState('');
+    const [userPhoneNumber, setUserPhoneNumber] = useState('');
+    const [userId, setUserId] = useState('');
+    const [userTrack, setUserTrack] = useState('');
+    const [userStatus, setUserStatus] = useState('');
+    const [reservationDetails, setReservationDetails] = useState(location.state || {});
     const navigate = useNavigate();
 
+
+    useEffect(() => {
+        const userName = localStorage.getItem('userName');
+        setUserName(userName);
+        const phonenum = localStorage.getItem('userPhoneNumber');
+        setUserPhoneNumber(phonenum);
+        const userId = localStorage.getItem('userID');
+        setUserId(userId);
+        const userTrack = localStorage.getItem('userTrack');
+        setUserTrack(userTrack);
+        const userStatus = localStorage.getItem('userGrade') + localStorage.getItem('userStatus');
+        setUserStatus(userStatus);
+    });
+
+    useEffect(() => {
+        const reservationData = location.state;
+        if (reservationData) {
+            setReservationDetails(reservationData);
+        }
+    }, [location.state]);
 
     // 체크박스 변경을 다루는 함수
     const [consents, setConsents] = useState({
@@ -31,12 +59,37 @@ const PersonReservationDetailsPage = () => {
   };
 
     // 결제하기 버튼 클릭 처리 함수
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (consents.personalInfoConsent && consents.placeTimeConsent) {
             console.log('예약 처리 로직');
         } else {
             alert('모든 항목의 동의가 필요합니다.');
         }
+        try {
+            await apiClient.post('/reservation/official', {
+                ...reservationDetails,
+                consents
+            });
+            alert('예약이 성공적으로 완료되었습니다.');
+            console.log(reservationDetails);
+            navigate('/mypage/rentinglist');
+        } catch (error) {
+            console.error('예약 실패:', error);
+            alert('예약에 실패했습니다. 다시 시도해주세요.');
+        }
+
+    };
+
+    const formatPhoneNumber = (phoneNumber) => {
+        // 전화번호가 11자리인 경우 010-0000-0000 형식으로 변환
+        return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+    };
+
+    const formatDate = (isoString) => {
+        const date = new Date(isoString);
+        console.log(reservationDetails.startDate)
+        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`;
+
     };
 
 
@@ -50,39 +103,39 @@ const PersonReservationDetailsPage = () => {
             </TitleBar>
             <FormItem>
                 <Label>이름</Label>
-                <Value>김동욱</Value>
+                <Value>{userName}</Value>
             </FormItem>
             <FormItem>
                 <Label>학번</Label>
-                <Value>1971047</Value>
+                <Value>{userId}</Value>
             </FormItem>
             <FormItem>
                 <Label>트랙</Label>
-                <Value>모바일소프트웨어</Value>
+                <Value>{userTrack}</Value>
             </FormItem>
             <FormItem>
                 <Label>재학 상태</Label>
-                <Value>4학년 재학중</Value>
+                <Value>{userStatus}</Value>
             </FormItem>
             <FormItem>
                 <Label>전화번호</Label>
-                <Value>010-8814-8935</Value>
+                <Value>{formatPhoneNumber(userPhoneNumber)}</Value>
             </FormItem>
             <FormItem>
                 <Label>대여 시간</Label>
-                <Value>2024.02.29 20시 00분</Value>
+                <Value>{formatDate(reservationDetails.startDate)}</Value>
             </FormItem>
             <FormItem>
                 <Label>반납 시간</Label>
-                <Value>2024.02.29 20시 00분</Value>
+                <Value>{formatDate(reservationDetails.endDate)}</Value>
             </FormItem>
             <FormItem>
                 <Label>대여 위치</Label>
-                <Value>상상관 1층</Value>
+                <Value>{reservationDetails.borrowPlace}</Value>
             </FormItem>
             <FormItem>
                 <Label>반납 위치</Label>
-                <Value>상상관 1층</Value>
+                <Value>{reservationDetails.returnPlace}</Value>
             </FormItem>
             <Line/>
             <CheckboxLabel>
@@ -255,4 +308,4 @@ const ConfirmButton = styled.button`
 // 이제 모든 스타일 컴포넌트가 왼쪽으로 정렬되어 표시됩니다.
 
 
-export default PersonReservationDetailsPage;
+export default OfficialReservationDetailsPage;
