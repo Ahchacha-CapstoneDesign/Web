@@ -215,10 +215,18 @@ const RentMainPage = () => {
         <PostList>
           {displayedPosts.map((post) => (
             <PostItem key={post.id} onClick={() => goToItemDetail(post.id)}>
+              {post.imageUrls && post.imageUrls.length > 0 ? (
               <ImageWrapper>
                 <img src={post.imageUrls[0]} alt="Item" />
-                {post.reservation === 'NO' && <RentingImage src={"/assets/img/renting.png"} alt="Renting" />} {/* 조건부 렌더링 */}
+                {post.reservation === 'NO' && <RentingImage src={"/assets/img/renting.png"} alt="Renting" />}
               </ImageWrapper>
+              ) : (
+              // 기본 이미지를 불러오는 경우
+              <ImageWrapper>
+                <img src="/assets/img/ItemDefault.png" alt="Default" />
+                {post.reservation === 'NO' && <RentingImage src={"/assets/img/renting.png"} alt="Renting" />}
+              </ImageWrapper>
+              )}
               <div>
                 <TitleWrapper>
                   {post.title}

@@ -1,13 +1,29 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled, {createGlobalStyle} from 'styled-components';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate, useLocation} from 'react-router-dom';
+import apiClient from '../../path/apiClient';
 
 
 const PersonReservationDetailsPage = () => {
-
-    const [fee, setFee] = useState('5000원'); // 사용료
-    const [imageUrl, setImageUrl] = useState('/assets/img/unChecked.PNG');
+    const location = useLocation();
     const navigate = useNavigate();
+    const [userNickname, setUserNickname] = useState('');
+    const [userPhoneNumber, setUserPhoneNumber] = useState('');
+    const [reservationDetails, setReservationDetails] = useState(location.state || {});
+
+    useEffect(() => {
+      const nickname = localStorage.getItem('userNickname');
+      setUserNickname(nickname);
+      const phonenum = localStorage.getItem('userPhoneNumber');
+      setUserPhoneNumber(phonenum);
+    });
+
+    useEffect(() => {
+      const reservationData = location.state;
+      if (reservationData) {
+          setReservationDetails(reservationData);
+      }
+  }, [location.state]);
 
 
     // 체크박스 변경을 다루는 함수
@@ -29,16 +45,38 @@ const PersonReservationDetailsPage = () => {
       console.log('돌아가기 버튼 클릭');
       navigate(-1);
     };
+    
 
     // 결제하기 버튼 클릭 처리 함수
-    const handleSubmit = () => {
-        if (consents.personalInfoConsent && consents.severeDamageConsent) {
-            console.log('예약 처리 로직');
-        } else {
-            alert('모든 항목의 동의가 필요합니다.');
-        }
+    const handleSubmit = async () => {
+      if (!consents.personalInfoConsent || !consents.severeDamageConsent) {
+          alert('모든 동의 항목에 체크해야 예약이 가능합니다.');
+          return;
+      }
+
+      try {
+          await apiClient.post('/reservation/person', {
+              ...reservationDetails,
+              consents
+          });
+          alert('예약이 성공적으로 완료되었습니다.');
+          console.log(reservationDetails);
+          navigate('/mypage/rentinglist'); 
+      } catch (error) {
+          console.error('예약 실패:', error);
+          alert('예약에 실패했습니다. 다시 시도해주세요.');
+      }
     };
 
+    const formatPhoneNumber = (phoneNumber) => {
+      // 전화번호가 11자리인 경우 010-0000-0000 형식으로 변환
+      return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+    };
+
+    const formatDate = (isoString) => {
+      const date = new Date(isoString);
+      return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`;
+    };
 
     return (
         <>
@@ -50,27 +88,27 @@ const PersonReservationDetailsPage = () => {
             </TitleBar>
             <FormItem>
                 <Label>닉네임</Label>
-                <Value>아차차</Value>
+                <Value>{userNickname}</Value>
             </FormItem>
             <FormItem>
                 <Label>전화번호</Label>
-                <Value>010-0000-0000</Value>
+                <Value>{formatPhoneNumber(userPhoneNumber)}</Value>
             </FormItem>
             <FormItem>
                 <Label>대여 시간</Label>
-                <Value>2024.02.29 20시 00분</Value>
+                <Value>{formatDate(reservationDetails.startDate)}</Value>
             </FormItem>
             <FormItem>
                 <Label>반납 시간</Label>
-                <Value>2024.02.29 20시 00분</Value>
+                <Value>{formatDate(reservationDetails.endDate)}</Value>
             </FormItem>
             <FormItem>
                 <Label>대여 위치</Label>
-                <Value>상상관 1층</Value>
+                <Value>{reservationDetails.borrowPlace}</Value>
             </FormItem>
             <FormItem>
                 <Label>반납 위치</Label>
-                <Value>상상관 1층</Value>
+                <Value>{reservationDetails.returnPlace}</Value>
             </FormItem>
             <Line/>
                 <CheckboxLabel>
@@ -91,7 +129,7 @@ const PersonReservationDetailsPage = () => {
             <FeeWrapper>
                 <FeeLabelValueWrapper>
                     <FeeLabel>결제 금액 </FeeLabel>
-                    <FeeValue>{fee}</FeeValue>
+                    <Value>{reservationDetails.totalFee}</Value>
                 </FeeLabelValueWrapper>
                 <ConfirmButton onClick={handleSubmit} >결제하기</ConfirmButton>
             </FeeWrapper>
@@ -150,8 +188,9 @@ const TitleBar = styled.div`
 `;
 
 const BackButton = styled.img`
-  width: 3.0625rem;
-  height: 3.0625rem;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
   margin-right:5.66rem;
 `;
 
