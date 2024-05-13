@@ -4,7 +4,7 @@ import styled, {createGlobalStyle} from 'styled-components';
 import {differenceInMinutes} from 'date-fns';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 
 const hourOptions = Array.from({ length: 24 }, (_, i) => (i < 10 ? `0${i}` : `${i}`));
 const minuteOptions = ['00', '30'];
@@ -19,6 +19,9 @@ const OfficialReservationPage = () => {
     const [value, onChange] = useState(new Date());
     const [dateRange, setDateRange] = useState([new Date(), new Date()]);
     const [startDate, endDate] = dateRange;
+    const { itemId } = useParams();
+    const location = useLocation();
+    const itemDetails = location.state?.itemDetails;
     const navigate = useNavigate();
 
 
@@ -48,11 +51,38 @@ const OfficialReservationPage = () => {
         return `${hours}시간 ${minutes > 0 ? `${minutes}분` : ''}`;
     };
 
-    const totalTime = calculateTotalTime();
 
     const formatDate = (date, hour, minute) => {
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()} ${hour}시 ${minute}분`;
     };
+
+    const handleNextPage = () => {
+        const startDateTime = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), parseInt(startTime), parseInt(startMinutes));
+        const endDateTime = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), parseInt(endTime), parseInt(endMinutes));
+
+        // 시간 차이를 분 단위로 계산
+        const diffMinutes = differenceInMinutes(endDateTime, startDateTime);
+
+        const hours = diffMinutes / 60;
+
+        const borrowDateTime = startDate.toISOString().split('T')[0] + "T" + startTime.padStart(2,'0') + ":" + startMinutes.padStart(2, '0') + ":00";
+        const returnDateTime = endDate.toISOString().split('T')[0] + "T" + endTime.padStart(2, '0') + ":" + endMinutes.padStart(2, '0') + ":00";
+
+
+        const reservationDetails = {
+            itemId: itemDetails.id,
+            borrowTime: borrowDateTime,
+            returnTime: returnDateTime,
+            borrowPlace: itemDetails.borrowPlace,
+            returnPlace: itemDetails.returnPlace,
+            pricePerHour: '0',
+            totalFee: `0원` // 통화 추가
+        };
+
+        navigate(`/rent/officialreservationdetails/${itemDetails.id}`, { state: reservationDetails });
+    };
+
+
 
     return (
         <>
@@ -110,7 +140,7 @@ const OfficialReservationPage = () => {
                         {endDate && <span> ~ {formatDate(endDate, endTime, endMinutes)}</span>}
                     </EndDateTimeDisplay>
 
-                    <ConfirmButton>예약하기</ConfirmButton>
+                    <ConfirmButton onClick={handleNextPage}>예약하기</ConfirmButton>
                 </RightColumn>
             </ContentContainer>
         </>
