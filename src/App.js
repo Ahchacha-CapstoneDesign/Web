@@ -30,6 +30,8 @@ import EditPost from './pages/Community/EditPost.jsx';
 import Register1 from './pages/Register/Register1.jsx';
 import PersonRegisterDetails from "./pages/Register/PersonRegisterDetails";
 import OfficialRegisterDetails from "./pages/Register/OfficialRegisterDetails";
+import UpdatePersonRegisterDetails from "./pages/Register/UpdatePersonRegisterDetails";
+import UpdateOfficialRegisterDetails from "./pages/Register/UpdateOfficialRegisterDetails";
 
 
 function App() {
@@ -112,6 +114,9 @@ function App() {
             <Route path="/register" element={<> <Header /> <Register1 /> </>}/>
             <Route path="/register/personregisterdetails" element={<> <Header /> <PersonRegisterDetails /> </>}/>
             <Route path="/register/officialregisterdetails" element={<> <Header /> <OfficialRegisterDetails /> </>}/>
+              <Route path="/register/personUpdate/:itemId" element={<><Header /> <UpdatePersonRegisterDetails /></>}/>
+              <Route path="/register/officialUpdate/:itemId" element={<><Header /> <UpdateOfficialRegisterDetails /></>}/>
+
             {/* 마이 페이지 */}
             <Route
                 path="/mypage/main"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 import Calendar from "react-calendar";
@@ -6,9 +6,8 @@ import apiClient from "../../path/apiClient";
 import { useLocation, useNavigate } from 'react-router-dom';
 import ConfirmOrCancleModal from '../ConfirmOrCancleModal';
 
-const PersonRegisterDetails = (props) => {
+const UpdatePersonRegisterDetails = (props) => {
     const location = useLocation(); // location 객체를 통해 현재 위치의 정보를 얻음
-    const selectedItem = location.state?.item; // Register1에서 전달된 selectedItem 값을 가져옴
     const [startTime, setStartTime] = useState('0');
     const [startMinutes, setStartMinutes] = useState('0');
     const [endTime, setEndTime] = useState('0');
@@ -20,6 +19,47 @@ const PersonRegisterDetails = (props) => {
     const minuteOptions = [0, 30];
     const [modalOpen, setModalOpen] = useState(false);
     const [modalClose, setModalClose] = useState(false);
+    const itemId = location.pathname.split('/').pop();
+
+    useEffect(() => {
+        // 백엔드로부터 아이템 정보 가져오기
+        const fetchItemData = async () => {
+            try {
+                const response = await apiClient.get(`/items/${itemId}`);
+                const itemData = response.data;
+
+
+                setFormData({
+                    title: itemData.title,
+                    price: itemData.pricePerHour,
+                    borrowPlace: itemData.borrowPlace,
+                    returnPlace: itemData.returnPlace,
+                    description: itemData.introduction,
+                    status: itemData.itemStatus,
+                    category: itemData.category
+                });
+
+                const borrowDateTime = new Date(itemData.canBorrowDateTime);
+                const returnDateTime = new Date(itemData.returnDateTime);
+                setStartTime(borrowDateTime.getHours().toString());
+                setStartMinutes(borrowDateTime.getMinutes().toString());
+                setEndTime(returnDateTime.getHours().toString());
+                setEndMinutes(returnDateTime.getMinutes().toString());
+                setDateRange([borrowDateTime, returnDateTime]);
+
+                setImageFiles(itemData.imageUrls.map(url => ({ url })));
+
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        if (itemId){
+            fetchItemData(); // 아이템 정보 가져오기 함수 호출
+        }
+    }, [itemId]);
+
+
 
 
     const [formData, setFormData] = useState({
@@ -105,16 +145,18 @@ const PersonRegisterDetails = (props) => {
         formDataToSend.append('returnPlace', formData.returnPlace);
         formDataToSend.append('introduction', formData.description);
         formDataToSend.append('itemStatus', formData.status);
-        formDataToSend.append('category', selectedItem);
+        formDataToSend.append('category', formData.category);
 
         for (let i = 0; i < imageFiles.length; i++) {
-            formDataToSend.append('file', imageFiles[i], imageFiles[i].name); // 파일 이름을 지정하여 추가
+            const imageBlob = new Blob([imageFiles[i]], { type: 'image/jpeg' }); // 또는 파일의 MIME 유형에 따라 조정
+            formDataToSend.append('file', imageBlob, `image${i}.jpg`);
         }
 
 
         try {
+            const itemId = location.pathname.split('/').pop();
             // 백엔드로 데이터 전송
-            const response = await apiClient.post('/items', formDataToSend);
+            const response = await apiClient.post(`/items/${itemId}/update`, formDataToSend);
             // 응답 확인
 
             console.log('상품 등록 성공');
@@ -166,7 +208,7 @@ const PersonRegisterDetails = (props) => {
                         {/* 이미지 미리보기 */}
                         {imageFiles.length > 0 && imageFiles.map((image, index) => (
                             <ImageContainer key={index}>
-                                <ImagePreview src={URL.createObjectURL(image)} alt={`상품 이미지 ${index + 1}`} />
+                                <ImagePreview src={image.url} alt={`상품 이미지 ${index + 1}`} />
                                 {/* 삭제 버튼 추가 */}
                                 <DeleteButton onClick={(e) => handleImageDelete(e, index)}>X</DeleteButton>
                             </ImageContainer>
@@ -324,14 +366,14 @@ const PersonRegisterDetails = (props) => {
                             onChange={(e) => handleInputChange(e, 'returnPlace')}
                             placeholder="반납위치를 입력해주세요(ex.상상관 1층)"/>
                     </FormGroup>
-                    <Button onClick={openModal}>등록하기</Button>
+                    <Button onClick={openModal}>수정하기</Button>
                     {modalOpen && (
-                      <ConfirmOrCancleModal
-                          message="물건을 등록하시겠습니까?"
-                          isOpen={modalOpen}
-                          setIsOpen={setModalOpen}
-                          onConfirm={handleModalConfirm}
-                      />
+                        <ConfirmOrCancleModal
+                            message="물건을 수정하시겠습니까?"
+                            isOpen={modalOpen}
+                            setIsOpen={setModalOpen}
+                            onConfirm={handleModalConfirm}
+                        />
                     )}
                 </Form>
             </Container>
@@ -411,12 +453,12 @@ const FormGroup = styled.div`
   font-style:normal;
   font-weight:600;
   line-height:normal;
-  
+
 `;
 const FormGroup2 = styled.div`
   display:flex;
   flex-direction: column;
-  
+
 `
 
 const Line = styled.span`
@@ -468,7 +510,7 @@ const DateTimeDisplay = styled.div`
   font-weight: 800;
   line-height: normal;
   margin-bottom: 0.5rem;
-  
+
 `;
 
 const RequiredIndicator1 = styled.span`
@@ -484,17 +526,17 @@ const ImageInput = styled.input`
   //border: solid #00FFE0;
   background-color: #000;
   border-radius: 0.5rem;
-  background-size: cover; 
-  background-position: center; 
-  background-repeat: no-repeat; 
-  color: transparent; 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: transparent;
   cursor: pointer;
   outline: none;
 `;
 
 const ImageInputButton = styled.label`
   background-color: #00FFE0;
-  color: #000;  
+  color: #000;
   padding: 8px 16px;
   border: none;
   border-radius: 8px;
@@ -509,7 +551,7 @@ const ItemInput = styled.input`
   height:2.25rem;
   border-color: #00FFE0;
   background-color: #000;
- 
+
   color: white;
 `;
 
@@ -518,7 +560,7 @@ const BorrowPlaceInput = styled.input`
   height:2.25rem;
   border-color: #00FFE0;
   background-color: #000;
- 
+
   color: white;
 `;
 
@@ -527,7 +569,7 @@ const ReturnPlaceInput = styled.input`
   height:2.25rem;
   border-color: #00FFE0;
   background-color: #000;
- 
+
   color: white;
 `;
 
@@ -589,7 +631,7 @@ const TimeSelectWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  
+
   margin-top :4rem;
 `;
 
@@ -736,4 +778,4 @@ const ModalButton = styled.button`
 
 
 
-export default PersonRegisterDetails;
+export default UpdatePersonRegisterDetails;

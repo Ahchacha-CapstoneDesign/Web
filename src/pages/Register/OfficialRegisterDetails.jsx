@@ -4,22 +4,22 @@ import { createGlobalStyle } from 'styled-components';
 import Calendar from "react-calendar";
 import apiClient from "../../path/apiClient";
 import { useLocation, useNavigate } from 'react-router-dom';
-
-
+import ConfirmOrCancleModal from '../ConfirmOrCancleModal';
 
 const OfficialRegisterDetails = (props) => {
     const location = useLocation(); // location 객체를 통해 현재 위치의 정보를 얻음
     const selectedItem = location.state?.item; // Register1에서 전달된 selectedItem 값을 가져옴
-    const [startTime, setStartTime] = useState('');
-    const [startMinutes, setStartMinutes] = useState('');
-    const [endTime, setEndTime] = useState('');
-    const [endMinutes, setEndMinutes] = useState('');
+    const [startTime, setStartTime] = useState('0');
+    const [startMinutes, setStartMinutes] = useState('0');
+    const [endTime, setEndTime] = useState('0');
+    const [endMinutes, setEndMinutes] = useState('0');
     const [dateRange, setDateRange] = useState([new Date(), new Date()]);
     const [startDate, endDate] = dateRange;
     const navigate = useNavigate();
     const [imageFiles, setImageFiles] = useState([]);
     const minuteOptions = [0, 30];
     const [modalOpen, setModalOpen] = useState(false);
+    const [modalClose, setModalClose] = useState(false);
 
 
     const [formData, setFormData] = useState({
@@ -39,20 +39,32 @@ const OfficialRegisterDetails = (props) => {
         });
     };
 
+    const tileDisabled = ({ date, view }) => {
+        // 현재 날짜
+        const currentDate = new Date();
+        // 현재 날짜보다 이전인 경우만 비활성화
+        return date < currentDate;
+    };
+
+    const handleImageDelete = (e, index) => {
+        e.preventDefault();
+        // 이미지 파일 배열에서 해당 인덱스의 이미지를 제거
+        const newImageFiles = imageFiles.filter((_, i) => i !== index);
+        // 새로운 배열로 이미지 파일 상태 업데이트
+        setImageFiles(newImageFiles);
+    };
 
 
     const handleImageChange = (e) => {
+        e.preventDefault()
         const files = Array.from(e.target.files);
-        setFormData(prevState => ({
-            ...prevState,
-            images: files
-        }));
         setImageFiles(files);
     };
 
 
 
     const handleInputChange = (e, fieldName) => {
+        e.preventDefault();
         const { value } = e.target;
         setFormData(prevState => ({ ...prevState, [fieldName]: value }));
     };
@@ -61,7 +73,8 @@ const OfficialRegisterDetails = (props) => {
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()} ${hour}시 ${minute}분`;
     };
 
-    const openModal = () => {
+    const openModal = (e) => {
+        e.preventDefault();
         setModalOpen(true);
     };
 
@@ -69,18 +82,17 @@ const OfficialRegisterDetails = (props) => {
     const closeModal = () => {
         setModalOpen(false);
     };
-    const handleModalConfirm = () => {
-        // 여기에 페이지 이동 처리 로직 추가
-        navigate('/rent/mainpage');
+    const handleModalConfirm = async () => {
+        setModalOpen(false);
+        await handleSubmit();
+
     };
 
 
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
 
         const formDataToSend = new FormData();
-        console.log("값", formData);
 
         const borrowDateTime = startDate.toISOString().split('T')[0] + "T" + startTime.padStart(2,'0') + ":" + startMinutes.padStart(2, '0') + ":00";
         const returnDateTime = endDate.toISOString().split('T')[0] + "T" + endTime.padStart(2, '0') + ":" + endMinutes.padStart(2, '0') + ":00";
@@ -104,16 +116,12 @@ const OfficialRegisterDetails = (props) => {
             // 백엔드로 데이터 전송
             const response = await apiClient.post('/items', formDataToSend);
             // 응답 확인
-            if (!response.ok) {
-                throw new Error('등록에 실패했습니다.');
-            }
-            // 성공 시 처리
+
             console.log('상품 등록 성공');
-            setModalOpen(true);
+            navigate('/mypage/registerlist');
         } catch (error) {
             // 에러 처리
             console.error('상품 등록 에러:', error.message);
-            setModalOpen(true);
         }
     };
     // Here you would typically handle the submission, e.g., posting to an API
@@ -155,9 +163,11 @@ const OfficialRegisterDetails = (props) => {
                         </Label>
                         <ImageInput id="image" type="file" accept="image/*" multiple onChange={handleImageChange}  />
                         {/* 이미지 미리보기 */}
-                        {formData.images && formData.images.map((image, index) => (
+                        {imageFiles.length > 0 && imageFiles.map((image, index) => (
                             <ImageContainer key={index}>
                                 <ImagePreview src={URL.createObjectURL(image)} alt={`상품 이미지 ${index + 1}`} />
+                                {/* 삭제 버튼 추가 */}
+                                <DeleteButton onClick={(e) => handleImageDelete(e, index)}>X</DeleteButton>
                             </ImageContainer>
                         ))}
                     </FormGroup>
@@ -221,13 +231,19 @@ const OfficialRegisterDetails = (props) => {
                         <Label htmlFor="description">설명
                             <RequiredIndicator>*</RequiredIndicator>
                         </Label>
-                        <Textarea
-                            id="description"
-                            name="description"
-                            value={formData.description}
-                            onChange={(e) => handleInputChange(e, 'description')}
-                            placeholder="구매시기, 브랜드/모델명, 제품의 상태(사용감,하자 유무)등을 입력해주세요"
-                        />
+                        <FormGroup2>
+                            <DescriptionText>
+                                구매시기, 브랜드/모델명, 제품의 상태(사용감, 하자 유무) 등을 입력해주세요
+                            </DescriptionText>
+                            <Textarea
+                                id="description"
+                                name="description"
+                                value={formData.description}
+                                onChange={(e) => handleInputChange(e, 'description')}
+
+                            />
+                        </FormGroup2>
+
                     </FormGroup>
                     <FormGroup>
                         <Label>대여 가능 일
@@ -237,6 +253,7 @@ const OfficialRegisterDetails = (props) => {
                             onChange={handleDateChange}
                             value={dateRange}
                             selectRange={true}
+                            tileDisabled={tileDisabled}
                         />
                     </FormGroup>
                     <FormGroup>
@@ -297,14 +314,14 @@ const OfficialRegisterDetails = (props) => {
                             onChange={(e) => handleInputChange(e, 'returnPlace')}
                             placeholder="반납위치를 입력해주세요(ex.상상관 1층)"/>
                     </FormGroup>
-                    <Button onClick={handleSubmit}>등록하기</Button>
+                    <Button onClick={openModal}>등록하기</Button>
                     {modalOpen && (
-                        <ModalOverlay>
-                            <Modal>
-                                <ModalTitle>아이템 등록 성공</ModalTitle>
-                                <ModalButton onClick={handleModalConfirm}>확인</ModalButton>
-                            </Modal>
-                        </ModalOverlay>
+                        <ConfirmOrCancleModal
+                            message="물건을 등록하시겠습니까?"
+                            isOpen={modalOpen}
+                            setIsOpen={setModalOpen}
+                            onConfirm={handleModalConfirm}
+                        />
                     )}
                 </Form>
             </Container>
@@ -316,13 +333,13 @@ const GlobalStyle = createGlobalStyle`
   body {
     background-color: #000;
     color: white;
-    font-family: 'Arial', sans-serif;
+    font-family: 'Pretendard';
     margin: 0;
     padding: 0;
   }
 
   input, select, button {
-    font-family: inherit;
+    font-family: 'Pretendard';
   }
 
   /* 스크롤바 전체 스타일 */
@@ -348,6 +365,26 @@ const Container = styled.div`
   align-items: center;
 `;
 
+const DeleteButton = styled.button`
+  position: absolute; /* 추가: 절대적으로 위치 지정 */
+  top: 0; /* 추가: 부모 요소 상단에 배치 */
+  right: 0; /* 추가: 부모 요소 오른쪽에 배치 */
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  cursor: pointer;
+`;
+
+const DescriptionText = styled.p`
+  color:#fff;
+  font-size:1rem;
+  font-weight:600;
+`;
+
 const Form = styled.form`
   width: 80rem;
   background-color: #000;
@@ -366,6 +403,11 @@ const FormGroup = styled.div`
   line-height:normal;
 
 `;
+const FormGroup2 = styled.div`
+  display:flex;
+  flex-direction: column;
+
+`
 
 const Line = styled.span`
   display: block;
@@ -379,6 +421,7 @@ const ImageContainer = styled.div`
   width: 100px;
   height: 100px;
   margin-right: 10px;
+  position: relative; /* 추가: 자식 요소에 대해 상대적 위치 설정 */
 `;
 
 const ImagePreview = styled.img`
