@@ -72,14 +72,14 @@
 
 ## 4. 브랜치 전략
 
-### Front-end
+### Front-end
 
 - Git-flow 전략을 기반으로 main, develop 브랜치와 개인별 보조 브랜치를 운용했습니다.
 - main, develop, 개인별 브랜치로 나누어 개발을 하였습니다.
     - **main** 브랜치는 배포 단계에서만 사용하는 브랜치입니다.
     - **develop** 브랜치는 개발 단계에서 git-flow의 master 역할을 하는 브랜치입니다.
 
-### Back-end
+### Back-end
 
 - Git-flow 전략을 기반으로 main, feature/기능 브랜치 생성 시 develop 브랜치에서 운용했습니다.
 - main, develop브랜치로 나누어 개발을 하였습니다.
@@ -88,8 +88,7 @@
 
 ### Pull Request 규칙
     1. Commit, Push
-    2. **pr** 생성
-        **→ develop 브랜치로! main 브랜치(x)**
+    2. pr 생성 → develop 브랜치로! main 브랜치(x)
         제목: type 내용 (ex. [FEAT] 회원가입 기능 구현)
         내용: 어떤 기능 (어떤 코드 추가, 어떤 오류 수정) 작업했는지 내용 작성하기 (ex. 이메일 중복 확인 코드 추가, 닉네임 중복 확인 코드 추가 등)
     3. Merge
