@@ -60,7 +60,7 @@
     - Figma는 온라인에서 사용할 수 있는 디자인 툴로, UX/UI 디자인 및 프로토타입 제작을 위한 기능들을 제공
     - 웹・앱・인터페이스 디자인 등 다양한 분야에서 사용되며, 디자인과 개발 과정에서 필요한 여러 협업 기능을 지원
 
-협업 툴 : Discord, Notion, Github 
+협업 툴 : Discord, Notion, Github
 
 ## 3. 프레임워크
 - Java Spring Boot
@@ -70,27 +70,32 @@
 
 <br>
 
-## 2. 브랜치 전략
+## 4. 브랜치 전략
 
-### React, styled-component
+### Front-end
 
-- React
-    - 컴포넌트화를 통해 추후 유지보수와 재사용성을 고려했습니다.
-    - 유저 배너, 상단과 하단 배너 등 중복되어 사용되는 부분이 많아 컴포넌트화를 통해 리소스 절약이 가능했습니다.
-- styled-component
-    - props를 이용한 조건부 스타일링을 활용하여 상황에 알맞은 스타일을 적용시킬 수 있었습니다.
-    - 빌드될 때 고유한 클래스 이름이 부여되어 네이밍 컨벤션을 정하는 비용을 절약할 수 있었습니다.
-    - S dot naming을 통해 일반 컴포넌트와 스타일드 컴포넌트를 쉽게 구별하도록 했습니다.
-    
-
-### 브랜치 전략
-
-- Git-flow 전략을 기반으로 main, develop 브랜치와 feature 보조 브랜치를 운용했습니다.
-- main, develop, Feat 브랜치로 나누어 개발을 하였습니다.
+- Git-flow 전략을 기반으로 main, develop 브랜치와 개인별 보조 브랜치를 운용했습니다.
+- main, develop, 개인별 브랜치로 나누어 개발을 하였습니다.
     - **main** 브랜치는 배포 단계에서만 사용하는 브랜치입니다.
     - **develop** 브랜치는 개발 단계에서 git-flow의 master 역할을 하는 브랜치입니다.
 
+### Back-end
 
+- Git-flow 전략을 기반으로 main, feature/기능 브랜치 생성 시 develop 브랜치에서 운용했습니다.
+- main, develop브랜치로 나누어 개발을 하였습니다.
+    - **main** 브랜치는 배포 단계에서만 사용하는 브랜치입니다.
+    - **develop** 브랜치는 개발 단계에서 git-flow의 master 역할을 하는 브랜치입니다.
+
+### Pull Request 규칙
+    1. Commit, Push
+    2. **pr** 생성
+        **→ develop 브랜치로! main 브랜치(x)**
+        제목: type 내용 (ex. [FEAT] 회원가입 기능 구현)
+        내용: 어떤 기능 (어떤 코드 추가, 어떤 오류 수정) 작업했는지 내용 작성하기 (ex. 이메일 중복 확인 코드 추가, 닉네임 중복 확인 코드 추가 등)
+    3. Merge
+    <div align="center">
+        <img width="580" alt="스크린샷 2024-05-14 오후 11 17 10" src="https://github.com/Ahchacha-CapstoneDesign/Web/assets/122718910/fcf37c20-aa06-4325-8e94-3e45104430db">
+    </div>
 <br>
 
 ## 4. 역할 분담
@@ -100,7 +105,7 @@
 - **Frontend**
     - 페이지 : 홈, 검색, 게시글 작성, 게시글 수정, 게시글 상세, 채팅방
     - 공통 컴포넌트 : 게시글 템플릿, 버튼
-- **기능**
+- **Design**
     - 유저 검색, 게시글 등록 및 수정, 게시글 상세 확인, 댓글 등록, 팔로워 게시글 불러오기, 좋아요 기능
 
 <br>
