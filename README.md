@@ -18,8 +18,7 @@
 ## 팀원 구성
 
 <div align="center">
-
-
+    <img width="586" alt="스크린샷 2024-05-14 오후 11 11 31" src="https://github.com/Ahchacha-CapstoneDesign/Web/assets/122718910/530fccf4-a32a-4f19-8dc8-7209fe3c2a29">
 </div>
 
 <br>
