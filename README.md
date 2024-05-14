@@ -190,13 +190,13 @@
 - **Frontend**
     - 
     - 
-- **Design**
+- **Design**
 
 <br>
     
 ### 권승진
 
-- **Backend**
+- **Backend**
     - 
     - 
 - **Frontend**
@@ -206,7 +206,7 @@
 
 ### 김동욱
 
-- **Backend**
+- **Backend**
     - 
     - 
 - **Frontend**
@@ -215,7 +215,7 @@
 
 ### 유호준
 
-- **Backend**
+- **Backend**
     - 
     - 
 
