@@ -85,12 +85,16 @@ const OfficialReservationDetailsPage = () => {
         return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
     };
 
-    const formatDate = (isoString) => {
+    const formatServerDate = (isoString) => {
         const date = new Date(isoString);
-        console.log(reservationDetails.startDate)
         return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`;
-
     };
+
+    const formatDate = (date, hour, minute) => {
+        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${hour}시 ${minute}분`;
+    };
+
+
 
 
     return (
@@ -123,11 +127,11 @@ const OfficialReservationDetailsPage = () => {
             </FormItem>
             <FormItem>
                 <Label>대여 시간</Label>
-                <Value>{formatDate(reservationDetails.startDate)}</Value>
+                <Value>{formatDate(reservationDetails.startDate, reservationDetails.startTime, reservationDetails.startMinutes)}</Value>
             </FormItem>
             <FormItem>
                 <Label>반납 시간</Label>
-                <Value>{formatDate(reservationDetails.endDate)}</Value>
+                <Value>{formatDate(reservationDetails.endDate, reservationDetails.endTime, reservationDetails.endMinutes)}</Value>
             </FormItem>
             <FormItem>
                 <Label>대여 위치</Label>

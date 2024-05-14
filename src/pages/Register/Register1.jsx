@@ -81,13 +81,12 @@ const Register1 = () => {
                             ))}
                         </ItemList>
                     </CategoryWrapper>
+                    {selectedPage === 'register' && (
+                        <RegisterButton onClick={handleRegisterClick}>등록하기</RegisterButton>
+                    )}
                 </>
             )}
 
-            {/* 등록하기 버튼 */}
-            {selectedPage === 'register' && (
-                <RegisterButton onClick={handleRegisterClick}>등록하기</RegisterButton>
-            )}
         </>
     );
 };
@@ -124,21 +123,6 @@ const categories = [
         name: "기타",
         items: ["기타"]
     },
-    {
-        id: 7,
-        name: "기타",
-        items: ["기타"]
-    },
-    {
-        id: 8,
-        name: "기타",
-        items: ["기타"]
-    },
-    {
-        id: 9,
-        name: "기타",
-        items: ["기타"]
-    }
 ];
 
 export default Register1;
@@ -167,7 +151,7 @@ const ButtonWrapper = styled.div`
   margin-left: 25rem;
 `
 const Button = styled.button`
-  color:#fff;
+  color: ${({ selected }) => selected ? '#00FFE0' : '#fff'};
   background-color: #000;
   font-size: 1.25rem;
   font-style: normal;
@@ -200,17 +184,20 @@ const Span = styled.div`
 
 const CategoryWrapper = styled.div`
   display: flex;
-  margin-top: 2rem;
-  width: 53.8%;
-  height: 450px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-top: 3rem;
+  width: 65rem;
+  margin-left: 27rem;
   justify-content: center;
+  font-size: 1.25rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: normal;
+  border: 0.1rem solid #fff;
 `;
 
 const CategoryList = styled.div`
-  width: 50%;
-  background-color: #333;
+  width: 32.15625rem;
+  background-color: #000;
   overflow-y: auto; /* 세로 스크롤을 추가 */
   scrollbar-width: thin; /* Firefox에서 스크롤바 크기 조정 */
   scrollbar-color: #888 #555; /* Firefox에서 스크롤바 색상 조정 */
@@ -229,28 +216,28 @@ const CategoryList = styled.div`
 `;
 
 const CategoryItem = styled.div`
-  color: #FFF;
+  color: ${({ selected }) => selected ? '#00FFE0' : '#fff'};
   padding: 1rem;
   cursor: pointer;
-
-  &:hover {
-    background-color: #555;
-  }
+  margin-left: 1rem;
+  margin-top:1rem;
+  
 `;
 
 const ItemList = styled.div`
-  width: 50%;
-  background-color: #666;
+  width: 32.15625rem;
+  background-color: #000;
   overflow-y: auto; /* 세로 스크롤을 추가 */
   scrollbar-width: thin; /* Firefox에서 스크롤바 크기 조정 */
   scrollbar-color: #888 #555; /* Firefox에서 스크롤바 색상 조정 */
-  /* WebKit 기반 브라우저 (Chrome, Safari) 스크롤바 숨기기 */
+  border-left: 0.1rem solid #fff;
+  
   &::-webkit-scrollbar {
     width: 8px; /* 스크롤바 너비 */
     height: 8px; /* 스크롤바 높이 */
   }
   &::-webkit-scrollbar-thumb {
-    background-color: #555; /* 스크롤바 색상 */
+    background-color: #fff; /* 스크롤바 색상 */
     border-radius: 4px; /* 스크롤바 모양 */
   }
   &::-webkit-scrollbar-track {
@@ -259,15 +246,10 @@ const ItemList = styled.div`
 `;
 
 const Item = styled.div`
-  color: #FFF;
+  color: ${({ selected }) => selected ? '#00FFE0' : '#fff'};
   padding: 1rem;
   cursor: pointer;
-
-  background-color: ${({ selected }) => selected ? '#444' : 'transparent'};
-
-  &:hover {
-    background-color: #444;
-  }
+  margin-left:1rem;
 `;
 
 const RegisterButton = styled.button`
