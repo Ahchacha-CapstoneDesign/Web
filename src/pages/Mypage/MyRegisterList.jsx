@@ -5,6 +5,8 @@ import { createGlobalStyle } from 'styled-components';
 import apiClient from "../../path/apiClient";
 import { useNavigate } from 'react-router-dom';
 import Pagination, {PaginationContainer} from '../Pagination';
+import ConfirmOrCancleModal from '../ConfirmOrCancleModal';
+import ConfirmOrCancleModalDetail from '../ConfirmOrCancleModalDetail';
 
 const LocalPaginationContainer = styled(PaginationContainer)`
   justify-content: flex-end;
@@ -18,6 +20,9 @@ const MyRegisterList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [registerData, setRegisterData] = useState({ canreserveCount: 0, reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
   const [currentStatus, setCurrentStatus] = useState('ALL');
+  const [showModal, setShowModal] = useState(false);
+  const [processingItemId, setProcessingItemId] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [statusData, setStatusData] = useState({
     ALL: { items: [], totalPages: 0 },
@@ -28,26 +33,45 @@ const MyRegisterList = () => {
   });
 
   useEffect(() => {
-    fetchItemsByStatus(currentStatus);
-  }, [currentStatus, currentPage]);
+    fetchItemsByStatus('ALL').then(() => {
+      fetchItemsByStatus('NONE').then(() => {
+        // 모든 데이터 로딩 후, NONE 상태로 UI 설정
+        handleStatusChange('NONE');
+      });
+    });
+    fetchNoneCount();
+  }, []);
+
+  const fetchNoneCount = async () => {
+    try {
+      const { data } = await apiClient.get('/items/reservationYES');
+      setRegisterData(prev => ({
+        ...prev,
+        canreserveCount: data.content.length
+      }));
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  };
 
   const fetchItemsByStatus = async (status) => {
-    let url = '/items/myItems'; // 기본 엔드포인트
-    if (status !== 'ALL') {
-      switch (status) {
-        case 'NONE':
-          url = '/items/reservationYES';
-          break;
-        case 'RESERVED':
-          url = '/items/rentingStatusRESERVED';
-          break;
-        case 'RENTING':
-          url = '/items/rentingStatusRENTING';
-          break;
-        case 'RETURNED':
-          url = '/items/rentingStatusRETURNED';
-          break;
-      }
+    let url = '/reservation/myAllItemsRentedByOther'; // 'ALL' 상태의 기본 엔드포인트
+    switch (status) {
+      case 'NONE':
+        url = '/items/reservationYES'; // 'NONE' 상태의 아이템을 가져오는 엔드포인트
+        break;
+      case 'RESERVED':
+        url = '/reservation/myItemsReservedByOther';
+        break;
+      case 'RENTING':
+        url = '/reservation/myItemsRentingByOther';
+        break;
+      case 'RETURNED':
+        url = '/reservation/myItemsReturnedByOther';
+        break;
+      default:
+        // 'ALL' 상태에서는 모든 아이템을 포함해야 하므로 특별한 경우가 아닌 경우 기본 URL 사용
+        break;
     }
   
     try {
@@ -62,16 +86,17 @@ const MyRegisterList = () => {
           totalPages 
         }
       }));
-
-      // Update register data only if on 'ALL' status
+  
+      // 'ALL' 상태에서는 전체 등록 데이터를 업데이트
       if (status === 'ALL') {
-        setRegisterData({
-          canreserveCount: filteredData.filter(item => item.rentingStatus === 'NONE').length,
+        setRegisterData(prev => ({
+          ...prev,
+          items: filteredData,
+          canreserveCount: prev.canreserveCount,  // 이미 업데이트된 canreserveCount를 유지
           reservedCount: filteredData.filter(item => item.rentingStatus === 'RESERVED').length,
           rentingCount: filteredData.filter(item => item.rentingStatus === 'RENTING').length,
           returnedCount: filteredData.filter(item => item.rentingStatus === 'RETURNED').length,
-          items: filteredData
-        });
+        }));
       }
     } catch (error) {
       console.error('Failed to fetch data:', error);
@@ -90,8 +115,13 @@ const MyRegisterList = () => {
   });
 
   const handleStatusChange = (status) => {
-    setCurrentStatus(status);
-    setCurrentPage(1); // Reset to page 1 on status change
+    if (currentStatus !== status) {
+      setCurrentStatus(status);
+      setCurrentPage(1); // 페이지 1로 리셋
+      fetchItemsByStatus(status).then(() => {
+        // 상태 변경 후 데이터를 성공적으로 불러온 후 UI 업데이트
+      });
+    }
   };
 
   const handlePageChange = newPage => {
@@ -102,6 +132,71 @@ const MyRegisterList = () => {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 월
+    const day = date.getDate().toString().padStart(2, '0'); // 일
+    const hours = date.getHours().toString().padStart(2, '0'); // 시간
+    const minutes = date.getMinutes().toString().padStart(2, '0'); // 분
+  
+    return `${year}/${month}/${day} ${hours}:${minutes}`;
+  };
+
+  const handleRent = (itemId) => {
+    setProcessingItemId(itemId);
+    setModalOpen(true);
+  };
+
+  const confirmRent = async () => {
+    if (!processingItemId) return;
+  
+    try {
+      const response = await apiClient.patch(`/reservation/${processingItemId}/updateReservedToRenting`);
+      if (response.status === 200) {
+        setModalOpen(false); // 모달 닫기
+
+        // 데이터 새로고침
+        await fetchItemsByStatus('RESERVED');
+        await fetchItemsByStatus('RENTING');
+
+        setRegisterData(prev => ({
+          ...prev,
+          reservedCount: prev.items.filter(item => item.rentingStatus === 'RESERVED').length,
+          rentingCount: prev.items.filter(item => item.rentingStatus === 'RENTING').length,
+        }));
+        navigate('/mypage/registerlist');
+      }
+    } catch (error) {
+      console.error('대여 처리 중 오류가 발생했습니다:', error);
+      alert('처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
+  };
+
+  const confirmReturn = async () => {
+    if (!processingItemId) return;
+  
+    try {
+      const response = await apiClient.patch(`/reservation/${processingItemId}/updateRentingToReturned`);
+      if (response.status === 200) {
+        setModalOpen(false); // 모달 닫기
+        
+        await fetchItemsByStatus('RENTING'); // 상태 업데이트 후 예약 완료 목록을 새로고침
+        await fetchItemsByStatus('RETURNED'); // 대여 중 상태도 업데이트
+
+        setRegisterData(prev => ({
+          ...prev,
+          reservedCount: prev.items.filter(item => item.rentingStatus === 'RENTING').length,
+          rentingCount: prev.items.filter(item => item.rentingStatus === 'RETURNED').length,
+        }));
+        navigate('/mypage/registerlist');
+      }
+    } catch (error) {
+      console.error('대여 처리 중 오류가 발생했습니다:', error);
+      alert('처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
+  };
 
     return (
         <>
@@ -123,8 +218,79 @@ const MyRegisterList = () => {
               <ItemContainer key={item.id} isFirst={index === 0}>
                 <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
                 <ItemTitle>{item.title}</ItemTitle>
-                <ItemPrice>{item.pricePerHour}원/시간</ItemPrice>
-                <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
+                {currentStatus === 'NONE' ? (
+                  <Item>
+                    <ItemDetails>
+                      <DetailsContainer>
+                        <DetailsTitle>대여</DetailsTitle>
+                        <DetailsContext>
+                          <Place>{item.borrowPlace}</Place>
+                          <Time>{formatDate(item.canBorrowDateTime)}</Time>
+                        </DetailsContext>
+                      </DetailsContainer>
+                      <DetailsContainer>
+                        <DetailsTitle>반납</DetailsTitle>
+                        <DetailsContext>
+                          <Place>{item.returnPlace}</Place>
+                          <Time>{formatDate(item.returnDateTime)}</Time>
+                        </DetailsContext>
+                      </DetailsContainer>
+                    </ItemDetails>
+                    <ItemPrice2>{item.pricePerHour}원/시간</ItemPrice2>
+                  </Item>
+                ) : (
+                  <Item>
+                    <ItemOwnerImage src = {item.userDefaultProfile || '/assets/img/Profile.png'} alt="Profile" />
+                    <ItemOwnerNickname>{item.userNickname}</ItemOwnerNickname>
+                    <ItemDetails>
+                      <DetailsContainer>
+                        <DetailsTitle>대여</DetailsTitle>
+                        <DetailsContext>
+                          <Place>{item.itemBorrowPlace}</Place>
+                          <Time>{formatDate(item.borrowTime)}</Time>
+                        </DetailsContext>
+                      </DetailsContainer>
+                      <DetailsContainer>
+                        <DetailsTitle>반납</DetailsTitle>
+                        <DetailsContext>
+                          <Place>{item.itemReturnPlace}</Place>
+                          <Time>{formatDate(item.returnTime)}</Time>
+                        </DetailsContext>
+                      </DetailsContainer>
+                    </ItemDetails>
+                    <ItemPrice>{item.totalPrice}원</ItemPrice>
+                  </Item>
+                )}
+                <ItemStatusDetail>
+                  <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
+                  {item.rentingStatus === 'RESERVED' && (
+                    <>
+                      <Handlebutton onClick={() => handleRent(item.id)}>대여 처리</Handlebutton>
+                      {modalOpen && (
+                        <ConfirmOrCancleModalDetail
+                          title="대여 처리를 하시겠습니까?"
+                          message={<span>대여자한테 물건을 전달하였다면<br/>대여 처리를 해주세요</span>}                          isOpen={modalOpen}
+                          setIsOpen={setModalOpen}
+                          onConfirm={confirmRent}
+                        />
+                      )}
+                    </>
+                  )}
+                  {item.rentingStatus === 'RENTING' && (
+                    <>
+                      <Handlebutton onClick={() => handleRent(item.id)}>반납 처리</Handlebutton>
+                      {modalOpen && (
+                        <ConfirmOrCancleModalDetail
+                          title="반납 처리를 하시겠습니까?"
+                          message={<span>대여자한테 물건을 반납 받았다면 <br/>반납 처리를 해주세요</span>}                          
+                          isOpen={modalOpen}
+                          setIsOpen={setModalOpen}
+                          onConfirm={confirmReturn}
+                        />
+                      )}
+                    </>
+                  )}
+                </ItemStatusDetail>
               </ItemContainer>
             ))}
             
@@ -183,28 +349,99 @@ const ItemTitle = styled.div`
   font-family: "Pretendard";
   font-size: 1.2rem;
   font-weight: 500;
-  width: 15.875rem;
+  width: 13rem;
   margin-left: 2rem;
 `;
 
+const ItemOwnerImage = styled.img`
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  margin-left: -2rem;
+`;
+
+const ItemOwnerNickname = styled.div `
+  width: 8rem;
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  font-weight: 500;
+`;
+
+const Item = styled.div `
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+`;
+
+const ItemDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const DetailsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const DetailsTitle = styled.div` 
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  font-weight: 300;
+  width:2rem;
+  align-items: center;
+
+`;
+
+const DetailsContext = styled.div`
+  display: flex;
+  color: white;
+  font-family: "Pretendard";
+  align-items: center;
+`;
+
+const Place = styled.div`
+  width: 5rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  align-items: center;
+`;
+
+const Time = styled.div`
+  font-size: 0.8rem;
+  font-weight: 300;
+  align-items: center;
+  margin-left: 1rem;
+`;
+
 const ItemPrice = styled.div`
+  margin-left: 2rem;
   width: 6rem;
   color: white;
   font-family: "Pretendard";
   font-size: 1rem;
   font-weight: 500;
-  margin-left: 13rem;
 `;
 
+const ItemPrice2 = styled.div`
+  margin-left: 8rem;
+  margin-right: 2rem;
+  width: 6rem;
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  font-weight: 500;
+`;
 const ItemStatus = styled.div`
   font-family: 'Pretendard';
   font-size: 1rem;
   font-weight: 600;
   padding: 0.5rem;
-  margin-left: 8rem;
   ${(props) => `color: ${props.color}; background-color: ${props.backgroundColor};`}
 `;
-
 
 const RentingTitleContainer = styled.div`
   display: flex;
@@ -247,6 +484,23 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   font-family: "Pretendard";
+`;
+
+const ItemStatusDetail = styled.div`
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+`;
+const Handlebutton = styled.button`
+  width: 5rem;
+  border-radius: 0.625rem;
+  border: 1px solid #D9D9D9;
+  font-family 'Pretendard';
+  background-color: transparent;
+  color: #D0CDCD;
+  font-size: 0.8rem;
+  font-weight: 400;
+  cursor: pointer;
 `;
 
 const Break = styled.div`
