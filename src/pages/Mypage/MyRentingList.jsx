@@ -4,19 +4,34 @@ import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 import apiClient from "../../path/apiClient";
 import { useNavigate } from 'react-router-dom';
-import Pagination from '../Pagination';
+import Pagination, {PaginationContainer} from '../Pagination';
+
+const LocalPaginationContainer = styled(PaginationContainer)`
+  justify-content: flex-end;
+  padding-left: 13rem;
+  margin-top: -1rem;
+`;
 
 const MyRentingList = () => {
   const [rentData, setRentData] = useState({ reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
   const navigate = useNavigate();
+  const [posts, setPosts] = useState([]);
   const ITEMS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [displayedPosts, setDisplayedPosts] = useState([]); // 현재 페이지에 표시될 포스트
 
 
   useEffect(() => {
     fetchRentData();
   }, [currentPage]);
+
+  useEffect(() => {
+    // 현재 페이지에 맞는 포스트를 계산하여 displayedPosts를 업데이트
+    const end = currentPage * ITEMS_PER_PAGE;
+    const start = end - ITEMS_PER_PAGE;
+    setDisplayedPosts(rentData.items.slice(start, end));
+  }, [rentData, currentPage]);
 
 
   const fetchRentData = async () => {
@@ -29,7 +44,7 @@ const MyRentingList = () => {
         returnedCount: data.filter(item => item.rentingStatus === 'RETURNED').length,
         items: data
       });
-      setTotalPages(Math.ceil(data.totalElements / ITEMS_PER_PAGE));  // 전체 페이지 수 계산
+      setTotalPages(Math.ceil(data.length / ITEMS_PER_PAGE));    
     } catch (error) {
       console.error('Failed to fetch rent data:', error);
     }
@@ -46,8 +61,8 @@ const MyRentingList = () => {
     color: statusColors[status]?.color || "white",
   });
 
-  const handlePageChange = (path) => {
-    navigate(path);
+  const handlePageChange = newPage => {
+    setCurrentPage(newPage); // 페이지 변경 처리
   };
 
     return (
@@ -63,20 +78,23 @@ const MyRentingList = () => {
                 <Renting>대여중<Break/>{rentData.rentingCount}</Renting>
                 <Returned>반납 완료<Break/>{rentData.returnedCount}</Returned>
               </RentingInfoBox>
+              <Divider />
 
-              {rentData.items.map(item => (
-                <ItemContainer key={item.id}>
+              {rentData.items.map((item, index) => (
+                <ItemContainer key={item.id} isFirst={index === 0}>
                   <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
                   <ItemTitle>{item.title}</ItemTitle>
                   <ItemPrice>{item.totalPrice}원</ItemPrice>
                   <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
                 </ItemContainer>
               ))}
+              <LocalPaginationContainer>
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
-                onPageChange={newPage => setCurrentPage(newPage)}
+                onPageChange={handlePageChange}
               />
+            </LocalPaginationContainer>
             </Container>
       </ >
     );
@@ -95,11 +113,18 @@ export const GlobalStyle = createGlobalStyle`
   }
 `;
 
+const Divider = styled.div`
+  height: 0.5px;
+  background-color: #FFF; // 배경색 설정
+  width: 59.5rem; // 너비 설정
+  margin-left: 15rem; // 좌측 여백 조정
+`;
+
+
 const ItemContainer = styled.div`
   display: flex;
   width: 59.5rem;
   height: 7rem;
-  margin-top: 1rem;
   margin-left: 15rem;
   border-bottom: 0.5px solid #FFF;
   align-items: center;
@@ -143,9 +168,7 @@ const ItemStatus = styled.div`
 
 const RentingTitleContainer = styled.div`
   display: flex;
-  align-items: center;
-  margin-top: 2rem;
-  margin-left: 14rem;
+  margin-left: -35rem;
 `;
 
 const RentingTitle = styled.div`
@@ -157,7 +180,7 @@ const RentingTitle = styled.div`
 `;
 
 const RentingInfoBox = styled.div`
-  background: #343434;
+  background: transparent;
   display: flex;
   justify-content: space-between;
   width: 59.5rem;
@@ -165,7 +188,6 @@ const RentingInfoBox = styled.div`
   margin-top: 1rem;
   margin-left: 15rem;
   align-items: center;
-  border-radius: 12px;
 `;
 
 const Reserved = styled.div`
@@ -174,7 +196,6 @@ const Reserved = styled.div`
   text-align: center;
   font-size: 1.2rem;
   font-weight: 800;
-  border-right: 1px solid #FFF;
 `;
 
 const Renting = styled.div`
@@ -183,7 +204,6 @@ const Renting = styled.div`
   text-align: center;
   font-size: 1.2rem;
   font-weight: 800;
-  border-right: 1px solid #FFF;
 `;
 
 const Returned = styled.div`
