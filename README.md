@@ -143,7 +143,7 @@
            - 프로토타입은 와이어프레임을 기반으로 더 상세하게 사용자와의 상호작용을 표현하고, 개발할 웹사이트를 시뮬레이션, 디자인의 실용성을 검증
            - Figma 디자인 툴을 활용하여 와이어프레임을 기반으로 제작, 보다 정확한 프로토타입을 제작하여 개발 전에 사용성 문제를 발견하여 수정
 
-협업 툴 : Discord, Notion, Github
+**협업 툴** : Discord, Notion, Github
 
 ## 3. 프레임워크
 - **Java Spring Boot**
@@ -174,11 +174,10 @@
         제목: type 내용 (ex. [FEAT] 회원가입 기능 구현)
         내용: 어떤 기능 (어떤 코드 추가, 어떤 오류 수정) 작업했는지 내용 작성하기 (ex. 이메일 중복 확인 코드 추가, 닉네임 중복 확인 코드 추가 등)
     3. Merge
-    <br>
-    <div align="center">
-        <img width="580" alt="스크린샷 2024-05-14 오후 11 17 10" src="https://github.com/Ahchacha-CapstoneDesign/Web/assets/122718910/fcf37c20-aa06-4325-8e94-3e45104430db">
-    </div>
 <br>
+<div align="center">
+        <img width="580" alt="스크린샷 2024-05-14 오후 11 17 10" src="https://github.com/Ahchacha-CapstoneDesign/Web/assets/122718910/fcf37c20-aa06-4325-8e94-3e45104430db">
+</div>
 
 ## 5. 역할 분담
 
