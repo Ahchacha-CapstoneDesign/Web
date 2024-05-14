@@ -2,13 +2,18 @@ import React, { useState, useEffect, useRef } from "react";
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import Pagination from "../Pagination";
+import Pagination, {PaginationContainer} from "../Pagination";
 import apiClient from "../../path/apiClient";
+import ConfirmOrCancleModal from "../ConfirmOrCancleModal";
 
+const LocalPaginationContainer = styled(PaginationContainer)`
+  justify-content: flex-end;
+  padding-left: 13rem;
+  margin-top: -1rem;
+`;
 
 const Register1 = () => {
     const navigate = useNavigate();
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedPage, setSelectedPage] = useState('register'); // 새로운 state 추가
@@ -16,11 +21,87 @@ const Register1 = () => {
     const ITEMS_PER_PAGE = 5;
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
-    const [registerData, setRegisterData] = useState({ reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
+    const [registerData, setRegisterData] = useState({ canreserveCount: 0, reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
+    const [currentStatus, setCurrentStatus] = useState('ALL');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalClose, setModalClose] = useState(false);
+    const [deleteItemId, setDeleteItemId] = useState(null);
+
+    const [statusData, setStatusData] = useState({
+        ALL: { items: [], totalPages: 0 },
+        NONE: { items: [], totalPages: 0 },
+        RESERVED: { items: [], totalPages: 0 },
+        RENTING: { items: [], totalPages: 0 },
+        RETURNED: { items: [], totalPages: 0 }
+    });
+
+    useEffect(() => {
+        fetchItemsByStatus(currentStatus);
+    }, [currentStatus, currentPage]);
 
     const handleCategoryClick = (category) => {
         setSelectedCategory(category);
         setSelectedItem(null); // 카테고리 변경 시 선택된 아이템 초기화
+    };
+
+    const handleUpdateClick = (itemId) => {
+        if (userstatus === "PERSON") {
+            navigate(`/register/personUpdate/${itemId}`);
+        } else if (userstatus === "OFFICIAL") {
+            navigate(`/register/officialUpdate/${itemId}`);
+        }
+    }
+
+    const fetchItemsByStatus = async (status) => {
+        let url = '/items/myItems'; // 기본 엔드포인트
+        if (status !== 'ALL') {
+            switch (status) {
+                case 'NONE':
+                    url = '/items/reservationYES';
+                    break;
+                case 'RESERVED':
+                    url = '/items/rentingStatusRESERVED';
+                    break;
+                case 'RENTING':
+                    url = '/items/rentingStatusRENTING';
+                    break;
+                case 'RETURNED':
+                    url = '/items/rentingStatusRETURNED';
+                    break;
+            }
+        }
+        try {
+            const { data } = await apiClient.get(url);
+            const filteredData = data.content;
+            const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+
+            setStatusData(prev => ({
+                ...prev,
+                [status]: {
+                    items: filteredData,
+                    totalPages
+                }
+            }));
+
+            if (status === 'ALL') {
+                setRegisterData({
+                    canreserveCount: filteredData.filter(item => item.rentingStatus === 'NONE').length,
+                    reservedCount: filteredData.filter(item => item.rentingStatus === 'RESERVED').length,
+                    rentingCount: filteredData.filter(item => item.rentingStatus === 'RENTING').length,
+                    returnedCount: filteredData.filter(item => item.rentingStatus === 'RETURNED').length,
+                    items: filteredData
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+        }
+    };
+
+    const statusColors = {
+        NONE: { text: "대여 가능", color: "white" },
+        RESERVED: { text: "예약 완료", color: "#00FFF0" },
+        RENTING: { text: "대여중", color: "#52FF00" },
+        RETURNED: { text: "반납완료", color: "#F00" }
     };
 
     const handleRegisterClick = () => {
@@ -74,20 +155,44 @@ const Register1 = () => {
         }
     };
 
-    const statusColors = {
-        NONE: { text: "대여 가능", color: "white" },
-        RESERVED: { text: "예약 완료", color: "#00FFF0" },
-        RENTING: { text: "대여중", color: "#52FF00" },
-        RETURNED: { text: "반납완료", color: "#F00" }
+
+    const handleDelete = (itemId) => {
+        setDeleteItemId(itemId);
+        setModalOpen(true);
     };
+
+    const handleModalConfirm = async () => {
+        if (deleteItemId) {
+            try {
+                await apiClient.delete(`/items/${deleteItemId}`);
+                await fetchItemsByStatus(currentStatus);
+            } catch (error) {
+                console.error('Failed to delete item:', error);
+            }
+        }
+        setModalOpen(false);
+        setDeleteItemId(null);
+    };
+
+
 
     const getStatusStyle = (status) => ({
         color: statusColors[status]?.color || "white",
     });
 
-    const handlePageChange = (path) => {
-        navigate(path);
+    const handlePageChange = newPage => {
+        setCurrentPage(newPage); // 페이지 변경 처리
     };
+
+    const handleStatusChange = (status) => {
+        setCurrentStatus(status);
+        setCurrentPage(1); // Reset to page 1 on status change
+    };
+
+    const displayedItems = statusData[currentStatus].items.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
 
     return (
         <>
@@ -136,27 +241,40 @@ const Register1 = () => {
 
 
 
-
-                    {registerData.items.map(item => (
-                        <ItemContainer key={item.id}>
+                    {displayedItems.map((item, index) => (
+                        <ItemContainer key={item.id} isFirst={index === 0}>
                             <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
                             <ItemName>{item.title}</ItemName>
                             <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
                             <ItemPrice>{item.pricePerHour}원/시간</ItemPrice>
-                            <ChangeButton>수정</ChangeButton>
+
+                            <UpdateButton onClick={() => handleUpdateClick(item.id)}>수정</UpdateButton>
+                            <DeleteButton onClick={() => handleDelete(item.id)}>삭제</DeleteButton>
+                            {modalOpen && (
+                                <ConfirmOrCancleModal
+                                    message="물건을 삭제하시겠습니까?"
+                                    isOpen={modalOpen}
+                                    setIsOpen={setModalOpen}
+                                    onConfirm={handleModalConfirm}
+                                />
+                            )}
                         </ItemContainer>
                     ))}
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={newPage => setCurrentPage(newPage)}
-                    />
+
+                    <LocalPaginationContainer>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={statusData[currentStatus].totalPages}
+                            onPageChange={handlePageChange}
+                        />
+                    </LocalPaginationContainer>
                 </Container>
             )}
 
         </>
     );
 };
+    export default Register1;
 
 
 const categories = [
@@ -192,7 +310,7 @@ const categories = [
     },
 ];
 
-export default Register1;
+
 
 // 스타일 컴포넌트들
 export const GlobalStyle = createGlobalStyle`
@@ -253,6 +371,17 @@ const SearchSection = styled.section`
   border: 1px solid #00FFE0; // 테두리 색상 설정
   background: transparent;
   
+`;
+
+const StatusButton = styled.div`
+  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
+  height: 4.5rem;
+  color: ${(props) => (props.isActive ? '#00FFE0' : 'white')};
+  border-bottom: ${(props) => (props.isActive ? '2px solid #00FFE0' : 'none')};
+  cursor: pointer;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
 `;
 
 const SearchText = styled.div`
@@ -402,7 +531,6 @@ const ItemContainer = styled.div`
   display: flex;
   width: 59.5rem;
   height: 7rem;
-  margin-top: 1rem;
   margin-left: 15rem;
   border-bottom: 0.5px solid #FFF;
   align-items: center;
@@ -413,7 +541,7 @@ const ItemImage = styled.img`
   height: 5rem;
   border-radius: 20px;
   border: 1px solid white;
-  margin-left: 1rem;
+  margin-left: 2rem;
 `;
 
 const ItemName = styled.div`
@@ -421,7 +549,7 @@ const ItemName = styled.div`
   font-family: "Pretendard";
   font-size: 1.2rem;
   font-weight: 500;
-  width: 10rem;
+  width: 15.875rem;
   margin-left: 2rem;
 `;
 
@@ -435,12 +563,11 @@ const ItemPrice = styled.div`
 `;
 
 const ItemStatus = styled.div`
-  width:5rem;
   font-family: 'Pretendard';
   font-size: 1rem;
   font-weight: 600;
   padding: 0.5rem;
-  margin-left: 3rem;
+  margin-left: 8rem;
   ${(props) => `color: ${props.color}; background-color: ${props.backgroundColor};`}
 `;
 
@@ -517,7 +644,7 @@ const Container = styled.div`
   font-family: "Pretendard";
 `;
 
-const ChangeButton=styled.button`
+const UpdateButton=styled.button`
   background-color: #000;
   width:5.3rem;
   height:2.6rem;
@@ -530,6 +657,28 @@ const ChangeButton=styled.button`
   border: 0.1rem solid #fff;
   margin-left:15rem;
 
+`;
+
+const DeleteButton=styled.button`
+  background-color: #000;
+  width:5.3rem;
+  height:2.6rem;
+  color:#fff;
+  font-size: 1.25rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.875rem; 
+  border-radius: 1rem;
+  border: 0.1rem solid #fff;
+  margin-left:1.5rem;
+
+`;
+
+const Divider = styled.div`
+  height: 0.5px;
+  background-color: #FFF; // 배경색 설정
+  width: 59.5rem; // 너비 설정
+  margin-left: 15rem; // 좌측 여백 조정
 `;
 
 const Break = styled.div`
