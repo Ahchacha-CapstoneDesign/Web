@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import Pagination from "../Pagination";
+import apiClient from "../../path/apiClient";
 
 
 const Register1 = () => {
@@ -11,6 +13,10 @@ const Register1 = () => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedPage, setSelectedPage] = useState('register'); // 새로운 state 추가
     const userstatus = localStorage.getItem('personOrOfficial');
+    const ITEMS_PER_PAGE = 5;
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [registerData, setRegisterData] = useState({ reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
 
     const handleCategoryClick = (category) => {
         setSelectedCategory(category);
@@ -29,7 +35,6 @@ const Register1 = () => {
                 navigate('/register/officialregisterdetails', {
                     state: {item: selectedItem}
                 });
-
             }
             else alert("잘못된 사용자 입니다");
 
@@ -47,6 +52,43 @@ const Register1 = () => {
         setSelectedPage(page);
     };
 
+    useEffect(() => {
+        fetchRegisterData();
+    }, [currentPage]);
+
+
+    const fetchRegisterData = async () => {
+        try {
+            const response = await apiClient.get('/items/myItems');
+            const data = response.data.content;
+            setRegisterData({
+                canreserveCount: data.filter(item => item.rentingStatus === 'NONE').length,
+                reservedCount: data.filter(item => item.rentingStatus === 'RESERVED').length,
+                rentingCount: data.filter(item => item.rentingStatus === 'RENTING').length,
+                returnedCount: data.filter(item => item.rentingStatus === 'RETURNED').length,
+                items: data
+            });
+            setTotalPages(Math.ceil(data.totalElements / ITEMS_PER_PAGE));  // 전체 페이지 수 계산
+        } catch (error) {
+            console.error('Failed to fetch register data:', error);
+        }
+    };
+
+    const statusColors = {
+        NONE: { text: "대여 가능", color: "white" },
+        RESERVED: { text: "예약 완료", color: "#00FFF0" },
+        RENTING: { text: "대여중", color: "#52FF00" },
+        RETURNED: { text: "반납완료", color: "#F00" }
+    };
+
+    const getStatusStyle = (status) => ({
+        color: statusColors[status]?.color || "white",
+    });
+
+    const handlePageChange = (path) => {
+        navigate(path);
+    };
+
     return (
         <>
             <GlobalStyle />
@@ -56,7 +98,6 @@ const Register1 = () => {
                 |
                 <Button onClick={() => handlePageSelect('manage')} selected={selectedPage === 'manage'}>물품 관리</Button>
             </ButtonWrapper>
-
             {/* 카테고리 및 아이템 목록 */}
             {selectedPage === 'register' && (
                 <>
@@ -85,6 +126,32 @@ const Register1 = () => {
                         <RegisterButton onClick={handleRegisterClick}>등록하기</RegisterButton>
                     )}
                 </>
+            )}
+
+            {selectedPage === 'manage' && (
+                <Container>
+                    <RentingTitleContainer>
+                        <RentingTitle>등록 내역</RentingTitle>
+                    </RentingTitleContainer>
+
+
+
+
+                    {registerData.items.map(item => (
+                        <ItemContainer key={item.id}>
+                            <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
+                            <ItemName>{item.title}</ItemName>
+                            <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
+                            <ItemPrice>{item.pricePerHour}원/시간</ItemPrice>
+                            <ChangeButton>수정</ChangeButton>
+                        </ItemContainer>
+                    ))}
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={newPage => setCurrentPage(newPage)}
+                    />
+                </Container>
             )}
 
         </>
@@ -135,8 +202,7 @@ html, body, #root {
   padding: 0;
   display: flex;
   flex-direction: column;
-  background-color: #000; 
-  overflow: hidden;
+  background-color: #000;
   background-position: center;
 }
 `;
@@ -172,6 +238,68 @@ const ItemTitle = styled.div`
   font-style: normal;
   font-weight: 700;
 `;
+
+const SearchSection = styled.section`
+  width: 26.1875rem;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items:center;
+  margin-top: 3rem;
+  margin-right: 17rem;
+  padding: 10px;
+  border-radius: 0.625rem;
+  border: 1px solid #00FFE0; // 테두리 색상 설정
+  background: transparent;
+  
+`;
+
+const SearchText = styled.div`
+  color: #fff; // 텍스트 색상
+  width: 11rem;
+  text-align: center;
+  font-family: "Pretendard";
+  font-size: 1.3rem;
+  font-weight: 700;
+`;
+
+const SearchInput = styled.input`
+  flex: 1; // 검색 입력 창이 섹션을 가득 채우도록 함
+  padding: 10px;
+  border: none; // 테두리 없음
+  background: transparent;
+  margin-right: 10px; // 버튼과의 간격
+  font-family: "Pretendard";
+  font-size: 1.3rem;
+  font-weight: 300;
+  color: #fff;
+  &:focus {
+    outline: none; // 입력 시 테두리 없앰
+  }
+`;
+
+const SearchButton = styled.button`
+  width: 1.8rem;
+  height: 1.8rem;
+  margin-right: 1.5rem;
+  border: none; // 테두리 없음
+  cursor: pointer; // 마우스 오버 시 포인터
+  background-image: url('/assets/img/Search.png'); // 돋보기 아이콘 이미지 경로
+  background-color: transparent; // 배경색 투명
+  background-repeat: no-repeat; // 이미지 반복 없음
+  background-position: center; // 이미지를 버튼 중앙에 위치
+  background-size: contain; // 이미지 사이즈를 버튼에 맞게 조정
+`;
+
+const VerticalLine = styled.div`
+  height: 30px; // 세로 선의 높이
+  width: 1px; // 세로 선의 두께
+  background-color: #00FFE0; // 세로 선 색상
+  margin-right: 2rem; // 입력 필드와의 간격
+`;
+
+
 
 const Span = styled.div` 
     display: inline-block; 
@@ -267,4 +395,143 @@ const RegisterButton = styled.button`
   line-height: normal;
   margin-left: 73.5rem;
   margin-top: 6rem;
+`;
+
+/////
+const ItemContainer = styled.div`
+  display: flex;
+  width: 59.5rem;
+  height: 7rem;
+  margin-top: 1rem;
+  margin-left: 15rem;
+  border-bottom: 0.5px solid #FFF;
+  align-items: center;
+`;
+
+const ItemImage = styled.img`
+  width: 5rem;
+  height: 5rem;
+  border-radius: 20px;
+  border: 1px solid white;
+  margin-left: 1rem;
+`;
+
+const ItemName = styled.div`
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1.2rem;
+  font-weight: 500;
+  width: 10rem;
+  margin-left: 2rem;
+`;
+
+const ItemPrice = styled.div`
+  width: 6rem;
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  font-weight: 500;
+  margin-left:3rem;
+`;
+
+const ItemStatus = styled.div`
+  width:5rem;
+  font-family: 'Pretendard';
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.5rem;
+  margin-left: 3rem;
+  ${(props) => `color: ${props.color}; background-color: ${props.backgroundColor};`}
+`;
+
+
+const RentingTitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 2rem;
+  margin-left: 14rem;
+`;
+
+const RentingTitle = styled.div`
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1.5rem;
+  font-style: normal;
+  font-weight: 700;
+  margin-right: 51rem;
+`;
+
+const RentingInfoBox = styled.div`
+  background: #343434;
+  display: flex;
+  justify-content: space-between;
+  width: 59.5rem;
+  height: 7rem;
+  margin-top: 1rem;
+  margin-left: 15rem;
+  align-items: center;
+  border-radius: 12px;
+`;
+
+
+const ReservationYes = styled.div`
+  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border-right: 1px solid #FFF;
+`;
+
+const Reserved = styled.div`
+  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border-right: 1px solid #FFF;
+`;
+
+const Renting = styled.div`
+  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border-right: 1px solid #FFF;
+`;
+
+const Returned = styled.div`
+  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+`;
+
+const Container = styled.div`
+  display: flex;
+  margin-right:20rem;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Pretendard";
+`;
+
+const ChangeButton=styled.button`
+  background-color: #000;
+  width:5.3rem;
+  height:2.6rem;
+  color:#fff;
+  font-size: 1.25rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.875rem; 
+  border-radius: 1rem;
+  border: 0.1rem solid #fff;
+  margin-left:15rem;
+
+`;
+
+const Break = styled.div`
+  margin-bottom: 0.75rem; /* 원하는 간격 조정 */
 `;
