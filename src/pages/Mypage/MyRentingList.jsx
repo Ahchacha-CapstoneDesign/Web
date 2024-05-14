@@ -98,6 +98,16 @@ const MyRentingList = () => {
     currentPage * ITEMS_PER_PAGE
   );
 
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 월
+    const day = date.getDate().toString().padStart(2, '0'); // 일
+    const hours = date.getHours().toString().padStart(2, '0'); // 시간
+    const minutes = date.getMinutes().toString().padStart(2, '0'); // 분
+  
+    return `${year}/${month}/${day} ${hours}:${minutes}`;
+  };
 
     return (
         <>
@@ -118,6 +128,24 @@ const MyRentingList = () => {
                 <ItemContainer key={item.id} isFirst={index === 0}>
                   <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
                   <ItemTitle>{item.title}</ItemTitle>
+                  <ItemOwnerImage src = {item.itemRegisterDefaultProfile || '/assets/img/Profile.png'} alt="Profile" />
+                  <ItemOwnerNickname>{item.itemUserNickName}</ItemOwnerNickname>
+                  <ItemDetails>
+                    <DetailsContainer>
+                      <DetailsTitle>대여</DetailsTitle>
+                      <DetailsContext>
+                        <Place>{item.itemBorrowPlace}</Place>
+                        <Time>{formatDate(item.borrowTime)}</Time>
+                      </DetailsContext>
+                    </DetailsContainer>
+                    <DetailsContainer>
+                      <DetailsTitle>반납</DetailsTitle>
+                      <DetailsContext>
+                        <Place>{item.itemReturnPlace}</Place>
+                        <Time>{formatDate(item.returnTime)}</Time>
+                      </DetailsContext>
+                    </DetailsContainer>
+                  </ItemDetails>
                   <ItemPrice>{item.totalPrice}원</ItemPrice>
                   <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
                 </ItemContainer>
@@ -177,28 +205,90 @@ const ItemTitle = styled.div`
   font-family: "Pretendard";
   font-size: 1.2rem;
   font-weight: 500;
-  width: 15.875rem;
+  width: 15rem;
   margin-left: 2rem;
 `;
 
+const ItemOwnerImage = styled.img`
+  position: fixed;
+  margin-left: 18.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+`;
+
+const ItemOwnerNickname = styled.div `
+  position: fixed;
+  margin-left: 20rem;
+  width: 8rem;
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  font-weight: 500;
+`;
+
+const ItemDetails = styled.div`
+  position: fixed;
+  margin-left: 27rem;
+  display: flex;
+  flex-direction: column;
+  
+`;
+
+const DetailsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const DetailsTitle = styled.div` 
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  font-weight: 300;
+  width:2rem;
+`;
+
+const DetailsContext = styled.div`
+  display: flex;
+  color: white;
+  font-family: "Pretendard";
+  align-items: center;
+`;
+
+const Place = styled.div`
+  width: 5rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  align-items: center;
+`;
+
+const Time = styled.div`
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 300;
+  align-items: center;
+`;
+
 const ItemPrice = styled.div`
+  position: fixed;
+  margin-left: 45rem;
   width: 6rem;
   color: white;
   font-family: "Pretendard";
   font-size: 1rem;
   font-weight: 500;
-  margin-left: 13rem;
 `;
 
 const ItemStatus = styled.div`
+  position: fixed;
+  margin-left: 53rem;
   font-family: 'Pretendard';
   font-size: 1rem;
   font-weight: 600;
   padding: 0.5rem;
-  margin-left: 8rem;
   ${(props) => `color: ${props.color}; background-color: ${props.backgroundColor};`}
 `;
-
 
 const RentingTitleContainer = styled.div`
   display: flex;
