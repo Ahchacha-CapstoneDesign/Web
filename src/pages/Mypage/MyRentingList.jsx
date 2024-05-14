@@ -4,7 +4,13 @@ import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 import apiClient from "../../path/apiClient";
 import { useNavigate } from 'react-router-dom';
-import Pagination from '../Pagination';
+import Pagination, {PaginationContainer} from '../Pagination';
+
+const LocalPaginationContainer = styled(PaginationContainer)`
+  justify-content: flex-end;
+  padding-left: 13rem;
+  margin-top: -1rem;
+`;
 
 const MyRentingList = () => {
   const [rentData, setRentData] = useState({ reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
@@ -12,42 +18,95 @@ const MyRentingList = () => {
   const ITEMS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [currentStatus, setCurrentStatus] = useState('ALL');
 
+  const [statusData, setStatusData] = useState({
+    ALL: { items: [], totalPages: 0 },
+    RESERVED: { items: [], totalPages: 0 },
+    RENTING: { items: [], totalPages: 0 },
+    RETURNED: { items: [], totalPages: 0 }
+  });
 
   useEffect(() => {
-    fetchRentData();
-  }, [currentPage]);
+    fetchItemsByStatus(currentStatus);
+  }, [currentStatus, currentPage]);
 
-
-  const fetchRentData = async () => {
+  const fetchItemsByStatus = async (status) => {
+    let url = '/reservation/myItems'; // 기본 엔드포인트
+    if (status !== 'ALL') {
+      switch (status) {
+        case 'RESERVED':
+          url = 'reservation/itemsRESERVED';
+          break;
+        case 'RENTING':
+          url = 'reservation/itemsRENTING';
+          break;
+        case 'RETURNED':
+          url = 'reservation/itemsRENTED';
+          break;
+      }
+    }
+  
     try {
-      const response = await apiClient.get('/reservation/myItems');
-      const data = response.data.content;
-      setRentData({
-        reservedCount: data.filter(item => item.rentingStatus === 'RESERVED').length,
-        rentingCount: data.filter(item => item.rentingStatus === 'RENTING').length,
-        returnedCount: data.filter(item => item.rentingStatus === 'RETURNED').length,
-        items: data
-      });
-      setTotalPages(Math.ceil(data.totalElements / ITEMS_PER_PAGE));  // 전체 페이지 수 계산
+      const { data } = await apiClient.get(url);
+      const filteredData = data.content;
+      const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+      
+      setStatusData(prev => ({
+        ...prev,
+        [status]: { 
+          items: filteredData, 
+          totalPages 
+        }
+      }));
+
+      // Update register data only if on 'ALL' status
+      if (status === 'ALL') {
+        setRentData({
+          reservedCount: filteredData.filter(item => item.rentingStatus === 'RESERVED').length,
+          rentingCount: filteredData.filter(item => item.rentingStatus === 'RENTING').length,
+          returnedCount: filteredData.filter(item => item.rentingStatus === 'RETURNED').length,
+          items: filteredData
+        });
+      }
     } catch (error) {
-      console.error('Failed to fetch rent data:', error);
+      console.error('Failed to fetch data:', error);
     }
   };
 
   const statusColors = {
-    NONE: { text: "대여 가능", color: "white" },
     RESERVED: { text: "예약 완료", color: "#00FFF0" },
     RENTING: { text: "대여중", color: "#52FF00" },
     RETURNED: { text: "반납완료", color: "#F00" }
+  };
+
+  const handleStatusChange = (status) => {
+    setCurrentStatus(status);
+    setCurrentPage(1); // Reset to page 1 on status change
   };
 
   const getStatusStyle = (status) => ({
     color: statusColors[status]?.color || "white",
   });
 
-  const handlePageChange = (path) => {
-    navigate(path);
+  const handlePageChange = newPage => {
+    setCurrentPage(newPage); // 페이지 변경 처리
+  };
+
+  const displayedItems = statusData[currentStatus].items.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 월
+    const day = date.getDate().toString().padStart(2, '0'); // 일
+    const hours = date.getHours().toString().padStart(2, '0'); // 시간
+    const minutes = date.getMinutes().toString().padStart(2, '0'); // 분
+  
+    return `${year}/${month}/${day} ${hours}:${minutes}`;
   };
 
     return (
@@ -59,24 +118,45 @@ const MyRentingList = () => {
               </RentingTitleContainer>
                 
               <RentingInfoBox>
-                <Reserved>예약 완료<Break/>{rentData.reservedCount}</Reserved>
-                <Renting>대여중<Break/>{rentData.rentingCount}</Renting>
-                <Returned>반납 완료<Break/>{rentData.returnedCount}</Returned>
+                <StatusButton onClick={() => handleStatusChange('RESERVED')} isActive={currentStatus === 'RESERVED'}>예약 완료<Break/>{rentData.reservedCount}</StatusButton>
+                <StatusButton onClick={() => handleStatusChange('RENTING')} isActive={currentStatus === 'RENTING'}>대여중<Break/>{rentData.rentingCount}</StatusButton>
+                <StatusButton onClick={() => handleStatusChange('RETURNED')} isActive={currentStatus === 'RETURNED'}>반납 완료<Break/>{rentData.returnedCount}</StatusButton>
               </RentingInfoBox>
+              <Divider />
 
-              {rentData.items.map(item => (
-                <ItemContainer key={item.id}>
+              {displayedItems.map((item, index) => (
+                <ItemContainer key={item.id} isFirst={index === 0}>
                   <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
                   <ItemTitle>{item.title}</ItemTitle>
+                  <ItemOwnerImage src = {item.itemRegisterDefaultProfile || '/assets/img/Profile.png'} alt="Profile" />
+                  <ItemOwnerNickname>{item.itemUserNickName}</ItemOwnerNickname>
+                  <ItemDetails>
+                    <DetailsContainer>
+                      <DetailsTitle>대여</DetailsTitle>
+                      <DetailsContext>
+                        <Place>{item.itemBorrowPlace}</Place>
+                        <Time>{formatDate(item.borrowTime)}</Time>
+                      </DetailsContext>
+                    </DetailsContainer>
+                    <DetailsContainer>
+                      <DetailsTitle>반납</DetailsTitle>
+                      <DetailsContext>
+                        <Place>{item.itemReturnPlace}</Place>
+                        <Time>{formatDate(item.returnTime)}</Time>
+                      </DetailsContext>
+                    </DetailsContainer>
+                  </ItemDetails>
                   <ItemPrice>{item.totalPrice}원</ItemPrice>
                   <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
                 </ItemContainer>
               ))}
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={newPage => setCurrentPage(newPage)}
-              />
+              <LocalPaginationContainer>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={statusData[currentStatus].totalPages}
+                  onPageChange={handlePageChange}
+                />
+              </LocalPaginationContainer>
             </Container>
       </ >
     );
@@ -95,11 +175,18 @@ export const GlobalStyle = createGlobalStyle`
   }
 `;
 
+const Divider = styled.div`
+  height: 0.5px;
+  background-color: #FFF; // 배경색 설정
+  width: 59.5rem; // 너비 설정
+  margin-left: 15rem; // 좌측 여백 조정
+`;
+
+
 const ItemContainer = styled.div`
   display: flex;
   width: 59.5rem;
   height: 7rem;
-  margin-top: 1rem;
   margin-left: 15rem;
   border-bottom: 0.5px solid #FFF;
   align-items: center;
@@ -118,34 +205,95 @@ const ItemTitle = styled.div`
   font-family: "Pretendard";
   font-size: 1.2rem;
   font-weight: 500;
-  width: 15.875rem;
+  width: 15rem;
   margin-left: 2rem;
 `;
 
+const ItemOwnerImage = styled.img`
+  position: fixed;
+  margin-left: 18.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+`;
+
+const ItemOwnerNickname = styled.div `
+  position: fixed;
+  margin-left: 20rem;
+  width: 8rem;
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  font-weight: 500;
+`;
+
+const ItemDetails = styled.div`
+  position: fixed;
+  margin-left: 27rem;
+  display: flex;
+  flex-direction: column;
+  
+`;
+
+const DetailsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const DetailsTitle = styled.div` 
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  font-weight: 300;
+  width:2rem;
+`;
+
+const DetailsContext = styled.div`
+  display: flex;
+  color: white;
+  font-family: "Pretendard";
+  align-items: center;
+`;
+
+const Place = styled.div`
+  width: 5rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  align-items: center;
+`;
+
+const Time = styled.div`
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 300;
+  align-items: center;
+`;
+
 const ItemPrice = styled.div`
+  position: fixed;
+  margin-left: 45rem;
   width: 6rem;
   color: white;
   font-family: "Pretendard";
   font-size: 1rem;
   font-weight: 500;
-  margin-left: 13rem;
 `;
 
 const ItemStatus = styled.div`
+  position: fixed;
+  margin-left: 53rem;
   font-family: 'Pretendard';
   font-size: 1rem;
   font-weight: 600;
   padding: 0.5rem;
-  margin-left: 8rem;
   ${(props) => `color: ${props.color}; background-color: ${props.backgroundColor};`}
 `;
 
-
 const RentingTitleContainer = styled.div`
   display: flex;
-  align-items: center;
+  margin-left: -40rem;
   margin-top: 2rem;
-  margin-left: 14rem;
 `;
 
 const RentingTitle = styled.div`
@@ -157,7 +305,7 @@ const RentingTitle = styled.div`
 `;
 
 const RentingInfoBox = styled.div`
-  background: #343434;
+  background: transparent;
   display: flex;
   justify-content: space-between;
   width: 59.5rem;
@@ -165,30 +313,13 @@ const RentingInfoBox = styled.div`
   margin-top: 1rem;
   margin-left: 15rem;
   align-items: center;
-  border-radius: 12px;
 `;
-
-const Reserved = styled.div`
+const StatusButton = styled.div`
   flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  color: white;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-  border-right: 1px solid #FFF;
-`;
-
-const Renting = styled.div`
-  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  color: white;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-  border-right: 1px solid #FFF;
-`;
-
-const Returned = styled.div`
-  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  color: white;
+  height: 4.5rem;
+  color: ${(props) => (props.isActive ? '#00FFE0' : 'white')};
+  border-bottom: ${(props) => (props.isActive ? '2px solid #00FFE0' : 'none')};
+  cursor: pointer;
   text-align: center;
   font-size: 1.2rem;
   font-weight: 800;
