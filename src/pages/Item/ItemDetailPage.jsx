@@ -15,7 +15,7 @@ const ItemDetailPage = () => {
 
         // 아이템의 소유자 유형을 확인하고 해당하는 경로로 이동
         if (itemDetails.personOrOfficial === 'OFFICIAL') {
-            navigate(`/rent/officialreservation/${itemDetails.id}`);
+            navigate(`/rent/officialreservation/${itemDetails.id}`, { state: { itemDetails } });
         } else if (itemDetails.personOrOfficial === 'PERSON') {
             navigate(`/rent/personreservation/${itemDetails.id}`, { state: { itemDetails } });
         }
