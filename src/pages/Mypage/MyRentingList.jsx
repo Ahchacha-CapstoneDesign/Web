@@ -15,46 +15,74 @@ const LocalPaginationContainer = styled(PaginationContainer)`
 const MyRentingList = () => {
   const [rentData, setRentData] = useState({ reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
   const navigate = useNavigate();
-  const [posts, setPosts] = useState([]);
   const ITEMS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [displayedPosts, setDisplayedPosts] = useState([]); // 현재 페이지에 표시될 포스트
+  const [currentStatus, setCurrentStatus] = useState('ALL');
 
+  const [statusData, setStatusData] = useState({
+    ALL: { items: [], totalPages: 0 },
+    RESERVED: { items: [], totalPages: 0 },
+    RENTING: { items: [], totalPages: 0 },
+    RETURNED: { items: [], totalPages: 0 }
+  });
 
   useEffect(() => {
-    fetchRentData();
-  }, [currentPage]);
+    fetchItemsByStatus(currentStatus);
+  }, [currentStatus, currentPage]);
 
-  useEffect(() => {
-    // 현재 페이지에 맞는 포스트를 계산하여 displayedPosts를 업데이트
-    const end = currentPage * ITEMS_PER_PAGE;
-    const start = end - ITEMS_PER_PAGE;
-    setDisplayedPosts(rentData.items.slice(start, end));
-  }, [rentData, currentPage]);
-
-
-  const fetchRentData = async () => {
+  const fetchItemsByStatus = async (status) => {
+    let url = '/reservation/myItems'; // 기본 엔드포인트
+    if (status !== 'ALL') {
+      switch (status) {
+        case 'RESERVED':
+          url = 'reservation/itemsRESERVED';
+          break;
+        case 'RENTING':
+          url = 'reservation/itemsRENTING';
+          break;
+        case 'RETURNED':
+          url = 'reservation/itemsRENTED';
+          break;
+      }
+    }
+  
     try {
-      const response = await apiClient.get('/reservation/myItems');
-      const data = response.data.content;
-      setRentData({
-        reservedCount: data.filter(item => item.rentingStatus === 'RESERVED').length,
-        rentingCount: data.filter(item => item.rentingStatus === 'RENTING').length,
-        returnedCount: data.filter(item => item.rentingStatus === 'RETURNED').length,
-        items: data
-      });
-      setTotalPages(Math.ceil(data.length / ITEMS_PER_PAGE));    
+      const { data } = await apiClient.get(url);
+      const filteredData = data.content;
+      const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+      
+      setStatusData(prev => ({
+        ...prev,
+        [status]: { 
+          items: filteredData, 
+          totalPages 
+        }
+      }));
+
+      // Update register data only if on 'ALL' status
+      if (status === 'ALL') {
+        setRentData({
+          reservedCount: filteredData.filter(item => item.rentingStatus === 'RESERVED').length,
+          rentingCount: filteredData.filter(item => item.rentingStatus === 'RENTING').length,
+          returnedCount: filteredData.filter(item => item.rentingStatus === 'RETURNED').length,
+          items: filteredData
+        });
+      }
     } catch (error) {
-      console.error('Failed to fetch rent data:', error);
+      console.error('Failed to fetch data:', error);
     }
   };
 
   const statusColors = {
-    NONE: { text: "대여 가능", color: "white" },
     RESERVED: { text: "예약 완료", color: "#00FFF0" },
     RENTING: { text: "대여중", color: "#52FF00" },
     RETURNED: { text: "반납완료", color: "#F00" }
+  };
+
+  const handleStatusChange = (status) => {
+    setCurrentStatus(status);
+    setCurrentPage(1); // Reset to page 1 on status change
   };
 
   const getStatusStyle = (status) => ({
@@ -65,6 +93,12 @@ const MyRentingList = () => {
     setCurrentPage(newPage); // 페이지 변경 처리
   };
 
+  const displayedItems = statusData[currentStatus].items.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+
     return (
         <>
         <GlobalStyle /> 
@@ -74,13 +108,13 @@ const MyRentingList = () => {
               </RentingTitleContainer>
                 
               <RentingInfoBox>
-                <Reserved>예약 완료<Break/>{rentData.reservedCount}</Reserved>
-                <Renting>대여중<Break/>{rentData.rentingCount}</Renting>
-                <Returned>반납 완료<Break/>{rentData.returnedCount}</Returned>
+                <StatusButton onClick={() => handleStatusChange('RESERVED')} isActive={currentStatus === 'RESERVED'}>예약 완료<Break/>{rentData.reservedCount}</StatusButton>
+                <StatusButton onClick={() => handleStatusChange('RENTING')} isActive={currentStatus === 'RENTING'}>대여중<Break/>{rentData.rentingCount}</StatusButton>
+                <StatusButton onClick={() => handleStatusChange('RETURNED')} isActive={currentStatus === 'RETURNED'}>반납 완료<Break/>{rentData.returnedCount}</StatusButton>
               </RentingInfoBox>
               <Divider />
 
-              {rentData.items.map((item, index) => (
+              {displayedItems.map((item, index) => (
                 <ItemContainer key={item.id} isFirst={index === 0}>
                   <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
                   <ItemTitle>{item.title}</ItemTitle>
@@ -89,12 +123,12 @@ const MyRentingList = () => {
                 </ItemContainer>
               ))}
               <LocalPaginationContainer>
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            </LocalPaginationContainer>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={statusData[currentStatus].totalPages}
+                  onPageChange={handlePageChange}
+                />
+              </LocalPaginationContainer>
             </Container>
       </ >
     );
@@ -168,7 +202,8 @@ const ItemStatus = styled.div`
 
 const RentingTitleContainer = styled.div`
   display: flex;
-  margin-left: -35rem;
+  margin-left: -40rem;
+  margin-top: 2rem;
 `;
 
 const RentingTitle = styled.div`
@@ -189,26 +224,12 @@ const RentingInfoBox = styled.div`
   margin-left: 15rem;
   align-items: center;
 `;
-
-const Reserved = styled.div`
+const StatusButton = styled.div`
   flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  color: white;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-`;
-
-const Renting = styled.div`
-  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  color: white;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-`;
-
-const Returned = styled.div`
-  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  color: white;
+  height: 4.5rem;
+  color: ${(props) => (props.isActive ? '#00FFE0' : 'white')};
+  border-bottom: ${(props) => (props.isActive ? '2px solid #00FFE0' : 'none')};
+  cursor: pointer;
   text-align: center;
   font-size: 1.2rem;
   font-weight: 800;
