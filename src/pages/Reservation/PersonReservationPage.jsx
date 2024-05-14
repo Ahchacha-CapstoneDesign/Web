@@ -74,14 +74,22 @@ const PersonReservationPage = () => {
       const totalFee = Math.round(hours * itemDetails.pricePerHour);
   
       const reservationDetails = {
-        itemId: itemDetails.id,
-        borrowTime: borrowDateTime,
-        returnTime: returnDateTime,
-        borrowPlace: itemDetails.borrowPlace,
-        returnPlace: itemDetails.returnPlace,
-        pricePerHour: itemDetails.pricePerHour,
-        totalFee: `${totalFee}원` // 통화 추가
+          itemId: itemDetails.id,
+          startDate: startDate,
+          startTime: startTime,
+          startMinutes: startMinutes,
+          endDate: endDate,
+          endTime: endTime,
+          endMinutes: endMinutes,
+          borrowTime: borrowDateTime,
+          returnTime: returnDateTime,
+          borrowPlace: itemDetails.borrowPlace,
+          returnPlace: itemDetails.returnPlace,
+          pricePerHour: itemDetails.pricePerHour,
+          totalFee: `${totalFee}원` // 통화 추가
     };
+
+
 
     navigate(`/rent/personreservationdetails/${itemDetails.id}`, { state: reservationDetails });
   };

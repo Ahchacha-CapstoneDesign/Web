@@ -71,6 +71,12 @@ const OfficialReservationPage = () => {
 
         const reservationDetails = {
             itemId: itemDetails.id,
+            startDate: startDate,
+            startTime: startTime,
+            startMinutes: startMinutes,
+            endDate: endDate,
+            endTime: endTime,
+            endMinutes: endMinutes,
             borrowTime: borrowDateTime,
             returnTime: returnDateTime,
             borrowPlace: itemDetails.borrowPlace,
