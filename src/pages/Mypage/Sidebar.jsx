@@ -49,7 +49,7 @@ const Sidebar = () => {
       >
         계정 관리
       </MenuItem>
-      <MenuItem active={activePage === '/mypage/review'} onClick={() => handlePageChange('/mypage/review')}>My 리뷰</MenuItem>
+      <MenuItem active={activePage === '/mypage/myreview'} onClick={() => handlePageChange('/mypage/myreview')}>My 리뷰</MenuItem>
       <Logout onClick={handleLogout}>로그아웃</Logout>
     </SidebarContainer>
   );

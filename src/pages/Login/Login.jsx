@@ -38,6 +38,9 @@ const Login = () => {
       // 이미지 URL이 없거나 빈 문자열인 경우, 기본 이미지 URL을 사용
       const imageUrl = response.data.defaultProfile || DEFAULT_IMAGE_URL;
       localStorage.setItem('profileImageUrl', imageUrl);
+      localStorage.setItem('ownerReviewScore', response.data.ownerReviewScore);
+      localStorage.setItem('renterReviewScore', response.data.renterReviewScore);
+
       // 로그인 후 처리 로직
       if (!response.data.nickname) {
         navigate('/setting-nickname');

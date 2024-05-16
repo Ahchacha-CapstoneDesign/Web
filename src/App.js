@@ -144,6 +144,14 @@ function App() {
                   </>
                 }
             />
+            <Route
+                  path="/mypage/myreview"
+                  element={
+                    <>
+                      <Header /> <Sidebar /> <MyReview />
+                    </>
+                  }
+              />
           </Routes>
         </div>
       </Router>
