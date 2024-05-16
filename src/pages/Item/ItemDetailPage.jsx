@@ -9,6 +9,7 @@ const ItemDetailPage = () => {
     const [itemDetails, setItemDetails] = useState(null);
     const navigate = useNavigate();
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [formattedScore, setFormattedScore] = useState("0.0"); // 초기값을 "0.0"으로 설정
 
     const handleReserve = () => {
         if (!itemDetails) return;
@@ -26,6 +27,14 @@ const ItemDetailPage = () => {
             try {
                 const response = await apiClient.get(`/items/${itemId}`);
                 setItemDetails(response.data);
+
+                const { ownerReviewScore, renterReviewScore } = response.data;
+                const scores = [];
+                if (ownerReviewScore != null && !isNaN(ownerReviewScore)) scores.push(ownerReviewScore);
+                if (renterReviewScore != null && !isNaN(renterReviewScore)) scores.push(renterReviewScore);
+
+                const newFormattedScore = scores.length > 0 ? (scores.reduce((acc, score) => acc + score, 0) / scores.length).toFixed(1) : '0.0';
+                setFormattedScore(newFormattedScore); // 상태 업데이트
             } catch (error) {
                 console.error('Failed to fetch item details:', error);
             }
@@ -76,7 +85,6 @@ const ItemDetailPage = () => {
         setCurrentImageIndex((prev) => (prev - 1 + itemDetails.imageUrls.length) % itemDetails.imageUrls.length);
     };
 
-
     return (
         <>
             <GlobalStyle/>
@@ -107,7 +115,7 @@ const ItemDetailPage = () => {
                       <Username>{itemDetails.userNickName}</Username>
                       <RatingContainer>
                         <StarIcon src="/assets/img/Star.png" alt="Star"/>
-                        <RatingValue>4.5</RatingValue>
+                        <RatingValue>{formattedScore}</RatingValue>
                       </RatingContainer>
                   </UserInfoContainer>
                   <ReviewBubble src="/assets/img/ReviewBubble.png" alt="Star">

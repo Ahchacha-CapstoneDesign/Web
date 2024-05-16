@@ -119,6 +119,10 @@ const MyRentingList = () => {
     setReviewModalOpen(false);
   };
 
+  const handleItemDetailPage = (item) => {
+    navigate(`/rent/itemdetail/${item}`);
+  };
+
   const displayedItems = statusData[currentStatus].items.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -152,11 +156,11 @@ const MyRentingList = () => {
 
               {displayedItems.map((item, index) => (
                 <ItemContainer key={item.id} isFirst={index === 0}>
-                  <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
-                  <ItemTitle>{item.title}</ItemTitle>
-                  <ItemOwnerImage src = {item.itemRegisterDefaultProfile || '/assets/img/Profile.png'} alt="Profile" />
+                  <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'}  onClick={() => handleItemDetailPage(item.itemId)}/>
+                  <ItemTitle  onClick={() => handleItemDetailPage(item.itemId)}>{item.title}</ItemTitle>
+                  <ItemOwnerImage src = {item.itemRegisterDefaultProfile || '/assets/img/Profile.png'} alt="Profile"  onClick={() => handleItemDetailPage(item.itemId)}/>
                   <ItemOwnerNickname>{item.itemUserNickName}</ItemOwnerNickname>
-                  <ItemDetails>
+                  <ItemDetails onClick={() => handleItemDetailPage(item.itemId)}>
                     <DetailsContainer>
                       <DetailsTitle>대여</DetailsTitle>
                       <DetailsContext>
@@ -172,7 +176,7 @@ const MyRentingList = () => {
                       </DetailsContext>
                     </DetailsContainer>
                   </ItemDetails>
-                  <ItemPrice>{item.totalPrice}원</ItemPrice>
+                  <ItemPrice onClick={() => handleItemDetailPage(item.itemId)}>{item.totalPrice}원</ItemPrice>
                   <ItemStatusDetail>
                   <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
                     {item.rentingStatus === 'RETURNED' && (
@@ -242,6 +246,7 @@ const ItemContainer = styled.div`
   margin-left: 15rem;
   border-bottom: 0.5px solid #FFF;
   align-items: center;
+  cursor: pointer;
 `;
 
 const ItemImage = styled.img`

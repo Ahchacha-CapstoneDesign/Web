@@ -9,6 +9,7 @@ const MypageMain = () => {
   const [userName, setUserName] = useState('');
   const [userNickname, setUserNickname] = useState('');
   const [profileImage, setProfileImage] = useState('');
+  const [averageScore, setAverageScore] = useState(0); // 평균 점수 상태 추가
   const navigate = useNavigate();
   const [rentData, setRentData] = useState({ reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
   const [registerData, setRegisterData] = useState({ reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
@@ -17,6 +18,23 @@ const MypageMain = () => {
     setUserName(localStorage.getItem('userName'));
     setUserNickname(localStorage.getItem('userNickname'));
     setProfileImage(localStorage.getItem('profileImageUrl') || '/assets/img/Profile.png');
+    
+    const ownerScore = parseFloat(localStorage.getItem('ownerReviewScore'));
+    const renterScore = parseFloat(localStorage.getItem('renterReviewScore'));
+    
+    let validScores = [];
+    if (!isNaN(ownerScore)) validScores.push(ownerScore);
+    if (!isNaN(renterScore)) validScores.push(renterScore);
+
+    if (validScores.length === 1) {
+      setAverageScore(validScores[0].toFixed(1));
+    } else if (validScores.length === 2) {
+      const avgScore = (validScores.reduce((acc, curr) => acc + curr, 0) / validScores.length).toFixed(1);
+      setAverageScore(avgScore);
+    } else {
+      // 두 점수 모두 유효하지 않을 때
+      setAverageScore('0.0');
+    }
     fetchRentData();
     fetchRegisterData();
   }, []);
@@ -93,7 +111,7 @@ const MypageMain = () => {
                         <NameAndRating>
                           <Name>{userName}</Name>
                           <Rating src="/assets/img/Star.png" alt="Star" />
-                          <Ratingavg>(4.5)</Ratingavg>
+                          <Ratingavg>{averageScore}</Ratingavg>
                         </NameAndRating>
                         <Nickname>{userNickname}</Nickname>
                       </ProfileDetails>

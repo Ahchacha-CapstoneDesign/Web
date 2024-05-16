@@ -9,6 +9,7 @@ const MyReview = () => {
   const [userName, setUserName] = useState('');
   const [userNickname, setUserNickname] = useState('');
   const [profileImage, setProfileImage] = useState('');
+  const [averageScore, setAverageScore] = useState(0); // 평균 점수 상태 추가
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +23,22 @@ const MyReview = () => {
     } else {
       // 저장된 이미지가 없을 경우 기본 이미지 경로 설정
       setProfileImage('/assets/img/Profile.png');
+    }
+    const ownerScore = parseFloat(localStorage.getItem('ownerReviewScore'));
+    const renterScore = parseFloat(localStorage.getItem('renterReviewScore'));
+    
+    let validScores = [];
+    if (!isNaN(ownerScore)) validScores.push(ownerScore);
+    if (!isNaN(renterScore)) validScores.push(renterScore);
+
+    if (validScores.length === 1) {
+      setAverageScore(validScores[0].toFixed(1));
+    } else if (validScores.length === 2) {
+      const avgScore = (validScores.reduce((acc, curr) => acc + curr, 0) / validScores.length).toFixed(1);
+      setAverageScore(avgScore);
+    } else {
+      // 두 점수 모두 유효하지 않을 때
+      setAverageScore('0.0');
     }
   });
 
@@ -37,12 +54,11 @@ const MyReview = () => {
                   <ProfileInfo>
                     <Avatar src={profileImage || "/assets/img/Profile.png"} alt="Profile" />
                       <ProfileDetails>
-                        <NameAndRating>
-                          {/* <Name>{userName}</Name> */}
-                          <Rating src="/assets/img/Star.png" alt="Star" />
-                          <Ratingavg>(4.5)</Ratingavg>
-                        </NameAndRating>
                         <Nickname>{userNickname}</Nickname>
+                        <RatingDetail>
+                          <Rating src="/assets/img/Star.png" alt="Star" />
+                          <Ratingavg>{averageScore}</Ratingavg>
+                        </RatingDetail>
                       </ProfileDetails>
                   </ProfileInfo>
                 </ProfileContainer>
@@ -56,12 +72,6 @@ const MyReview = () => {
                    <RentingTitle>대여후기</RentingTitle> {/*대여 후기/거래 후기 선택에 따라 변경 */}
                 </RentingTitleContainer>
 
-                <ItemContainer>
-                  <ItemImage/>
-                  <ItemTitle>제목</ItemTitle>
-                  <ItemPrice>0000원</ItemPrice>
-                  <ItemStatus>대여중</ItemStatus>
-                </ItemContainer>
             </Container>
       </ >
     );
@@ -78,52 +88,6 @@ export const GlobalStyle = createGlobalStyle`
       flex-direction: column;
       background-color: #000; // body 전체의 배경색을 검은색으로 설정
   }
-`;
-
-const scoreContainer = styled.div`
-  display: flex;
-  width: 59.5rem;
-  height: 6rem;
-  margin-top: 1rem;
-  margin-left: 15rem;
-  border: 0.5px solid #FFF;
-`;
-
-const ItemContainer = styled.div`
-  display: flex;
-  width: 59.5rem;
-  height: 6rem;
-  margin-top: 1rem;
-  margin-left: 15rem;
-  border-bottom: 0.5px solid #FFF;
-`;
-
-
-
-const ItemImage = styled.img`
-  width: 100px; /* 원하는 이미지 너비로 조정 */
-  height: auto; /* 높이 자동 조정 */
-  margin-right: 1rem; /* 이미지와 제목 사이 여백 조정 */
-`;
-
-const ItemTitle = styled.div`
-  color: white;
-  font-family: "Pretendard";
-  font-size: 1.2rem;
-`;
-
-const ItemPrice = styled.div`
-  color: white;
-  font-family: "Pretendard";
-  font-size: 1rem;
-  margin-left: 1rem; /* 가격과 상태 사이 여백 조정 */
-`;
-
-const ItemStatus = styled.div`
-  color: white;
-  font-family: "Pretendard";
-  font-size: 1rem;
-  font-weight: 700;
 `;
 
 const RentingTitleContainer = styled.div`
@@ -162,15 +126,6 @@ const Reserved = styled.div`
   border-right: 1px solid #FFF;
 `;
 
-const Renting = styled.div`
-  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  color: white;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-  border-right: 1px solid #FFF;
-`;
-
 const Returned = styled.div`
   flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
   color: white;
@@ -201,39 +156,30 @@ const ProfileContainer = styled.div`
 
 const ProfileInfo = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
   margin-bottom: 10px;
   margin-right: 2rem;
-  
 `;
 
 const Avatar = styled.img`
   width: 4.6875rem;
   height: 4.6875rem;
-  margin-left: 2rem;
   border-radius: 50%;
 `;
 
 const ProfileDetails = styled.div`
   display: flex;
   flex-direction: column;
-  margin-left: 3rem;
-`;
-
-const NameAndRating = styled.div`
-  display: flex;
+  text-align: center;
   align-items: center;
 `;
 
-const Name = styled.span`
-  color: #00FFE0;
-  text-align: left;
-  font-family: "Pretendard";
-  font-size: 1.5rem;
-  font-style: normal;
-  font-weight: 700;
-  width: 4.875rem;
-  margin-right: 0.8rem;
+const RatingDetail = styled.div`
+  display: flex;
+  margin-top: 1rem;
+  margin-left: -1rem;
+  margin-bottom: 2rem;
 `;
 
 const Rating = styled.img`
@@ -247,36 +193,14 @@ const Ratingavg = styled.span`
   font-size: 1rem;
   font-style: normal;
   font-weight: 400;
-  margin-left: 0.5rem;
+  margin-left: 1rem;
 `;
 
 const Nickname = styled.span`
   color: #00FFE0;
-  text-align: left;
   font-family: "Pretendard";
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-style: normal;
-  font-weight: 400;
-  margin-top: 0.8rem;
-`;
-
-const Editbutton = styled.button`
-    width: 6.5rem;
-    height: 2.1875rem;
-    background-color: #000;
-    color: #00FFE0;
-    border-radius: 0.625rem;
-    border: 0.5px solid #00FFE0;
-    cursor: pointer;
-    font-size: 1rem;
-    font-style: normal;
-    font-weight: 500;
-    color: #00FFE0;
-    font-family: "Pretendard";
-    margin-top: 0.8rem;
-    margin-left: 30rem;
-`;
-
-const Break = styled.div`
-  margin-bottom: 0.75rem; /* 원하는 간격 조정 */
+  font-weight: 600;
+  margin-top: 1rem;
 `;
