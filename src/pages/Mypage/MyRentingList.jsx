@@ -5,6 +5,8 @@ import { createGlobalStyle } from 'styled-components';
 import apiClient from "../../path/apiClient";
 import { useNavigate } from 'react-router-dom';
 import Pagination, {PaginationContainer} from '../Pagination';
+import ConfirmOrCancleModalDetail from '../ConfirmOrCancleModalDetail';
+import ReviewModal from '../ReviewModalToOwner';
 
 const LocalPaginationContainer = styled(PaginationContainer)`
   justify-content: flex-end;
@@ -19,6 +21,10 @@ const MyRentingList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [currentStatus, setCurrentStatus] = useState('ALL');
+  const [showModal, setShowModal] = useState(false);
+  const [processingItemId, setProcessingItemId] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   const [statusData, setStatusData] = useState({
     ALL: { items: [], totalPages: 0 },
@@ -93,6 +99,26 @@ const MyRentingList = () => {
     setCurrentPage(newPage); // 페이지 변경 처리
   };
 
+  const handleRent = (itemId) => {
+    setProcessingItemId(itemId);
+    setModalOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setModalOpen(false);  // 기존 모달을 닫고
+    setReviewModalOpen(true);  // 리뷰 모달을 엽니다.
+  };
+
+  const goBackToConfirm = () => {
+    setReviewModalOpen(false); // 리뷰 모달 닫기
+    setModalOpen(true); // 이전 모달 열기
+  };
+
+  const handleCloseAllModals = () => {
+    setModalOpen(false);
+    setReviewModalOpen(false);
+  };
+
   const displayedItems = statusData[currentStatus].items.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -147,7 +173,33 @@ const MyRentingList = () => {
                     </DetailsContainer>
                   </ItemDetails>
                   <ItemPrice>{item.totalPrice}원</ItemPrice>
+                  <ItemStatusDetail>
                   <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
+                    {item.rentingStatus === 'RETURNED' && (
+                      <>
+                        <Handlebutton onClick={() => handleRent(item.id)}>리뷰 쓰기</Handlebutton>
+                        {modalOpen && (
+                          <ConfirmOrCancleModalDetail
+                            title="리뷰를 작성하시겠습니까?"
+                            message={<span>제공자에에 대한 별점을 주셔야 <br/>다른 물건 대여 가능합니다</span>}                          
+                            isOpen={modalOpen}
+                            setIsOpen={setModalOpen}
+                            onConfirm={handleConfirm}
+                          />
+                        )}
+                        {reviewModalOpen && (
+                          <ReviewModal
+                            onBack={goBackToConfirm}
+                            isOpen={reviewModalOpen}
+                            setIsOpen={setReviewModalOpen}
+                            reservationId={processingItemId}
+                            handleCloseAllModals={handleCloseAllModals}
+                            // 여기에 리뷰 모달에 필요한 추가적인 props를 전달할 수 있습니다.
+                          />
+                        )}
+                      </>
+                    )}
+                </ItemStatusDetail>
                 </ItemContainer>
               ))}
               <LocalPaginationContainer>
@@ -281,8 +333,6 @@ const ItemPrice = styled.div`
 `;
 
 const ItemStatus = styled.div`
-  position: fixed;
-  margin-left: 53rem;
   font-family: 'Pretendard';
   font-size: 1rem;
   font-weight: 600;
@@ -330,6 +380,26 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   font-family: "Pretendard";
+`;
+
+const ItemStatusDetail = styled.div`
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  position: fixed;
+  margin-left: 52rem;
+`;
+
+const Handlebutton = styled.button`
+  width: 5rem;
+  border-radius: 0.625rem;
+  border: 1px solid #D9D9D9;
+  font-family 'Pretendard';
+  background-color: transparent;
+  color: #D0CDCD;
+  font-size: 0.8rem;
+  font-weight: 400;
+  cursor: pointer;
 `;
 
 const Break = styled.div`
