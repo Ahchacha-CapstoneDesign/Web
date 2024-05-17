@@ -16,6 +16,37 @@ const MyReview = () => {
   const [visibleCount, setVisibleCount] = useState(2); // 처음에 보여줄 리뷰 수
   const navigate = useNavigate();
 
+  const [visibleCounts, setVisibleCounts] = useState({
+    rentalActive: 2,
+    rentalInactive: 2,
+    dealActive: 2,
+    dealInactive: 2
+  });
+
+  useEffect(() => {
+    fetchReviews();
+    // 처음에 해당 섹션에 맞는 리뷰 수를 설정
+    resetVisibleCount();
+  }, [isActiveMyReview, activeReviewType]);
+
+  const resetVisibleCount = () => {
+    setVisibleCounts({
+      ...visibleCounts,
+      [`${activeReviewType}${isActiveMyReview ? 'Active' : 'Inactive'}`]: 2
+    });
+  };
+
+  const handleLoadMore = () => {
+    const key = `${activeReviewType}${isActiveMyReview ? 'Active' : 'Inactive'}`;
+    setVisibleCounts({
+      ...visibleCounts,
+      [key]: visibleCounts[key] + 3
+    });
+  };
+
+  const currentVisibleCount = visibleCounts[`${activeReviewType}${isActiveMyReview ? 'Active' : 'Inactive'}`];
+
+
   useEffect(() => {
     const name = localStorage.getItem('userName');
     setUserName(name);
@@ -75,10 +106,6 @@ const MyReview = () => {
     navigate(path);
   };
 
-  const handleLoadMore = () => {
-    setVisibleCount(prev => prev + 3); // 현재 보이는 리뷰 수를 3개 증가
-  };
-
   const StarRating = ({ score }) => {
     const fullStars = Math.floor(score);
     const emptyStars = 5 - fullStars;
@@ -131,7 +158,7 @@ const MyReview = () => {
                 </RentingTitleContainer>
 
                 <ReviewList>
-                  {reviews.slice(0, visibleCount).map(review => (
+                  {reviews.slice(0, currentVisibleCount).map(review => (
                     <ReviewItem key={review.reviewId}>
                       <ProfileItem>
                         <ProfileImg src={isOwnerEndpoint() ? review.ownerProfile || "/assets/img/Profile.png" : review.renterProfile || "/assets/img/Profile.png"} alt="Profile" />
@@ -145,7 +172,7 @@ const MyReview = () => {
                     </ReviewItem>
                   ))}
                 </ReviewList>
-                {visibleCount < reviews.length && (
+                {currentVisibleCount < reviews.length && (
                   <MoreViewButton onClick={handleLoadMore}>더 보기</MoreViewButton> // 리뷰가 더 있을 경우 더 보기 버튼 표시
                 )}
             </Container>
@@ -307,9 +334,9 @@ const Rating = styled.img`
 const Ratingavg = styled.span` 
   color: #FFF;
   font-family: "Pretendard";
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   margin-left: 1rem;
 `;
 
@@ -374,6 +401,7 @@ const ItemTitle = styled.button`
   display: inline-block; /* 내용에 따라 너비가 조정되도록 */
   white-space: nowrap;
   max-width: 10rem;
+  cursor: pointer;
 `;
 
 const Comment = styled.div`
