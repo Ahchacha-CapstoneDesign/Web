@@ -32,6 +32,7 @@ import PersonRegisterDetails from "./pages/Register/PersonRegisterDetails";
 import OfficialRegisterDetails from "./pages/Register/OfficialRegisterDetails";
 import UpdatePersonRegisterDetails from "./pages/Register/UpdatePersonRegisterDetails";
 import UpdateOfficialRegisterDetails from "./pages/Register/UpdateOfficialRegisterDetails";
+import OwnerReview from './pages/Item/OwnerReview.jsx';
 
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
 
             {/* 대여 페이지 */}
             <Route path="rent/itemdetail/:itemId" element={<> <Header /> <ItemDetailPage /> </> } />
+            <Route path="rent/ownerreview/:userId" element={<> <Header /> <OwnerReview /> </> } />
             <Route path="rent/personreservation/:itemId" element={<> <Header /> <PersonReservationPage /> </> } />
             <Route path="rent/officialreservation/:itemId" element={<> <Header /> <OfficialReservationPage /> </> } />
             <Route path="rent/personreservationdetails/:itemId" element={<> <Header /> <PersonReservationDetailsPage /> </> } />

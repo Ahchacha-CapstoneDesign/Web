@@ -13,7 +13,6 @@ const MyReview = () => {
   const [activeReviewType, setActiveReviewType] = useState('rental');
   const [isActiveMyReview, setIsActiveMyReview] = useState(true);
   const [reviews, setReviews] = useState([]);
-  const [visibleCount, setVisibleCount] = useState(2); // 처음에 보여줄 리뷰 수
   const navigate = useNavigate();
 
   const [visibleCounts, setVisibleCounts] = useState({

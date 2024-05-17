@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 import {useParams, useNavigate} from "react-router-dom";
 import apiClient from "../../path/apiClient";
+import OwnerReview from './OwnerReview';
 
 const ItemDetailPage = () => {
     const { itemId } = useParams();
@@ -85,6 +86,10 @@ const ItemDetailPage = () => {
         setCurrentImageIndex((prev) => (prev - 1 + itemDetails.imageUrls.length) % itemDetails.imageUrls.length);
     };
 
+    const handleGoToOwnerReview = () => {
+      navigate(`/rent/ownerreview/${itemDetails.userId}`, { state: { userProfile: itemDetails.userProfile, userNickName: itemDetails.userNickName, averageScore: formattedScore } });
+    };
+
     return (
         <>
             <GlobalStyle/>
@@ -123,7 +128,7 @@ const ItemDetailPage = () => {
                     <ReviewText>횟수가 많이 남아있어요... 괜찮아요..</ReviewText>
                   </ReviewBubble>
                     <ButtonContainer>
-                      <MoreReviewsButton>리뷰 더 보러가기</MoreReviewsButton>
+                      <MoreReviewsButton onClick={handleGoToOwnerReview}>리뷰 더 보러가기</MoreReviewsButton>
                     </ButtonContainer>
 
                   </LeftContainer>
