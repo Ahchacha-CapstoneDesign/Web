@@ -366,9 +366,9 @@ const Rating = styled.img`
 const Ratingavg = styled.span` 
   color: #FFF;
   font-family: "Pretendard";
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   margin-left: 0.5rem;
 `;
 

@@ -185,7 +185,7 @@ const MyRentingList = () => {
                         {modalOpen && (
                           <ConfirmOrCancleModalDetail
                             title="리뷰를 작성하시겠습니까?"
-                            message={<span>제공자에에 대한 별점을 주셔야 <br/>다른 물건 대여 가능합니다</span>}                          
+                            message={<span>제공자에 대한 별점을 주셔야 <br/>다른 물건 대여가 가능합니다</span>}                          
                             isOpen={modalOpen}
                             setIsOpen={setModalOpen}
                             onConfirm={handleConfirm}
