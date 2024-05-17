@@ -309,12 +309,13 @@ const MyRegisterList = () => {
                     </>
                   )}
                   {item.rentingStatus === 'RETURNED' && (
+                    item.toRenterWrittenStatus === 'NONWRITTEN' || item.toRenterWrittenStatus === null ? (
                       <>
                         <Handlebutton onClick={() => handleRent(item.id)}>리뷰 쓰기</Handlebutton>
                         {modalOpen && (
                           <ConfirmOrCancleModalDetail
                             title="리뷰를 작성하시겠습니까?"
-                            message={<span>대여자에 대한 별점을 주셔야 <br/>다른 물건 등록이 가능합니다</span>}                          
+                            message={<span>대여자에 대한 별점을 주셔야 <br />다른 물건 등록이 가능합니다<br /><RedText>삭제 및 수정이 불가능합니다.</RedText></span>}
                             isOpen={modalOpen}
                             setIsOpen={setModalOpen}
                             onConfirm={handleConfirm}
@@ -331,6 +332,7 @@ const MyRegisterList = () => {
                           />
                         )}
                       </>
+                    ) : null
                     )}
                 </ItemStatusDetail>
               </ItemContainer>
@@ -555,4 +557,8 @@ const Handlebutton = styled.button`
 
 const Break = styled.div`
   margin-bottom: 0.75rem; /* 원하는 간격 조정 */
+`;
+
+const RedText = styled.span`
+  color: red;
 `;

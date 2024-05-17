@@ -16,10 +16,12 @@ const UpdatePersonRegisterDetails = (props) => {
     const [startDate, endDate] = dateRange;
     const navigate = useNavigate();
     const [imageFiles, setImageFiles] = useState([]);
+    const [imageFiles2, setImageFiles2] = useState([]);
     const minuteOptions = [0, 30];
     const [modalOpen, setModalOpen] = useState(false);
     const [modalClose, setModalClose] = useState(false);
     const itemId = location.pathname.split('/').pop();
+
 
     useEffect(() => {
         // 백엔드로부터 아이템 정보 가져오기
@@ -47,7 +49,7 @@ const UpdatePersonRegisterDetails = (props) => {
                 setEndMinutes(returnDateTime.getMinutes().toString());
                 setDateRange([borrowDateTime, returnDateTime]);
 
-                setImageFiles(itemData.imageUrls.map(url => ({ url })));
+                setImageFiles2(itemData.imageUrls.map(url => ({ url })));
 
             } catch (error) {
                 console.error(error);
@@ -85,6 +87,14 @@ const UpdatePersonRegisterDetails = (props) => {
         const newImageFiles = imageFiles.filter((_, i) => i !== index);
         // 새로운 배열로 이미지 파일 상태 업데이트
         setImageFiles(newImageFiles);
+    };
+
+    const handleImageDelete2 = (e, index) => {
+        e.preventDefault();
+        // 이미지 파일 배열에서 해당 인덱스의 이미지를 제거
+        const newImageFiles = imageFiles2.filter((_, i) => i !== index);
+        // 새로운 배열로 이미지 파일 상태 업데이트
+        setImageFiles2(newImageFiles);
     };
 
 
@@ -146,6 +156,9 @@ const UpdatePersonRegisterDetails = (props) => {
         formDataToSend.append('introduction', formData.description);
         formDataToSend.append('itemStatus', formData.status);
         formDataToSend.append('category', formData.category);
+        imageFiles2.forEach(image => {
+            formDataToSend.append('file2', image.url);
+        });
 
         for (let i = 0; i < imageFiles.length; i++) {
             const imageBlob = new Blob([imageFiles[i]], { type: 'image/jpeg' }); // 또는 파일의 MIME 유형에 따라 조정
@@ -153,17 +166,19 @@ const UpdatePersonRegisterDetails = (props) => {
         }
 
 
+        console.log('FormDataToSend:', formDataToSend);
+
         try {
             const itemId = location.pathname.split('/').pop();
             // 백엔드로 데이터 전송
             const response = await apiClient.post(`/items/${itemId}/update`, formDataToSend);
             // 응답 확인
 
-            console.log('상품 등록 성공');
+            console.log('상품 수정 성공');
             navigate('/mypage/registerlist');
         } catch (error) {
             // 에러 처리
-            console.error('상품 등록 에러:', error.message);
+            console.error('상품 수정 에러:', error.message);
         }
     };
     // Here you would typically handle the submission, e.g., posting to an API
@@ -206,9 +221,16 @@ const UpdatePersonRegisterDetails = (props) => {
                         </Label>
                         <ImageInput id="image" type="file" accept="image/*" multiple onChange={handleImageChange}  />
                         {/* 이미지 미리보기 */}
-                        {imageFiles.length > 0 && imageFiles.map((image, index) => (
+                        {imageFiles2.length > 0 && imageFiles2.map((image, index) => (
                             <ImageContainer key={index}>
                                 <ImagePreview src={image.url} alt={`상품 이미지 ${index + 1}`} />
+                                {/* 삭제 버튼 추가 */}
+                                <DeleteButton onClick={(e) => handleImageDelete2(e, index)}>X</DeleteButton>
+                            </ImageContainer>
+                        ))}
+                        {imageFiles.length > 0 && imageFiles.map((image, index) => (
+                            <ImageContainer key={index}>
+                                <ImagePreview src={URL.createObjectURL(image)} alt={`상품 이미지 ${index + 1}`} />
                                 {/* 삭제 버튼 추가 */}
                                 <DeleteButton onClick={(e) => handleImageDelete(e, index)}>X</DeleteButton>
                             </ImageContainer>
