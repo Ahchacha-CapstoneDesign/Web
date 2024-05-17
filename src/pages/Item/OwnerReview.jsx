@@ -22,7 +22,15 @@ const OwnerReview = () => {
 
   useEffect(() => {
     fetchReviews();
+    resetVisibleCount();
   }, [userId, activeReviewType]);
+
+  const resetVisibleCount = () => {
+    setVisibleCounts({
+      ...visibleCounts,
+      [activeReviewType]: 2
+    });
+  };
 
   const fetchReviews = async () => {
     const endpoint = activeReviewType === 'rental'
@@ -37,12 +45,6 @@ const OwnerReview = () => {
     }
   };
 
-  const calculateAverageScore = (ownerScore, renterScore) => {
-    let validScores = [];
-    if (ownerScore) validScores.push(ownerScore);
-    if (renterScore) validScores.push(renterScore);
-    return validScores.length ? validScores.reduce((acc, score) => acc + score, 0) / validScores.length : 0;
-  };
   const StarRating = ({ score }) => {
     const fullStars = Math.floor(score);
     const emptyStars = 5 - fullStars;
@@ -69,6 +71,17 @@ const OwnerReview = () => {
   const handleGoBack = () => {
     console.log('돌아가기 버튼 클릭');
     navigate(-1);
+  };
+
+  const dateTimeFormatOptions = {
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+    hour12: false // 24시간 형식
+  };
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', dateTimeFormatOptions);
   };
 
   return (
@@ -113,6 +126,7 @@ const OwnerReview = () => {
                 {review.itemTitle} &gt;
               </ItemTitle>
               <Comment>{review.reviewComment}</Comment>
+              <Time>{formatDateTime(review.createdAt)}</Time>
             </ReviewItem>
           )))}
         </ReviewList>
@@ -326,7 +340,15 @@ const Comment = styled.div`
   font-size: 1.2rem;
   color: #FFF;
   margin-top: 1.5rem;
-  margin-bottom: 2rem;
+  margin-left: 1rem;
+  white-space: pre-wrap; /* 내용에 줄바꿈 적용 */
+`;
+
+const Time = styled.div`
+  font-size: 1rem;
+  color: #ccc;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
   margin-left: 1rem;
   white-space: pre-wrap; /* 내용에 줄바꿈 적용 */
 `;

@@ -121,6 +121,17 @@ const MyReview = () => {
     );
   };
 
+  const dateTimeFormatOptions = {
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+    hour12: false // 24시간 형식
+  };
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', dateTimeFormatOptions);
+  };
+
     return (
         <>
         <GlobalStyle /> 
@@ -168,6 +179,7 @@ const MyReview = () => {
                       </ProfileItem>
                       <ItemTitle onClick={() => goToItemDetail(review.itemId)}>{review.itemTitle} &gt;</ItemTitle>
                       <Comment>{review.reviewComment}</Comment>
+                      <Time>{formatDateTime(review.createdAt)}</Time>
                     </ReviewItem>
                   ))}
                 </ReviewList>
@@ -409,7 +421,15 @@ const Comment = styled.div`
   font-size: 1.2rem;
   color: #FFF;
   margin-top: 1.5rem;
-  margin-bottom: 2rem;
+  margin-left: 1rem;
+  white-space: pre-wrap; /* 내용에 줄바꿈 적용 */
+`;
+
+const Time = styled.div`
+  font-size: 1rem;
+  color: #ccc;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
   margin-left: 1rem;
   white-space: pre-wrap; /* 내용에 줄바꿈 적용 */
 `;
