@@ -149,10 +149,10 @@ const MyReview = () => {
 
                 <RentingTitleContainer>
                    <RentingTitle onClick={() => handleReviewTypeChange('rental')} isActive={activeReviewType === 'rental'}>
-                    대여 후기
+                    대여 리뷰
                   </RentingTitle>
                    <DealTitle onClick={() => handleReviewTypeChange('deal')} isActive={activeReviewType === 'deal'}>
-                    거래 후기
+                    거래 리뷰
                   </DealTitle>
                 </RentingTitleContainer>
 

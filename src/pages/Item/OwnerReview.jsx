@@ -90,14 +90,17 @@ const OwnerReview = () => {
         </ProfileContainer>
         <RentingInfoBox>
           <Reserved onClick={() => setActiveReviewType('rental')} isActive={activeReviewType === 'rental'}>
-            대여 후기
+            대여 리뷰
           </Reserved>
           <Returned onClick={() => setActiveReviewType('deal')} isActive={activeReviewType === 'deal'}>
-            거래 후기
+            거래 리뷰
           </Returned>
         </RentingInfoBox>
         <ReviewList>
-          {reviews.slice(0, visibleCounts[activeReviewType]).map((review, index) => (
+          {reviews.length === 0 ? (
+            <NoReviewMessage>리뷰가 없습니다.</NoReviewMessage>
+          ) : (
+          reviews.slice(0, visibleCounts[activeReviewType]).map((review, index) => (
             <ReviewItem key={index}>
               <ProfileItem>
                 <ProfileImg src={activeReviewType === 'rental' ? review.renterProfile : review.ownerProfile} alt="Profile" />
@@ -107,11 +110,11 @@ const OwnerReview = () => {
                 </NickNameAndRating>
               </ProfileItem>
               <ItemTitle onClick={() => navigate(`/rent/itemdetail/${review.itemId}`)}>
-                {review.itemTitle}
+                {review.itemTitle} &gt;
               </ItemTitle>
               <Comment>{review.reviewComment}</Comment>
             </ReviewItem>
-          ))}
+          )))}
         </ReviewList>
         {visibleCounts[activeReviewType] < reviews.length && (
           <MoreViewButton onClick={handleLoadMore}>더 보기</MoreViewButton>
@@ -342,4 +345,12 @@ const MoreViewButton = styled.button `
   background-position: left center; 
   cursor: pointer;
   margin-top: 1rem;
+`;
+
+const NoReviewMessage = styled.div `
+  margin-top: 3rem;
+  font-family: 'Pretendard';
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #9C9C9C;
 `;
