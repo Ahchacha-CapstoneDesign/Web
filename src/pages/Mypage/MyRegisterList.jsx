@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import Pagination, {PaginationContainer} from '../Pagination';
 import ConfirmOrCancleModal from '../ConfirmOrCancleModal';
 import ConfirmOrCancleModalDetail from '../ConfirmOrCancleModalDetail';
+import ReviewModal from '../ReviewModalToRetner'
 
 const LocalPaginationContainer = styled(PaginationContainer)`
   justify-content: flex-end;
@@ -23,6 +24,8 @@ const MyRegisterList = () => {
   const [showModal, setShowModal] = useState(false);
   const [processingItemId, setProcessingItemId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+
 
   const [statusData, setStatusData] = useState({
     ALL: { items: [], totalPages: 0 },
@@ -147,6 +150,21 @@ const MyRegisterList = () => {
   const handleRent = (itemId) => {
     setProcessingItemId(itemId);
     setModalOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setModalOpen(false);  // 기존 모달을 닫고
+    setReviewModalOpen(true);  // 리뷰 모달을 엽니다.
+  };
+
+  const goBackToConfirm = () => {
+    setReviewModalOpen(false); // 리뷰 모달 닫기
+    setModalOpen(true); // 이전 모달 열기
+  };
+
+  const handleCloseAllModals = () => {
+    setModalOpen(false);
+    setReviewModalOpen(false);
   };
 
   const confirmRent = async () => {
@@ -290,6 +308,30 @@ const MyRegisterList = () => {
                       )}
                     </>
                   )}
+                  {item.rentingStatus === 'RETURNED' && (
+                      <>
+                        <Handlebutton onClick={() => handleRent(item.id)}>리뷰 쓰기</Handlebutton>
+                        {modalOpen && (
+                          <ConfirmOrCancleModalDetail
+                            title="리뷰를 작성하시겠습니까?"
+                            message={<span>대여자에 대한 별점을 주셔야 <br/>다른 물건 등록이 가능합니다</span>}                          
+                            isOpen={modalOpen}
+                            setIsOpen={setModalOpen}
+                            onConfirm={handleConfirm}
+                          />
+                        )}
+                        {reviewModalOpen && (
+                          <ReviewModal
+                            onBack={goBackToConfirm}
+                            isOpen={reviewModalOpen}
+                            setIsOpen={setReviewModalOpen}
+                            reservationId={processingItemId}
+                            handleCloseAllModals={handleCloseAllModals}
+                            // 여기에 리뷰 모달에 필요한 추가적인 props를 전달할 수 있습니다.
+                          />
+                        )}
+                      </>
+                    )}
                 </ItemStatusDetail>
               </ItemContainer>
             ))}
