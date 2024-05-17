@@ -13,6 +13,7 @@ const MyReview = () => {
   const [activeReviewType, setActiveReviewType] = useState('rental');
   const [isActiveMyReview, setIsActiveMyReview] = useState(true);
   const [reviews, setReviews] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(2); // 처음에 보여줄 리뷰 수
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,6 +75,10 @@ const MyReview = () => {
     navigate(path);
   };
 
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 3); // 현재 보이는 리뷰 수를 3개 증가
+  };
+
   const StarRating = ({ score }) => {
     const fullStars = Math.floor(score);
     const emptyStars = 5 - fullStars;
@@ -126,7 +131,7 @@ const MyReview = () => {
                 </RentingTitleContainer>
 
                 <ReviewList>
-                  {reviews.map(review => (
+                  {reviews.slice(0, visibleCount).map(review => (
                     <ReviewItem key={review.reviewId}>
                       <ProfileItem>
                         <ProfileImg src={isOwnerEndpoint() ? review.ownerProfile || "/assets/img/Profile.png" : review.renterProfile || "/assets/img/Profile.png"} alt="Profile" />
@@ -135,12 +140,14 @@ const MyReview = () => {
                           <StarRating score={review.reviewScore} />
                         </NickNameAndRating>
                       </ProfileItem>
-                      <ItemTitle>c타입 충전기 </ItemTitle>
+                      <ItemTitle>c타입 충전기 &gt;</ItemTitle>
                       <Comment>{review.reviewComment}</Comment>
                     </ReviewItem>
                   ))}
                 </ReviewList>
-
+                {visibleCount < reviews.length && (
+                  <MoreViewButton onClick={handleLoadMore}>더 보기</MoreViewButton> // 리뷰가 더 있을 경우 더 보기 버튼 표시
+                )}
             </Container>
       </ >
     );
@@ -204,7 +211,7 @@ const DealTitle = styled.button`
   font-size: 1.3rem;
   font-style: normal;
   font-weight: 700;
-  margin-left: 2rem;
+  margin-left: 0.7rem;
   cursor: pointer;
 `;
 
@@ -359,7 +366,8 @@ const ProfileImg = styled.img`
 const ItemTitle = styled.button`
   font-size: 1rem;
   color: white; /* 아이템 제목 색상 */
-  margin-top: 10px;
+  margin-top: 1.5rem;
+  margin-left: 1rem;
   height: 2rem;
   border: 1px solid #B2B2B2;
   background-color: transparent;
@@ -368,10 +376,28 @@ const ItemTitle = styled.button`
   max-width: 10rem;
 `;
 
-const Comment = styled.p`
-  font-size: 16px;
-  color: #CCC; /* 리뷰 내용 색상 */
-  margin-top: 10px;
+const Comment = styled.div`
+  font-size: 1.2rem;
+  color: #FFF;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  margin-left: 1rem;
   white-space: pre-wrap; /* 내용에 줄바꿈 적용 */
 `;
 
+const MoreViewButton = styled.button `
+  margin-left: 15rem;
+  color: #9C9C9C;
+  background-color: transparent;
+  border: none;
+  font-family: 'Pretendard';
+  font-size: 1.2rem;
+  font-weight: 500;
+  padding-left: 30px; /* 텍스트 왼쪽에 공간 추가 */
+  background-image: url('/assets/img/Plus.png');
+  background-repeat: no-repeat;
+  background-size: 20px 20px; /* 이미지 크기 조정 */
+  background-position: left center; 
+  cursor: pointer;
+  margin-top: 1rem;
+`;
