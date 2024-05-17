@@ -148,7 +148,7 @@ const OfficialPersonRegisterDetails = (props) => {
         const returnDateTime = endDate.toISOString().split('T')[0] + "T" + endTime.padStart(2, '0') + ":" + endMinutes.padStart(2, '0') + ":00";
 
         formDataToSend.append('title', formData.title);
-        formDataToSend.append('pricePerHour', formData.price);formDataToSend
+        formDataToSend.append('pricePerHour', formData.price);
         formDataToSend.append('canBorrowDateTime', borrowDateTime);
         formDataToSend.append('returnDateTime', returnDateTime);
         formDataToSend.append('borrowPlace', formData.borrowPlace);
