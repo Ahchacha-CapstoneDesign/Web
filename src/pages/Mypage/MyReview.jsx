@@ -13,7 +13,6 @@ const MyReview = () => {
   const [activeReviewType, setActiveReviewType] = useState('rental');
   const [isActiveMyReview, setIsActiveMyReview] = useState(true);
   const [reviews, setReviews] = useState([]);
-  const [visibleCount, setVisibleCount] = useState(2); // 처음에 보여줄 리뷰 수
   const navigate = useNavigate();
 
   const [visibleCounts, setVisibleCounts] = useState({
@@ -102,8 +101,8 @@ const MyReview = () => {
     setIsActiveMyReview(isMyReview);
   };
 
-  const handlePageChange = (path) => {
-    navigate(path);
+  const goToItemDetail = (itemId) => {
+    navigate(`/rent/itemdetail/${itemId}`);
   };
 
   const StarRating = ({ score }) => {
@@ -150,10 +149,10 @@ const MyReview = () => {
 
                 <RentingTitleContainer>
                    <RentingTitle onClick={() => handleReviewTypeChange('rental')} isActive={activeReviewType === 'rental'}>
-                    대여 후기
+                    대여 리뷰
                   </RentingTitle>
                    <DealTitle onClick={() => handleReviewTypeChange('deal')} isActive={activeReviewType === 'deal'}>
-                    거래 후기
+                    거래 리뷰
                   </DealTitle>
                 </RentingTitleContainer>
 
@@ -167,7 +166,7 @@ const MyReview = () => {
                           <StarRating score={review.reviewScore} />
                         </NickNameAndRating>
                       </ProfileItem>
-                      <ItemTitle>c타입 충전기 &gt;</ItemTitle>
+                      <ItemTitle onClick={() => goToItemDetail(review.itemId)}>{review.itemTitle} &gt;</ItemTitle>
                       <Comment>{review.reviewComment}</Comment>
                     </ReviewItem>
                   ))}
@@ -260,10 +259,11 @@ const Reserved = styled.button`
   background-color: transparent;
   border: none;
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   color: ${(props) => (props.isActive ? '#00FFE0' : 'white')};
   border-bottom: ${(props) => (props.isActive ? '2px solid #00FFE0' : 'none')};
+  border-radius: 5px;
 `;
 
 const Returned = styled.button`
@@ -272,10 +272,11 @@ const Returned = styled.button`
   background-color: transparent;
   border: none;
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   color: ${(props) => (props.isActive ? '#00FFE0' : 'white')};
   border-bottom: ${(props) => (props.isActive ? '2px solid #00FFE0' : 'none')};
+  border-radius: 5px;
 `;
 
 const Container = styled.div`

@@ -391,15 +391,19 @@ const ItemTitle = styled.div`
   font-family: "Pretendard";
   font-size: 1.2rem;
   font-weight: 500;
-  width: 13rem;
+  width: 11rem; // 최대 너비 설정
+  max-width: 11rem;
   margin-left: 2rem;
+  overflow: hidden; // 내용이 넘치면 숨김 처리
+  text-overflow: ellipsis; // 내용이 넘칠 때 ... 표시
+  white-space: nowrap; // 텍스트를 한 줄로 표시
 `;
 
 const ItemOwnerImage = styled.img`
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;
-  margin-left: -2rem;
+  margin-left: 2rem;
 `;
 
 const ItemOwnerNickname = styled.div `
@@ -446,10 +450,14 @@ const DetailsContext = styled.div`
 `;
 
 const Place = styled.div`
-  width: 5rem;
   font-size: 1.2rem;
   font-weight: 500;
   align-items: center;
+  width: 5rem; // 최대 너비 설정
+  max-width: 7rem;
+  overflow: hidden; // 내용이 넘치면 숨김 처리
+  text-overflow: ellipsis; // 내용이 넘칠 때 ... 표시
+  white-space: nowrap; // 텍스트를 한 줄로 표시
 `;
 
 const Time = styled.div`
