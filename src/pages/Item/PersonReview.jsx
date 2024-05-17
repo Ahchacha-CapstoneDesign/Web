@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useState, useEffect } from "react";
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
@@ -102,8 +101,8 @@ const MyReview = () => {
     setIsActiveMyReview(isMyReview);
   };
 
-  const goToItemDetail = (itemId) => {
-    navigate(`/rent/itemdetail/${itemId}`);
+  const handlePageChange = (path) => {
+    navigate(path);
   };
 
   const StarRating = ({ score }) => {
@@ -141,21 +140,12 @@ const MyReview = () => {
                 
                 <RentingInfoBox>
                   <Reserved onClick={() => handleReviewSectionChange(true)} isActive={isActiveMyReview}>
-                    내가 쓴 리뷰
+                    대여 후기
                   </Reserved>
                   <Returned onClick={() => handleReviewSectionChange(false)} isActive={!isActiveMyReview}>
-                    나에게 쓴 리뷰
+                    거래 후기
                   </Returned>
                 </RentingInfoBox>
-
-                <RentingTitleContainer>
-                   <RentingTitle onClick={() => handleReviewTypeChange('rental')} isActive={activeReviewType === 'rental'}>
-                    대여 후기
-                  </RentingTitle>
-                   <DealTitle onClick={() => handleReviewTypeChange('deal')} isActive={activeReviewType === 'deal'}>
-                    거래 후기
-                  </DealTitle>
-                </RentingTitleContainer>
 
                 <ReviewList>
                   {reviews.slice(0, currentVisibleCount).map(review => (
@@ -167,7 +157,7 @@ const MyReview = () => {
                           <StarRating score={review.reviewScore} />
                         </NickNameAndRating>
                       </ProfileItem>
-                      <ItemTitle onClick={() => goToItemDetail(review.itemId)}>{review.itemTitle} &gt;</ItemTitle>
+                      <ItemTitle>c타입 충전기 &gt;</ItemTitle>
                       <Comment>{review.reviewComment}</Comment>
                     </ReviewItem>
                   ))}
@@ -260,11 +250,10 @@ const Reserved = styled.button`
   background-color: transparent;
   border: none;
   font-size: 1.2rem;
-  font-weight: 600;
+  font-weight: 800;
   cursor: pointer;
   color: ${(props) => (props.isActive ? '#00FFE0' : 'white')};
   border-bottom: ${(props) => (props.isActive ? '2px solid #00FFE0' : 'none')};
-  border-radius: 5px;
 `;
 
 const Returned = styled.button`
@@ -273,11 +262,10 @@ const Returned = styled.button`
   background-color: transparent;
   border: none;
   font-size: 1.2rem;
-  font-weight: 600;
+  font-weight: 800;
   cursor: pointer;
   color: ${(props) => (props.isActive ? '#00FFE0' : 'white')};
   border-bottom: ${(props) => (props.isActive ? '2px solid #00FFE0' : 'none')};
-  border-radius: 5px;
 `;
 
 const Container = styled.div`
