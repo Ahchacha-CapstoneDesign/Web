@@ -1,7 +1,7 @@
 [build]
     command = "CI= npm run build"
-    publish = "publish"
+    publish = "build"
 [[redirects]]
     from = "/*"
-    to = "/build/index.html"
+    to = "/index.html"
     status = 200
