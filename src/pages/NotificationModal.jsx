@@ -1,67 +1,68 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
+import apiClient from '../path/apiClient';
 
 const NotificationModal = ({ isOpen, onClose }) => {
+    const [notifications, setNotifications] = useState([]);
 
     const handleWheel = (e) => {
         e.stopPropagation();
-      };
+    };
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const response = await apiClient.get('/notification');
+                setNotifications(response.data);
+            } catch (error) {
+                console.error('알림을 가져오는 데 실패했습니다:', error);
+            }
+        };
+
+        if (isOpen) {
+            fetchNotifications();
+        }
+    }, [isOpen]);
+
+    const getNotificationMessage = (notification) => {
+        switch (notification.notificationType) {
+            case 'COMMENT':
+                return `${notification.writer}님의 게시물에 댓글이 달렸습니다`;
+            case 'HEART':
+                return `${notification.writer}님이 ${notification.communityTitle} 게시글에 좋아요를 눌렀습니다.`;
+            case 'RESERVATION':
+                return `${notification.writer}님이 ${notification.itemTitle} 물건을 대여하였습니다.`;
+            default:
+                return '알 수 없는 알림입니다.';
+        }
+    };
+
     return (
         <>
-        {isOpen && (
-            <>
-                <Overlay onClick={onClose}>
-                    <ModalContainer onClick={(e) => e.stopPropagation()} onWheel={handleWheel}>
-                        <ModalHeader>
-                            <Title>아차차! 알림 봐야지</Title>
-                            <CloseButton onClick={onClose}>X</CloseButton>
-                        </ModalHeader>
-                        <Divider />
-                        <Content>
-                            <Message>
-                                <Icon src="/assets/img/Ah_logo.png" alt="Ah!" />
-                                <Text>으라차차의 물건을 대여 완료했습니다.</Text>
-                            </Message> 
-                            <Message>
-                                <Icon src="/assets/img/Ah_logo.png" alt="Ah!" />
-                                <Text>으라차차의 물건을 대여 완료했습니다.</Text>
-                            </Message>   
-                            <Message>
-                                <Icon src="/assets/img/Ah_logo.png" alt="Ah!" />
-                                <Text>으라차차의 물건을 대여 완료했습니다.</Text>
-                            </Message>   
-                            <Message>
-                                <Icon src="/assets/img/Ah_logo.png" alt="Ah!" />
-                                <Text>으라차차의 물건을 대여 완료했습니다.</Text>
-                            </Message>
-                            <Message>
-                                <Icon src="/assets/img/Ah_logo.png" alt="Ah!" />
-                                <Text>으라차차의 물건을 대여 완료했습니다.</Text>
-                            </Message>  
-                            <Message>
-                                <Icon src="/assets/img/Ah_logo.png" alt="Ah!" />
-                                <Text>으라차차의 물건을 대여 완료했습니다.</Text>
-                            </Message>  
-                            <Message>
-                                <Icon src="/assets/img/Ah_logo.png" alt="Ah!" />
-                                <Text>으라차차의 물건을 대여 완료했습니다.</Text>
-                            </Message>  
-                            <Message>
-                                <Icon src="/assets/img/Ah_logo.png" alt="Ah!" />
-                                <Text>으라차차의 물건을 대여 완료했습니다.</Text>
-                            </Message>  
-                            <Message>
-                                <Icon src="/assets/img/Ah_logo.png" alt="Ah!" />
-                                <Text>으라차차의 물건을 대여 완료했습니다.</Text>
-                            </Message>  
-                        </Content>
-                </ModalContainer>
-                </Overlay>
-            </>
+            {isOpen && (
+                <>
+                    <Overlay onClick={onClose}>
+                        <ModalContainer onClick={(e) => e.stopPropagation()} onWheel={handleWheel}>
+                            <ModalHeader>
+                                <Title>아차차! 알림 봐야지</Title>
+                                <CloseButton onClick={onClose}>X</CloseButton>
+                            </ModalHeader>
+                            <Divider />
+                            <Content>
+                                {notifications.map((notification, index) => (
+                                    <Message key={index}>
+                                        <Icon src="/assets/img/Ah_logo.png" alt="Ah!" />
+                                        <Text>{getNotificationMessage(notification)}</Text>
+                                    </Message>
+                                ))}
+                            </Content>
+                        </ModalContainer>
+                    </Overlay>
+                </>
             )}
         </>
-        );
+    );
 };
 
 export default NotificationModal;
