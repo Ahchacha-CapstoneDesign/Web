@@ -67,10 +67,32 @@ const RentFirstPage = () => {
     }
   };
 
-  const handleSearch = () => {
-    // 검색어를 RentMainPage로 전달
-    navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
+  const handleSearch = async () => {
+    try {
+      const [titleResponse, categoryResponse] = await Promise.all([
+        apiClient.get(`/items/search-title?title=${searchTerm}&page=1`),
+        apiClient.get(`/items/search-category?category=${searchTerm}&page=1`)
+      ]);
+
+      const combinedResults = [
+        ...titleResponse.data.content,
+        ...categoryResponse.data.content
+      ];
+
+      // 중복 제거
+      const uniqueResults = Array.from(new Set(combinedResults.map(item => item.id)))
+        .map(id => {
+          return combinedResults.find(item => item.id === id);
+        });
+
+      // 검색 결과를 RentMainPage로 전달
+      navigate('/rent/mainpage', { state: { searchResults: uniqueResults } });
+
+    } catch (error) {
+      console.error('Error during search:', error);
+    }
   };
+
 
   return (
     <>
