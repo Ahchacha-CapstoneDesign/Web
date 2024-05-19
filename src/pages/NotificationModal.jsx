@@ -28,11 +28,15 @@ const NotificationModal = ({ isOpen, onClose }) => {
     const getNotificationMessage = (notification) => {
         switch (notification.notificationType) {
             case 'COMMENT':
-                return `${notification.writer}님의 게시물에 댓글이 달렸습니다`;
+                return `${notification.communityTitle}에 댓글이 달렸습니다.`;
             case 'HEART':
                 return `${notification.writer}님이 ${notification.communityTitle} 게시글에 좋아요를 눌렀습니다.`;
             case 'RESERVATION':
-                return `${notification.writer}님이 ${notification.itemTitle} 물건을 대여하였습니다.`;
+                return `${notification.itemTitle} 물건을 예약하였습니다.`;
+            case 'RETURN_ONE_HOUR':
+                return `${notification.itemTitle}의 반납 시간이 1시간 남았습니다.`;
+            case 'RETURN_TWENTY_FOUR_HOURS':
+                return `${notification.itemTitle}의 반납 시간이 24시간 남았습니다.`;
             default:
                 return '알 수 없는 알림입니다.';
         }

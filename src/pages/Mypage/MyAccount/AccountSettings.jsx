@@ -21,6 +21,7 @@ const AccountSettings = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successModalMessage, setSuccessModalMessage] = useState('');
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
     const DEFAULT_IMAGE_URL = '/assets/img/Profile.png';
@@ -114,7 +115,7 @@ const AccountSettings = () => {
         const imageUrl = response.data; // 서버로부터 받은 이미지 URL
         localStorage.setItem('profileImageUrl', imageUrl); // localStorage에 이미지 URL 저장
         setProfileImage(imageUrl); // 상태 업데이트로 UI에 반영
-        setShowSuccessModal(true); // 성공 모달을 표시
+        setShowSuccessModal(true); 
       } catch (error) {
         console.error('이미지 업로드 실패:', error);
         alert('이미지 업로드에 실패했습니다.');
@@ -125,9 +126,9 @@ const AccountSettings = () => {
       try {
         // 서버로 POST 요청을 보냅니다.
         await apiClient.post('/users/reset-profile');
-        setShowSuccessModal(true); // 성공 모달을 표시
         localStorage.removeItem('profileImageUrl'); // 로컬 스토리지에서 이미지 URL 삭제
         setProfileImage(DEFAULT_IMAGE_URL); // 상태 업데이트로 기본 이미지 사용
+        setShowSuccessModal(true); // 성공 모달을 표시
       } catch (error) {
         console.error('기본 이미지로 재설정 실패:', error);
         alert('기본 이미지로 재설정하는 동안 오류가 발생했습니다.');
@@ -138,6 +139,7 @@ const AccountSettings = () => {
       // 전화번호가 11자리인 경우 010-0000-0000 형식으로 변환
       return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
     };
+
     const handleModalClose = () => {
       setShowSuccessModal(false);
     }
@@ -160,26 +162,9 @@ const AccountSettings = () => {
                       <UserNickname>{userNickname}</UserNickname>
                   </NameAndNickname>
                   <EditButton onClick={() => fileInputRef.current.click()}>이미지 변경</EditButton>
-                  {showSuccessModal && (
-                    <ConfirmModal
-                      message="이미지 변경이 완료되었습니다!"
-                      isOpen={showSuccessModal}
-                      setIsOpen={setShowSuccessModal}
-                      onConfirm={handleModalClose}
-                    />
-                  )}
                   <BasicEditButton onClick={resetToDefaultImage}>기본이미지 변경</BasicEditButton>
-                  {showSuccessModal && (
-                    <ConfirmModal
-                      message="이미지 변경이 완료되었습니다!"
-                      isOpen={showSuccessModal}
-                      setIsOpen={setShowSuccessModal}
-                      onConfirm={handleModalClose}
-                    />
-                  )}
               </NameAndButton>
             </ProfileSection>
-
             <Divider />
             <DetailsSection>
                 <Title>프로필 정보</Title>
@@ -227,7 +212,15 @@ const AccountSettings = () => {
                 </DetailItem>
                 <DetailDivider />
             </DetailsSection>
-            </AccountContainer>
+          </AccountContainer>
+          {showSuccessModal && (
+                <ConfirmModal
+                    message="이미지 변경이 완료되었습니다!"
+                    isOpen={showSuccessModal}
+                    setIsOpen={setShowSuccessModal}
+                    onConfirm={handleModalClose}
+                />
+          )}
         </>
     );
 };

@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import styled, {createGlobalStyle} from 'styled-components';
 import {useNavigate, useLocation} from 'react-router-dom';
 import apiClient from '../../path/apiClient';
+import ConfirmOrCancleModal from '../ConfirmOrCancleModal';
+import ConfirmModal from '../ConfirmModal';
 
 
 const PersonReservationDetailsPage = () => {
@@ -10,6 +12,8 @@ const PersonReservationDetailsPage = () => {
     const [userNickname, setUserNickname] = useState('');
     const [userPhoneNumber, setUserPhoneNumber] = useState('');
     const [reservationDetails, setReservationDetails] = useState(location.state || {});
+    const [isWarningModalOpen, setIsWarningModalOpen] = useState(false); // 경고 모달 상태
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
     useEffect(() => {
       const nickname = localStorage.getItem('userNickname');
@@ -46,20 +50,21 @@ const PersonReservationDetailsPage = () => {
       navigate(-1);
     };
     
+    const handlePaymentClick = () => {
+      if (!consents.personalInfoConsent || !consents.severeDamageConsent) {
+          setIsWarningModalOpen(true); // 동의 항목 미체크 시 경고 모달 열기
+      } else {
+          setIsConfirmModalOpen(true); // 동의 항목 체크 시 예약 확인 모달 열기
+      }
+    };
 
     // 결제하기 버튼 클릭 처리 함수
     const handleSubmit = async () => {
-      if (!consents.personalInfoConsent || !consents.severeDamageConsent) {
-          alert('모든 동의 항목에 체크해야 예약이 가능합니다.');
-          return;
-      }
-
       try {
           await apiClient.post('/reservation/person', {
               ...reservationDetails,
               consents
           });
-          alert('예약이 성공적으로 완료되었습니다.');
           console.log(reservationDetails);
           navigate('/mypage/rentinglist'); 
       } catch (error) {
@@ -131,10 +136,23 @@ const PersonReservationDetailsPage = () => {
                     <FeeLabel>결제 금액 </FeeLabel>
                     <Value>{reservationDetails.totalFee}</Value>
                 </FeeLabelValueWrapper>
-                <ConfirmButton onClick={handleSubmit} >결제하기</ConfirmButton>
+                <ConfirmButton onClick={handlePaymentClick} >결제하기</ConfirmButton>
             </FeeWrapper>
         </PageWrapper>
-            </>
+
+        <ConfirmModal 
+          message={<span>모든 동의 항목에 체크해야 <br /> 예약이 가능합니다.</span>}
+          isOpen={isWarningModalOpen}
+          setIsOpen={setIsWarningModalOpen}
+          onConfirm={() => setIsWarningModalOpen(false)}
+        />
+        <ConfirmOrCancleModal 
+          message="예약하시겠습니까?"
+          isOpen={isConfirmModalOpen}
+          setIsOpen={setIsConfirmModalOpen}
+          onConfirm={handleSubmit}
+        />
+      </>
     );
 };
 
