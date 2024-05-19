@@ -343,13 +343,14 @@ const TitleSection = styled.div`
   margin-bottom: 2rem;
 `;
 
-const Title = styled.span`
-  width: 38.125rem;
+const Title = styled.div`
+  width: 20rem;
   font-size: 1.7rem;
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  margin-right: 5rem;
+  margin-left: -23rem;
+  display: flex;
 `;
 
 const SubTitle = styled.span`
@@ -361,11 +362,11 @@ const SubTitle = styled.span`
   font-weight: 600;
   border-radius: 1.25rem;
   border: 3px solid #FF6B00;
-  margin-left:20rem;
   position: relative; // 상대적 위치 설정, 필요에 따라 조정 가능
   transform: translateY(-80%); // Y축으로 -50% 만큼 이동하여 수직 중앙 정렬
   // 주의: 이 방식을 사용하려면 SubTitle의 상위 요소가 position: relative;로 설정되어야 합니다.
   cursor: pointer;
+  margin-left: 5rem;
 `;
 
 const InformationSection = styled.div`

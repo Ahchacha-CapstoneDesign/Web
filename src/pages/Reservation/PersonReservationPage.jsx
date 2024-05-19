@@ -6,11 +6,10 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import {useLocation, useParams,useNavigate} from 'react-router-dom';
 import apiClient from '../../path/apiClient';
+import ConfirmModal from '../ConfirmModal';
 
 const hourOptions = Array.from({ length: 24 }, (_, i) => (i < 10 ? `0${i}` : `${i}`));
 const minuteOptions = ['00', '30'];
-
-
 
 const PersonReservationPage = () => {
     const [startTime, setStartTime] = useState(hourOptions[0]); // 시작 시간 상태
@@ -23,6 +22,9 @@ const PersonReservationPage = () => {
     const { itemId } = useParams();
     const location = useLocation();
     const itemDetails = location.state?.itemDetails;
+    const [availableStart, setAvailableStart] = useState(new Date(itemDetails.canBorrowDateTime));
+    const [availableEnd, setAvailableEnd] = useState(new Date(itemDetails.returnDateTime));
+    const [modalOpen, setModalOpen] = useState(false);
     const navigate = useNavigate();
 
     const handleDateChange = dates => {
@@ -32,6 +34,36 @@ const PersonReservationPage = () => {
     const handleGoBack = () => {
         console.log('돌아가기 버튼 클릭');
         navigate(-1);
+    };
+
+    const tileDisabled = ({ date, view }) => {
+      // 'month' 뷰일 때만 비활성화 조건 적용
+      if (view === 'month') {
+          // 선택 가능한 날짜 범위를 벗어나면 비활성화
+          return date < availableStart || date > availableEnd;
+      }
+    };
+
+    // 달력 타일 클래스 설정
+    const tileClassName = ({ date, view }) => {
+      const now = new Date();
+      // Intl을 사용하여 달력의 날짜를 'yyyy년 mm월 dd일' 형식의 문자열로 포맷
+      const dateFormatter = new Intl.DateTimeFormat('ko-KR', {
+          year: 'numeric', month: 'long', day: 'numeric'
+      });
+      const dateStr = dateFormatter.format(date);
+      const nowStr = dateFormatter.format(now);
+
+      if (view === 'month') {
+          // 현재 날짜인 경우
+          if (dateStr === nowStr) {
+              return 'today';
+          }
+          // 대여 가능 범위 밖의 날짜인 경우
+          if (date < availableStart || date > availableEnd) {
+              return 'disabled-date';
+          }
+      }
     };
 
 
@@ -58,7 +90,19 @@ const PersonReservationPage = () => {
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()} ${hour}시 ${minute}분`;
     };
 
+    const validateReservation = () => {
+      const startDateTime = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), parseInt(startTime), parseInt(startMinutes));
+      const endDateTime = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), parseInt(endTime), parseInt(endMinutes));
+
+      // 대여 및 반납 가능한 시간인지 확인
+      return startDateTime >= new Date(itemDetails.canBorrowDateTime) && endDateTime <= new Date(itemDetails.returnDateTime);
+    };
+
     const handleNextPage = () => {
+      if (!validateReservation()) {
+        setModalOpen(true); // 유효하지 않으면 모달을 열어 경고 표시
+        return;
+      }
       const startDateTime = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), parseInt(startTime), parseInt(startMinutes));
       const endDateTime = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), parseInt(endTime), parseInt(endMinutes));
 
@@ -94,6 +138,27 @@ const PersonReservationPage = () => {
     navigate(`/rent/personreservationdetails/${itemDetails.id}`, { state: reservationDetails });
   };
 
+  function formatDate2(dateString) {
+    const date = new Date(dateString);
+    const formatter = new Intl.DateTimeFormat('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    return formatter.format(date); // 예: '2024년 5월 17일'
+  }
+
+  // 날짜 문자열에서 시간만 추출하는 함수
+  function getTime(dateString) {
+    const date = new Date(dateString);
+    const formatter = new Intl.DateTimeFormat('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false // 24시간제를 사용하려면 false로 설정합니다.
+    });
+    return formatter.format(date);
+  }
+
     
     return (
         <>
@@ -101,11 +166,27 @@ const PersonReservationPage = () => {
             <ContentContainer>
                 <BackButton src="/assets/img/BackArrow.png" alt="Back" onClick={handleGoBack} />
                 <LeftColumn>
+                  <Info>
+                    <InfoItem>
+                      <InfoTitle>대여 비용</InfoTitle>
+                      <InfoContent>{itemDetails.pricePerHour}원(1시간)</InfoContent>
+                    </InfoItem>
+                    <InfoItem>
+                      <InfoTitle>대여 가능 날짜</InfoTitle>
+                      <InfoContent>{formatDate2(itemDetails.canBorrowDateTime)} ~ {formatDate2(itemDetails.returnDateTime)}</InfoContent>
+                    </InfoItem>
+                    <InfoItem>
+                      <InfoTitle>대여 및 반납 가능 시간</InfoTitle>
+                      <InfoContent>{getTime(itemDetails.canBorrowDateTime)} ~ {getTime(itemDetails.returnDateTime)}</InfoContent>
+                    </InfoItem>
+                  </Info>
                     <DateSection>날짜 선택</DateSection>
                     <StyledCalendar
                         onChange={handleDateChange}
                         value={dateRange}
                         selectRange={true}
+                        tileDisabled={tileDisabled}
+                        tileClassName={tileClassName}
                     />
                 </LeftColumn>
                 <RightColumn>
@@ -157,6 +238,14 @@ const PersonReservationPage = () => {
                         </TotalTimeDisplay>
                     )}
                     <ConfirmButton onClick={handleNextPage}>예약하기</ConfirmButton>
+                    {modalOpen && (
+                      <ConfirmModal
+                          message="대여, 반납이 불가능한 시간입니다!"
+                          isOpen={modalOpen}
+                          setIsOpen={setModalOpen}
+                          onConfirm={() => setModalOpen(false)}
+                      />
+                    )}
                 </RightColumn>
             </ContentContainer>
         </>
@@ -182,6 +271,10 @@ const StyledCalendar = styled(Calendar)`
   
   .react-calendar__tile--now {
     background-color: #D6F800; /* 오늘 날짜 */
+  }
+
+  .today {
+    background-color: #D6F800; /* 현재 날짜의 색을 노란색으로 설정 */
   }
 
   .react-calendar__tile--active,
@@ -215,6 +308,11 @@ const StyledCalendar = styled(Calendar)`
     font-weight: 800;
     line-height: normal;
     border-bottom: none; /* 네비게이션 바 아래 테두리 제거 */
+  }
+
+  .disabled-date {
+    background-color: white;
+    color: #a1a1a1;
   }
 `;
 
@@ -267,6 +365,38 @@ const ContentContainer = styled.div`
   color: #fff;
 `;
 
+const Info = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 5rem;
+  margin-bottom: 2rem;
+  margin-left: -2.5rem;
+  border: 0.05rem solid white;
+  padding: 5px;
+  width: 30rem;
+  margin-
+`;
+
+const InfoItem = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  width: 38.125rem;
+  height: 2rem;
+`;
+
+const InfoTitle = styled.div`
+  font-size: 1.1rem;
+  font-style: 'Pretendard';
+  font-weight: 650;
+  margin-right: 1rem;
+`;
+
+const InfoContent = styled.div`
+  color: #FFF;
+  font-size: 1.1rem;
+  font-style: 'Pretendard';
+  font-weight: 300;
+`;
 
 const LeftColumn = styled.div`
     display: flex;
@@ -281,6 +411,7 @@ const RightColumn = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center; // 자식 요소들을 가로축 중앙에 배치
+    margin-top: 4rem;
 `;
 
 
@@ -435,7 +566,7 @@ const TimeSectionContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 13rem;
+  margin-bottom: 10rem;
 `;
 
 const RentalNotice = styled.span`

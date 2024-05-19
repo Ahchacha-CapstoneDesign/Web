@@ -171,6 +171,7 @@ const GlobalStyle = createGlobalStyle`
     color: #fff;
     background-color: #000; // body 전체의 배경색을 검은색으로 설정
     font-family: "Pretendard";
+    overflow: hidden;
   }
 
   ::-webkit-scrollbar {
@@ -198,9 +199,9 @@ const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100vh;
   font-family: 'Pretendard', sans-serif;
-
+  margin-left: -7rem;
+  margin-top: -3rem;
 `;
 
 // 제목을 감싸는 컴포넌트, 여기에 돌아가기 버튼도 포함
@@ -229,9 +230,9 @@ const Title = styled.h1`
 
 const Line = styled.span`
   display: block; // span은 기본적으로 inline 요소이므로, 너비와 높이를 적용하기 위해 block으로 변경
-  width: 70.125rem; // 줄의 너비
+  width: 65rem;; // 줄의 너비
   height: 0.2rem; // 줄의 높이
-  margin-left:2rem;
+  margin-left: 10rem;
   margin-top: 0.5rem;
   margin-bottom: 1.87rem;
   background-color: #00FFE0; // 형광색 배경색 설정
@@ -242,8 +243,6 @@ const FormItem = styled.div`
   width: 34.125rem;
   height: 2.875rem;
   margin-top: 1.12rem;
-  margin-right: 25rem;
-
 `;
 
 const Label = styled.div`
@@ -280,16 +279,16 @@ const TextLabel = styled.span`
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  margin-left: 26rem;
+  margin-left: 28rem;
   text-align: left; // 텍스트를 왼쪽 정렬
 `;
 
 const Image = styled.img`
   width: 1.875rem;
   height: 1.875rem;
+  margin-left: -2rem;
+  cursor: pointer;
 `;
-
-
 
 const ConfirmButton = styled.button`
   background-color: #00FFE0;
@@ -305,8 +304,8 @@ const ConfirmButton = styled.button`
   align-self: flex-end; // 버튼을 오른쪽으로 정렬
   width: 19.125rem;
   height: 3.0625rem;
-  margin-top: 2rem; // 여백 조정
-  margin-right: 21.5rem;
+  margin-top: 1rem; // 여백 조정
+  margin-right: 18rem;
 `;
 
 // 이제 모든 스타일 컴포넌트가 왼쪽으로 정렬되어 표시됩니다.
