@@ -2,7 +2,8 @@ import React, {useEffect, useState} from 'react';
 import styled, {createGlobalStyle} from 'styled-components';
 import {useLocation, useNavigate} from 'react-router-dom';
 import apiClient from "../../path/apiClient";
-
+import ConfirmOrCancleModal from '../ConfirmOrCancleModal';
+import ConfirmModal from '../ConfirmModal';
 
 const OfficialReservationDetailsPage = () => {
     const location = useLocation();
@@ -16,6 +17,8 @@ const OfficialReservationDetailsPage = () => {
     const [userStatus, setUserStatus] = useState('');
     const [reservationDetails, setReservationDetails] = useState(location.state || {});
     const navigate = useNavigate();
+    const [isWarningModalOpen, setIsWarningModalOpen] = useState(false); // 경고 모달 상태
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
 
     useEffect(() => {
@@ -56,28 +59,28 @@ const OfficialReservationDetailsPage = () => {
     const handleGoBack = () => {
       console.log('돌아가기 버튼 클릭');
       navigate(-1);
-  };
+    };
 
-    // 결제하기 버튼 클릭 처리 함수
+    const handlePaymentClick = () => {
+      if (!consents.personalInfoConsent || !consents.placeTimeConsent) {
+          setIsWarningModalOpen(true); // 동의 항목 미체크 시 경고 모달 열기
+      } else {
+          setIsConfirmModalOpen(true); // 동의 항목 체크 시 예약 확인 모달 열기
+      }
+    };
+
     const handleSubmit = async () => {
-        if (consents.personalInfoConsent && consents.placeTimeConsent) {
-            console.log('예약 처리 로직');
-        } else {
-            alert('모든 항목의 동의가 필요합니다.');
-        }
-        try {
-            await apiClient.post('/reservation/official', {
-                ...reservationDetails,
-                consents
-            });
-            alert('예약이 성공적으로 완료되었습니다.');
-            console.log(reservationDetails);
-            navigate('/mypage/rentinglist');
-        } catch (error) {
-            console.error('예약 실패:', error);
-            alert('예약에 실패했습니다. 다시 시도해주세요.');
-        }
-
+      try {
+          await apiClient.post('/reservation/person', {
+              ...reservationDetails,
+              consents
+          });
+          console.log(reservationDetails);
+          navigate('/mypage/rentinglist'); 
+      } catch (error) {
+          console.error('예약 실패:', error);
+          alert('예약에 실패했습니다. 다시 시도해주세요.');
+      }
     };
 
     const formatPhoneNumber = (phoneNumber) => {
@@ -155,10 +158,22 @@ const OfficialReservationDetailsPage = () => {
                        onClick={() => handleImageClick('placeTimeConsent')} />
             </CheckboxLabel>
 
-                <ConfirmButton onClick={handleSubmit} >예약하기</ConfirmButton>
+                <ConfirmButton onClick={handlePaymentClick} >예약하기</ConfirmButton>
 
         </PageWrapper>
-            </>
+        <ConfirmModal 
+          message={<span>모든 동의 항목에 체크해야 <br /> 예약이 가능합니다.</span>}
+          isOpen={isWarningModalOpen}
+          setIsOpen={setIsWarningModalOpen}
+          onConfirm={() => setIsWarningModalOpen(false)}
+        />
+        <ConfirmOrCancleModal 
+          message="예약하시겠습니까?"
+          isOpen={isConfirmModalOpen}
+          setIsOpen={setIsConfirmModalOpen}
+          onConfirm={handleSubmit}
+        />
+      </>
     );
 };
 

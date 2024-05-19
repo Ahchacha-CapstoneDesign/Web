@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import Pagination, {PaginationContainer} from "../Pagination";
 import apiClient from "../../path/apiClient";
 import ConfirmOrCancleModal from "../ConfirmOrCancleModal";
+import ConfirmModal from "../ConfirmModal";
 
 const LocalPaginationContainer = styled(PaginationContainer)`
   justify-content: flex-end;
@@ -23,6 +24,7 @@ const Register1 = () => {
     const [registerData, setRegisterData] = useState({ canreserveCount: 0, reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
     const [currentStatus, setCurrentStatus] = useState('ALL');
     const [modalOpen, setModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
     const [modalClose, setModalClose] = useState(false);
     const [deleteItemId, setDeleteItemId] = useState(null);
 
@@ -119,7 +121,8 @@ const Register1 = () => {
             else alert("잘못된 사용자 입니다");
 
         } else {
-            alert("카테고리를 선택하세요.");
+            setModalMessage("카테고리를 선택하세요.");
+            setModalOpen(true);
         }
     };
 
@@ -241,6 +244,12 @@ const Register1 = () => {
                     {selectedPage === 'register' && (
                         <RegisterButton onClick={handleRegisterClick}>등록하기</RegisterButton>
                     )}
+                    <ConfirmModal
+                        message={modalMessage}
+                        isOpen={modalOpen}
+                        setIsOpen={setModalOpen}
+                        onConfirm={handleModalConfirm}
+                    />
                 </>
             )}
 
@@ -306,7 +315,6 @@ const Register1 = () => {
                     </LocalPaginationContainer>
                 </Container>
             )}
-
         </>
     );
 };

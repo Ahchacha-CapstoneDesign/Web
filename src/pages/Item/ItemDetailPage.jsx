@@ -52,7 +52,7 @@ const ItemDetailPage = () => {
     }, [itemId]);
 
     if (!itemDetails) {
-        return <div>Loading...</div>;
+        return <div></div>;
     }
 
     function formatDate(dateString) {

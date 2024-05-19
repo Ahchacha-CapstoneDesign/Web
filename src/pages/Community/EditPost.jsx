@@ -7,6 +7,7 @@ import axios from 'axios';
 import { createGlobalStyle } from 'styled-components';
 import { useLocation } from 'react-router-dom';
 import apiClient from '../../path/apiClient';
+import ConfirmModal from '../ConfirmModal';
 
  const TEMP_DATA_KEY = "temporaryData";
 
@@ -24,6 +25,8 @@ import apiClient from '../../path/apiClient';
   const [hasDeferredModal, setHasDeferredModal] = useState(false);
   const [imageUrls, setImageUrls] = useState([]);
   const [tempSavedPostId, setTempSavedPostId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
 
   useEffect(() => {
@@ -144,10 +147,13 @@ import apiClient from '../../path/apiClient';
 
    const handleSubmit = async (e) => {
     e.preventDefault();
+    // HTML 태그 제거
+    const strippedContent = content.replace(/<[^>]*>?/gm, '');
 
-    if (!title.trim() || !content.trim()) {
-      alert('제목과 내용을 모두 입력해주세요.');
-      return;
+    if (!title.trim() || !strippedContent.trim()) {
+        setModalMessage('제목과 내용을 입력해주세요.');
+        setIsModalOpen(true);
+        return;
     }
 
     const formData = new FormData();
@@ -163,12 +169,13 @@ import apiClient from '../../path/apiClient';
       });
 
       if (response.status === 200) {
-        alert('게시글이 성공적으로 수정되었습니다.');
-        navigate(`/community/${communityId}`); // 수정된 게시글 보기 페이지로 리다이렉트
+        setModalMessage('글이 성공적으로 수정되었습니다.');
+        setIsModalOpen(true);
       }
     } catch (error) {
       console.error('게시글 수정 중 오류 발생:', error);
-      alert('게시글 수정 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setModalMessage('글 수정 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setIsModalOpen(true);
     }
   };
     
@@ -248,6 +255,16 @@ useEffect(() => {
             </ButtonContainer>
           </Form>
       </PageContainer>
+      <ConfirmModal 
+        message={modalMessage}
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        onConfirm={() => {
+          if (modalMessage === '글이 성공적으로 수정되었습니다.') {
+            navigate(`/community/${communityId}`);
+          }
+        }}
+      />
       </>
     );
   };

@@ -7,6 +7,7 @@ import axios from 'axios';
 import { createGlobalStyle } from 'styled-components';
 import { useLocation } from 'react-router-dom';
 import apiClient from '../../path/apiClient';
+import ConfirmModal from '../ConfirmModal';
 
  const TEMP_DATA_KEY = "temporaryData";
 
@@ -21,11 +22,12 @@ import apiClient from '../../path/apiClient';
   const maxContentLength = 500;
   const quillRef = useRef(null);
   const [posts, setPosts] = useState([]); // 글 목록 상태 추가
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVerified, setIsVerified] = useState(false); // 현직자 인증 상태
   const [hasDeferredModal, setHasDeferredModal] = useState(false);
   const [imageUrls, setImageUrls] = useState([]);
   const [tempSavedPostId, setTempSavedPostId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
 
   useEffect(() => {
@@ -126,7 +128,8 @@ import apiClient from '../../path/apiClient';
     e.preventDefault();
   
     if (!title.trim() || !content.trim()) {
-      alert('제목과 내용을 입력해주세요.');
+      setModalMessage('제목과 내용을 입력해주세요.');
+      setIsModalOpen(true);
       return;
     }
   
@@ -151,12 +154,13 @@ import apiClient from '../../path/apiClient';
       });
   
       if (response.status === 200 || response.status === 201) {
-        alert('글이 성공적으로 등록되었습니다.');
-        navigate(`/community/main`); // 글이 성공적으로 등록된 후 이동할 페이지
+        setModalMessage('글이 성공적으로 등록되었습니다.');
+        setIsModalOpen(true);
       }
     } catch (error) {
       console.error('글 등록 중 오류 발생:', error);
-      alert('글 등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setModalMessage('글 등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setIsModalOpen(true);
     }
   };
     
@@ -236,6 +240,16 @@ useEffect(() => {
             </ButtonContainer>
           </Form>
       </PageContainer>
+      <ConfirmModal 
+        message={modalMessage}
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        onConfirm={() => {
+          if (modalMessage === '글이 성공적으로 등록되었습니다.') {
+            navigate(`/community/main`);
+          }
+        }}
+      />
       </>
     );
   };

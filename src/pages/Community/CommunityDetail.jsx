@@ -258,7 +258,7 @@
       console.log('New comment state:', newComment);
     }, [newComment]);
       
-        if (!post) return <div>Loading...</div>;
+    if (!post) return <div></div>;
 
       return (
         <>

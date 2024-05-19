@@ -111,7 +111,7 @@ const PersonRegisterDetails = (props) => {
     };
 
     const handleSubmit = async (e) => {
-      e.preventDefault(); // 폼의 기본 제출 동작을 막음
+      if (e) e.preventDefault(); // 폼의 기본 제출 동작을 막음
 
       // 입력 검증 로직 추가
       const error = validateForm();
