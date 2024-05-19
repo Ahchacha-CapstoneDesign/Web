@@ -302,21 +302,6 @@ const GlobalStyle = createGlobalStyle`
 
 `;
 
-const TotalTimeDisplay = styled.div`
-  color: #fff;
-  width: 10.25rem;
-  height: 3.0625rem;
-  font-size: 1.875rem;
-  font-style: normal;
-  font-weight: 800;
-  margin-top: 0.94rem;
-  margin-bottom: 2.81rem;
-  line-height: normal;
-  text-align: center;
-`;
-
-
-
 const DateSection = styled.label`
   text-align: left;
   color: #fff;
