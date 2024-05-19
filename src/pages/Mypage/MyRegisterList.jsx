@@ -287,7 +287,8 @@ const MyRegisterList = () => {
                       {modalOpen && (
                         <ConfirmOrCancleModalDetail
                           title="대여 처리를 하시겠습니까?"
-                          message={<span>대여자한테 물건을 전달하였다면<br/>대여 처리를 해주세요</span>}                          isOpen={modalOpen}
+                          message={<span>대여자한테 물건을 전달하였다면<br/>대여 처리를 해주세요</span>}                          
+                          isOpen={modalOpen}
                           setIsOpen={setModalOpen}
                           onConfirm={confirmRent}
                         />
@@ -487,6 +488,7 @@ const ItemPrice2 = styled.div`
   font-size: 1rem;
   font-weight: 500;
 `;
+
 const ItemStatus = styled.div`
   font-family: 'Pretendard';
   font-size: 1rem;

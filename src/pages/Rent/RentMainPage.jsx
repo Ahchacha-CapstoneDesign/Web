@@ -344,7 +344,7 @@ const SearchButton = styled.button`
 
 const ItemTitle = styled.div` 
   color: #FFF;
-  margin-top: 2.8rem;
+  margin-top: 2rem;
   text-align: left;
   margin-left: 25rem;
   font-family: "Pretendard";
@@ -390,7 +390,7 @@ const Details = styled.div`
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
-    margin-left: 5rem;
+    margin-left: 4rem;
 `;
 
 const PostList = styled.div`
@@ -435,6 +435,7 @@ const CanBorrowDateTime = styled.div`
     font-style: normal;
     font-weight: 400;
     margin-left: 2rem;
+    width: 13rem;
 `;
 
 const RentPlaceWrapper = styled.div`

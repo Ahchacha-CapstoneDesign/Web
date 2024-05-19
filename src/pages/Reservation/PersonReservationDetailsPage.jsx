@@ -73,18 +73,15 @@ const PersonReservationDetailsPage = () => {
       return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
     };
 
-    const formatDate = (date, hour, minute) => {
-        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${hour}시 ${minute}분`;
-    };
-    const formatServerDate = (isoString) => {
-        const date = new Date(isoString);
-        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`;
+    const formatDate = (isoString) => {
+      const date = new Date(isoString);
+      return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`;
     };
 
     return (
         <>
-            <GlobalStyle/>
-        <PageWrapper>
+          <GlobalStyle/>
+          <PageWrapper>
             <TitleBar>
                 <BackButton src="/assets/img/BackArrow.png" alt="Back" onClick={handleGoBack} />
                 <Title>예약자 확인</Title>
@@ -99,11 +96,11 @@ const PersonReservationDetailsPage = () => {
             </FormItem>
             <FormItem>
                 <Label>대여 시간</Label>
-                <Value>{formatDate(reservationDetails.startDate, reservationDetails.startTime, reservationDetails.startMinutes)}</Value>
+                <Value>{formatDate(reservationDetails.startDate)}</Value>
             </FormItem>
             <FormItem>
                 <Label>반납 시간</Label>
-                <Value>{formatDate(reservationDetails.endDate, reservationDetails.endTime, reservationDetails.endMinutes)}</Value>
+                <Value>{formatDate(reservationDetails.endDate)}</Value>
             </FormItem>
             <FormItem>
                 <Label>대여 위치</Label>
@@ -177,9 +174,8 @@ const PageWrapper = styled.div`
   display: flex;
   flex-direction: column; 
   align-items: center; 
-  height: 100vh;
-  font-family: 'Pretendard', sans-serif;
-  
+  font-family: 'Pretendard';
+  margin-left: -7rem;
 `;
 
 // 제목을 감싸는 컴포넌트, 여기에 돌아가기 버튼도 포함
@@ -208,9 +204,9 @@ const Title = styled.h1`
 
 const Line = styled.span`
   display: block; // span은 기본적으로 inline 요소이므로, 너비와 높이를 적용하기 위해 block으로 변경
-  width: 70.125rem; // 줄의 너비
+  width: 65rem; // 줄의 너비
   height: 0.2rem; // 줄의 높이
-  margin-left:2rem;
+  margin-left: 10rem;
   margin-top: 2.81rem;
   margin-bottom: 1.87rem;
   background-color: #00FFE0; // 형광색 배경색 설정
@@ -221,8 +217,6 @@ const FormItem = styled.div`
   width: 34.125rem;
   height: 2.875rem;
   margin-top: 1.12rem;
-  margin-right: 25rem;
- 
 `;
 
 const Label = styled.div`
@@ -258,13 +252,15 @@ const TextLabel = styled.span`
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  margin-left: 26rem;
+  margin-left: 28rem;
   text-align: left; // 텍스트를 왼쪽 정렬
 `;
 
 const Image = styled.img`
   width: 1.875rem;
   height: 1.875rem;
+  margin-left: -2rem;
+  cursor: pointer;
 `;
 
 
@@ -272,35 +268,24 @@ const Image = styled.img`
 const FeeWrapper = styled.div`
   display: flex;
   flex-direction: column; // 요소들을 수직으로 쌓음
-  align-items: flex-end; // 요소들을 오른쪽으로 정렬
-  width: 100%; // 전체 너비 사용
-  margin-top: 2rem; // 상단 여백 조정
+  align-items: center; // 요소들을 오른쪽으로 정렬
+  margin-left: 57rem;
 `;
 
 const FeeLabelValueWrapper = styled.div`
   display: flex;
-  justify-content: center; // 금액 레이블과 값을 오른쪽으로 정렬
-  width: 60%; // 전체 너비 사용
-  margin-top:5rem;
+  margin-top: 2rem;
   margin-bottom: -1rem;
-  margin-right:-2rem;
   font-size: 1.875rem;
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  
 `;
 
 const FeeLabel = styled.span`
   color: #fff;
   margin-right: 1.5rem;
 `;
-
-const FeeValue = styled.span`
-  color: #fff;
-  font-weight: bold;
-`;
-
 
 const ConfirmButton = styled.button`
   background-color: #00FFE0;
@@ -317,7 +302,6 @@ const ConfirmButton = styled.button`
   width: 19.125rem;
   height: 3.0625rem;
   margin-top: 2rem; // 여백 조정
-  margin-right: 21.5rem;
 `;
 
 // 이제 모든 스타일 컴포넌트가 왼쪽으로 정렬되어 표시됩니다.

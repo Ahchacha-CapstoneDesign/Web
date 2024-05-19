@@ -5,6 +5,7 @@ import {differenceInMinutes} from 'date-fns';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
+import ConfirmModal from '../ConfirmModal';
 
 const hourOptions = Array.from({ length: 24 }, (_, i) => (i < 10 ? `0${i}` : `${i}`));
 const minuteOptions = ['00', '30'];
@@ -22,6 +23,9 @@ const OfficialReservationPage = () => {
     const { itemId } = useParams();
     const location = useLocation();
     const itemDetails = location.state?.itemDetails;
+    const [availableStart, setAvailableStart] = useState(new Date(itemDetails.canBorrowDateTime));
+    const [availableEnd, setAvailableEnd] = useState(new Date(itemDetails.returnDateTime));
+    const [modalOpen, setModalOpen] = useState(false);
     const navigate = useNavigate();
 
 
@@ -34,29 +38,53 @@ const OfficialReservationPage = () => {
       navigate(-1);
   };
 
-    const calculateTotalTime = () => {
-        if (!endDate) return null;
-        const start = new Date(startDate.setHours(parseInt(startTime, 10), parseInt(startMinutes, 10)));
-        const end = new Date(endDate.setHours(parseInt(endTime, 10), parseInt(endMinutes, 10)));
-        const diffMinutes = differenceInMinutes(end, start);
+  const tileDisabled = ({ date, view }) => {
+    // 'month' 뷰일 때만 비활성화 조건 적용
+    if (view === 'month') {
+        // 선택 가능한 날짜 범위를 벗어나면 비활성화
+        return date < availableStart || date > availableEnd;
+    }
+  };
 
-        // 음수인 경우 (대여 시간이 반납 시간보다 늦은 경우) 처리
-        if (diffMinutes < 0) {
-            return null; // 혹은 '시간 선택이 잘못되었습니다.'와 같은 메시지를 반환할 수 있습니다.
-        }
+  // 달력 타일 클래스 설정
+  const tileClassName = ({ date, view }) => {
+    const now = new Date();
+    // Intl을 사용하여 달력의 날짜를 'yyyy년 mm월 dd일' 형식의 문자열로 포맷
+    const dateFormatter = new Intl.DateTimeFormat('ko-KR', {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+    const dateStr = dateFormatter.format(date);
+    const nowStr = dateFormatter.format(now);
 
-        const hours = Math.floor(diffMinutes / 60);
-        const minutes = diffMinutes % 60;
-
-        return `${hours}시간 ${minutes > 0 ? `${minutes}분` : ''}`;
-    };
-
+    if (view === 'month') {
+      // 현재 날짜인 경우
+      if (dateStr === nowStr) {
+          return 'today';
+      }
+      // 대여 가능 범위 밖의 날짜인 경우
+      if (date < availableStart || date > availableEnd) {
+        return 'disabled-date';
+      }
+    }
+  };
 
     const formatDate = (date, hour, minute) => {
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()} ${hour}시 ${minute}분`;
     };
 
+    const validateReservation = () => {
+      const startDateTime = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), parseInt(startTime), parseInt(startMinutes));
+      const endDateTime = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), parseInt(endTime), parseInt(endMinutes));
+
+      // 대여 및 반납 가능한 시간인지 확인
+      return startDateTime >= new Date(itemDetails.canBorrowDateTime) && endDateTime <= new Date(itemDetails.returnDateTime);
+    };
+
     const handleNextPage = () => {
+        if (!validateReservation()) {
+          setModalOpen(true); // 유효하지 않으면 모달을 열어 경고 표시
+          return;
+        }
         const startDateTime = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), parseInt(startTime), parseInt(startMinutes));
         const endDateTime = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), parseInt(endTime), parseInt(endMinutes));
 
@@ -88,7 +116,26 @@ const OfficialReservationPage = () => {
         navigate(`/rent/officialreservationdetails/${itemDetails.id}`, { state: reservationDetails });
     };
 
-
+    function formatDate2(dateString) {
+      const date = new Date(dateString);
+      const formatter = new Intl.DateTimeFormat('ko-KR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+      });
+      return formatter.format(date); // 예: '2024년 5월 17일'
+    }
+  
+    // 날짜 문자열에서 시간만 추출하는 함수
+    function getTime(dateString) {
+      const date = new Date(dateString);
+      const formatter = new Intl.DateTimeFormat('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false // 24시간제를 사용하려면 false로 설정합니다.
+      });
+      return formatter.format(date);
+    }
 
     return (
         <>
@@ -96,11 +143,23 @@ const OfficialReservationPage = () => {
             <ContentContainer>
                 <BackButton src="/assets/img/BackArrow.png" alt="Back" onClick={handleGoBack} />
                 <LeftColumn>
+                  <Info>
+                    <InfoItem>
+                      <InfoTitle>대여 가능 날짜</InfoTitle>
+                      <InfoContent>{formatDate2(itemDetails.canBorrowDateTime)} ~ {formatDate2(itemDetails.returnDateTime)}</InfoContent>
+                    </InfoItem>
+                    <InfoItem>
+                      <InfoTitle>대여 및 반납 가능 시간</InfoTitle>
+                      <InfoContent>{getTime(itemDetails.canBorrowDateTime)} ~ {getTime(itemDetails.returnDateTime)}</InfoContent>
+                    </InfoItem>
+                  </Info>
                     <DateSection>날짜 선택</DateSection>
                     <StyledCalendar
                         onChange={handleDateChange}
                         value={dateRange}
                         selectRange={true}
+                        tileDisabled={tileDisabled}
+                        tileClassName={tileClassName}
                     />
                 </LeftColumn>
                 <RightColumn>
@@ -147,6 +206,14 @@ const OfficialReservationPage = () => {
                     </EndDateTimeDisplay>
 
                     <ConfirmButton onClick={handleNextPage}>예약하기</ConfirmButton>
+                    {modalOpen && (
+                      <ConfirmModal
+                          message="대여, 반납이 불가능한 시간입니다!"
+                          isOpen={modalOpen}
+                          setIsOpen={setModalOpen}
+                          onConfirm={() => setModalOpen(false)}
+                      />
+                    )}
                 </RightColumn>
             </ContentContainer>
         </>
@@ -169,9 +236,13 @@ const StyledCalendar = styled(Calendar)`
   background-color: #000;
   color:#fff;
   border: none;
-
+  
   .react-calendar__tile--now {
     background-color: #D6F800; /* 오늘 날짜 */
+  }
+
+  .today {
+    background-color: #D6F800; /* 현재 날짜의 색을 노란색으로 설정 */
   }
 
   .react-calendar__tile--active,
@@ -186,8 +257,8 @@ const StyledCalendar = styled(Calendar)`
 
   .react-calendar__tile {
     color: #A1A1A1; /* 글씨 색깔 */
-
-    width: 4.5625rem;
+    
+    width: 4.5625rem; 
     height: 4.9375rem;
     border: 1px solid #A1A1A1; /* 흰색 테두리 추가 */
   }
@@ -206,6 +277,11 @@ const StyledCalendar = styled(Calendar)`
     line-height: normal;
     border-bottom: none; /* 네비게이션 바 아래 테두리 제거 */
   }
+
+  .disabled-date {
+    background-color: white;
+    color: #a1a1a1;
+  }
 `;
 
 const StartDateTimeDisplay = styled.div`
@@ -218,6 +294,7 @@ const StartDateTimeDisplay = styled.div`
   font-style: normal;
   font-weight: 800;
   line-height: normal;
+  margin-top: 4rem;
   margin-bottom: 0.5rem;
 
   &::before {
@@ -270,9 +347,42 @@ const RightColumn = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center; // 자식 요소들을 가로축 중앙에 배치
+  margin-top: 3rem;
 `;
 
 
+const Info = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 5rem;
+  margin-bottom: 2rem;
+  margin-left: -2.5rem;
+  border: 0.05rem solid white;
+  padding: 5px;
+  width: 30rem;
+  margin-
+`;
+
+const InfoItem = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  width: 38.125rem;
+  height: 2rem;
+`;
+
+const InfoTitle = styled.div`
+  font-size: 1.1rem;
+  font-style: 'Pretendard';
+  font-weight: 650;
+  margin-right: 1rem;
+`;
+
+const InfoContent = styled.div`
+  color: #FFF;
+  font-size: 1.1rem;
+  font-style: 'Pretendard';
+  font-weight: 300;
+`;
 
 const GlobalStyle = createGlobalStyle`
   html, body, #root {
@@ -301,21 +411,6 @@ const GlobalStyle = createGlobalStyle`
   }
 
 `;
-
-const TotalTimeDisplay = styled.div`
-  color: #fff;
-  width: 10.25rem;
-  height: 3.0625rem;
-  font-size: 1.875rem;
-  font-style: normal;
-  font-weight: 800;
-  margin-top: 0.94rem;
-  margin-bottom: 2.81rem;
-  line-height: normal;
-  text-align: center;
-`;
-
-
 
 const DateSection = styled.label`
   text-align: left;
