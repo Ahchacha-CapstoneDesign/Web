@@ -35,10 +35,25 @@ const RentFirstPage = () => {
     fetchTopCategories();
   }, []);
 
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      fetchAllPosts();
+    }
+  }, [searchTerm]);
+
 
   const handleCategoryClick = (categoryName) => {
     // navigate 함수를 사용하여 /rent/mainpage 경로로 이동하면서 상태 전달
     navigate('/rent/mainpage', { state: { searchTerm: categoryName } });
+  };
+
+  const fetchAllPosts = async () => {
+    try {
+      const response = await apiClient.get(`/items/latest`);
+      setPosts(response.data.content);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -68,6 +83,13 @@ const RentFirstPage = () => {
   };
 
   const handleSearch = async () => {
+
+    if (searchTerm.trim() === '') {
+      fetchAllPosts();
+      navigate('/rent/mainpage', { state: { searchResults: [] } });
+      return;
+    }
+
     try {
       const [titleResponse, categoryResponse] = await Promise.all([
         apiClient.get(`/items/search-title?title=${searchTerm}&page=1`),

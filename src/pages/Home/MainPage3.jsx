@@ -142,22 +142,28 @@ const MainPage3 = () => {
 
   const handleSearch = async () => {
     try {
-      const [titleResponse, categoryResponse] = await Promise.all([
-        apiClient.get(`/items/search-title?title=${searchTerm}&page=1`),
-        apiClient.get(`/items/search-category?category=${searchTerm}&page=1`)
-      ]);
+      if (searchTerm.trim() === '') {
+        const response = await apiClient.get('/items/latest');
+        const allItems = response.data.content;
+        navigate('/rent/mainpage', { state: { searchResults: allItems, searchTerm: '' } });
+      } else {
+        const [titleResponse, categoryResponse] = await Promise.all([
+          apiClient.get(`/items/search-title?title=${searchTerm}&page=1`),
+          apiClient.get(`/items/search-category?category=${searchTerm}&page=1`)
+        ]);
 
-      const combinedResults = [
-        ...titleResponse.data.content,
-        ...categoryResponse.data.content
-      ];
+        const combinedResults = [
+          ...titleResponse.data.content,
+          ...categoryResponse.data.content
+        ];
 
-      const uniqueResults = Array.from(new Set(combinedResults.map(item => item.id)))
-        .map(id => {
-          return combinedResults.find(item => item.id === id);
-        });
+        const uniqueResults = Array.from(new Set(combinedResults.map(item => item.id)))
+          .map(id => {
+            return combinedResults.find(item => item.id === id);
+          });
 
-      navigate('/rent/mainpage', { state: { searchResults: uniqueResults, searchTerm: searchTerm } });
+        navigate('/rent/mainpage', { state: { searchResults: uniqueResults, searchTerm: searchTerm } });
+      }
     } catch (error) {
       console.error('Error during search:', error);
     }

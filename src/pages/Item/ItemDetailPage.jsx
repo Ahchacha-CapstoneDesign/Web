@@ -321,13 +321,17 @@ const ItemDetails = styled.div`
 `;
 
 const TitleSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 13rem;
   padding-bottom: 1rem;
-  margin-bottom: 1rem;
+  max-width: 17rem;
+  align-items: center;
+  margin-bottom: 2rem;
 `;
 
 const Title = styled.span`
   width: 38.125rem;
-  height: 3.6875rem;
   font-size: 1.7rem;
   font-style: normal;
   font-weight: 800;
@@ -338,16 +342,14 @@ const Title = styled.span`
 const SubTitle = styled.span`
   display: block; // 블록 레벨 요소로 변경
   width: 7.6875rem; // 너비 지정
-  height: 2.875rem; // 높이 지정
   line-height: 2.875rem; // line-height를 height와 동일하게 설정하여 텍스트를 수직 중앙에 배치
   text-align: center; // 텍스트 수평 중앙 정렬
   font-size: 1rem;
   font-weight: 600;
   border-radius: 1.25rem;
   border: 3px solid #FF6B00;
-  margin-left:17rem;
+  margin-left:20rem;
   position: relative; // 상대적 위치 설정, 필요에 따라 조정 가능
-  top: 50%; // 상위 요소 대비 상단에서 50% 위치
   transform: translateY(-80%); // Y축으로 -50% 만큼 이동하여 수직 중앙 정렬
   // 주의: 이 방식을 사용하려면 SubTitle의 상위 요소가 position: relative;로 설정되어야 합니다.
   cursor: pointer;

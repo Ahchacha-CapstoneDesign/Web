@@ -344,7 +344,7 @@ const SearchButton = styled.button`
 
 const ItemTitle = styled.div` 
   color: #FFF;
-  margin-top: 2.8rem;
+  margin-top: 2rem;
   text-align: left;
   margin-left: 25rem;
   font-family: "Pretendard";
