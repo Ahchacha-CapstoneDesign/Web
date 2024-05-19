@@ -1,25 +1,27 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { createGlobalStyle } from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../path/apiClient';
 
 const NotificationModal = ({ isOpen, onClose }) => {
     const [notifications, setNotifications] = useState([]);
+    const navigate = useNavigate();
 
     const handleWheel = (e) => {
         e.stopPropagation();
     };
 
-    useEffect(() => {
-        const fetchNotifications = async () => {
-            try {
-                const response = await apiClient.get('/notification');
-                setNotifications(response.data);
-            } catch (error) {
-                console.error('알림을 가져오는 데 실패했습니다:', error);
-            }
-        };
+    const fetchNotifications = async () => {
+        try {
+            const response = await apiClient.get('/notification');
+            console.log('Fetched notifications:', response.data); // Fetch 시점에 콘솔 출력
+            setNotifications(response.data);
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
+        }
+    };
 
+    useEffect(() => {
         if (isOpen) {
             fetchNotifications();
         }
@@ -28,17 +30,41 @@ const NotificationModal = ({ isOpen, onClose }) => {
     const getNotificationMessage = (notification) => {
         switch (notification.notificationType) {
             case 'COMMENT':
-                return `${notification.communityTitle}에 댓글이 달렸습니다.`;
+                return `${notification.writer}님이 ${notification.communityTitle} 게시글에 댓글을 달았습니다.`;
             case 'HEART':
                 return `${notification.writer}님이 ${notification.communityTitle} 게시글에 좋아요를 눌렀습니다.`;
             case 'RESERVATION':
-                return `${notification.itemTitle} 물건을 예약하였습니다.`;
+                return `${notification.writer}님의 ${notification.itemTitle} 물건을 예약하였습니다.`;
             case 'RETURN_ONE_HOUR':
-                return `${notification.itemTitle}의 반납 시간이 1시간 남았습니다.`;
+                return `${notification.itemTitle}의 반납 1시간 전입니다.`;
             case 'RETURN_TWENTY_FOUR_HOURS':
-                return `${notification.itemTitle}의 반납 시간이 24시간 남았습니다.`;
+                return `${notification.itemTitle}의 반납 하루 전입니다.`;
             default:
                 return '알 수 없는 알림입니다.';
+        }
+    };
+
+    const handleNotificationClick = async (notification) => {
+        try {
+            // 알림을 읽음 상태로 업데이트
+            await apiClient.put(`/notification/${notification.id}/read`);
+
+            // 클라이언트 상태를 업데이트
+            setNotifications((prevNotifications) => 
+                prevNotifications.map((noti) => 
+                    noti.id === notification.id ? { ...noti, isRead: true } : noti
+                )
+            );
+
+            // 페이지 이동 후 모달 닫기
+            if (['COMMENT', 'HEART'].includes(notification.notificationType) && notification.communityId) {
+                navigate(`/community/${notification.communityId}`);
+            } else {
+                navigate('/mypage/main');
+            }
+            onClose(); 
+        } catch (error) {
+            console.error('Failed to update read status:', error);
         }
     };
 
@@ -55,9 +81,13 @@ const NotificationModal = ({ isOpen, onClose }) => {
                             <Divider />
                             <Content>
                                 {notifications.map((notification, index) => (
-                                    <Message key={index}>
+                                    <Message 
+                                        key={index} 
+                                        onClick={() => handleNotificationClick(notification)}
+                                        isRead={notification.read}
+                                    >
                                         <Icon src="/assets/img/Ah_logo.png" alt="Ah!" />
-                                        <Text>{getNotificationMessage(notification)}</Text>
+                                        <Text isRead={notification.read}>{getNotificationMessage(notification)}</Text>
                                     </Message>
                                 ))}
                             </Content>
@@ -146,15 +176,17 @@ const Content = styled.div`
     }
 `;
 
-
 const Message = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px; // 메시지 간 간격을 추가합니다.
-
-  &:last-child {
-    margin-bottom: 0;
-  }
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px; // 메시지 간 간격을 추가합니다.
+    width: 28rem;
+    overflow: hidden;
+    &:last-child {
+        margin-bottom: 0;
+    }
+    cursor: pointer;
+    opacity: ${({ isRead }) => (isRead ? 0.5 : 1)};
 `;
 
 const Icon = styled.img`
@@ -163,8 +195,11 @@ const Icon = styled.img`
   height: 30px;
 `;
 
-
 const Text = styled.p`
   margin: 0;
   font-size: 1rem;
+  white-space: nowrap; // 텍스트가 한 줄로 유지되도록 설정합니다.
+  overflow: hidden; // 넘치는 텍스트를 숨깁니다.
+  text-overflow: ellipsis;
+  color: ${({ isRead }) => (isRead ? '#ccc' : '#fff')}; // 읽은 알림은 색이 흐려짐
 `;
