@@ -89,7 +89,7 @@ const PersonRegisterDetails = (props) => {
           setModalMessage("물건을 등록하시겠습니까?"); // 등록 확인 메시지 설정
           setModalOpen(true); // 확인 모달 열기
       }
-  };
+    };
 
     // 모달 닫기
     const closeModal = () => {
@@ -101,7 +101,7 @@ const PersonRegisterDetails = (props) => {
           setModalOpen(false);
           await handleSubmit();
       }
-  };
+    };
 
     const tileDisabled = ({ date, view }) => {
         // 현재 날짜

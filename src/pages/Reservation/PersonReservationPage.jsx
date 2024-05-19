@@ -315,7 +315,7 @@ const GlobalStyle = createGlobalStyle`
 
 const TotalTimeDisplay = styled.div`
   color: #fff;
-  width: 10.25rem;
+  width: 15rem;
   height: 3.0625rem;
   font-size: 1.875rem;
   font-style: normal;
