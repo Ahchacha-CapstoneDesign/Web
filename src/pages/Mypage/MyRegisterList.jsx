@@ -488,6 +488,7 @@ const ItemPrice2 = styled.div`
   font-size: 1rem;
   font-weight: 500;
 `;
+
 const ItemStatus = styled.div`
   font-family: 'Pretendard';
   font-size: 1rem;
