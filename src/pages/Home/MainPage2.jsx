@@ -98,24 +98,6 @@ const MainPage2 = () => {
     setCurrentPage(newPage);
   };
 
-  // 아이템 작성 페이지로 이동
-  const goToItemPost = () => {
-    navigate('/items');
-  };
-
-  // 아이템 상세 페이지로 이동
-  // const goToItemDetail = (id) => {
-  //   navigate(`/items/${itemId}`);
-  // };
-
-  const handleModalOpen = () => {
-    setIsModalOpen(true); // 모달 열기
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false); // 모달 닫기
-  };
-
   useEffect(() => {
     const handleWheel = (e) => {
       if (e.deltaY > 0) { // 마우스 휠을 아래로 스크롤할 경우
@@ -149,13 +131,37 @@ const MainPage2 = () => {
     }
   };
 
-  const handleSearch = () => {
-    // 검색어를 RentMainPage로 전달
-    navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
-  };
-
   const goToItemDetail = (itemId) => {
     navigate(`/rent/itemdetail/${itemId}`);
+  };
+
+  const handleSearch = async () => {
+    try {
+      if (searchTerm.trim() === '') {
+        const response = await apiClient.get('/items/latest');
+        const allItems = response.data.content;
+        navigate('/rent/mainpage', { state: { searchResults: allItems, searchTerm: '' } });
+      } else {
+        const [titleResponse, categoryResponse] = await Promise.all([
+          apiClient.get(`/items/search-title?title=${searchTerm}&page=1`),
+          apiClient.get(`/items/search-category?category=${searchTerm}&page=1`)
+        ]);
+
+        const combinedResults = [
+          ...titleResponse.data.content,
+          ...categoryResponse.data.content
+        ];
+
+        const uniqueResults = Array.from(new Set(combinedResults.map(item => item.id)))
+          .map(id => {
+            return combinedResults.find(item => item.id === id);
+          });
+
+        navigate('/rent/mainpage', { state: { searchResults: uniqueResults, searchTerm: searchTerm } });
+      }
+    } catch (error) {
+      console.error('Error during search:', error);
+    }
   };
 
   return (

@@ -35,10 +35,25 @@ const RentFirstPage = () => {
     fetchTopCategories();
   }, []);
 
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      fetchAllPosts();
+    }
+  }, [searchTerm]);
+
 
   const handleCategoryClick = (categoryName) => {
     // navigate 함수를 사용하여 /rent/mainpage 경로로 이동하면서 상태 전달
     navigate('/rent/mainpage', { state: { searchTerm: categoryName } });
+  };
+
+  const fetchAllPosts = async () => {
+    try {
+      const response = await apiClient.get(`/items/latest`);
+      setPosts(response.data.content);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -67,10 +82,39 @@ const RentFirstPage = () => {
     }
   };
 
-  const handleSearch = () => {
-    // 검색어를 RentMainPage로 전달
-    navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
+  const handleSearch = async () => {
+
+    if (searchTerm.trim() === '') {
+      fetchAllPosts();
+      navigate('/rent/mainpage', { state: { searchResults: [] } });
+      return;
+    }
+
+    try {
+      const [titleResponse, categoryResponse] = await Promise.all([
+        apiClient.get(`/items/search-title?title=${searchTerm}&page=1`),
+        apiClient.get(`/items/search-category?category=${searchTerm}&page=1`)
+      ]);
+
+      const combinedResults = [
+        ...titleResponse.data.content,
+        ...categoryResponse.data.content
+      ];
+
+      // 중복 제거
+      const uniqueResults = Array.from(new Set(combinedResults.map(item => item.id)))
+        .map(id => {
+          return combinedResults.find(item => item.id === id);
+        });
+
+      // 검색 결과를 RentMainPage로 전달
+      navigate('/rent/mainpage', { state: { searchResults: uniqueResults } });
+
+    } catch (error) {
+      console.error('Error during search:', error);
+    }
   };
+
 
   return (
     <>

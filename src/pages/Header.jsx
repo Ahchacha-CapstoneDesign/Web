@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled, { css } from "styled-components";
 import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationModal from './NotificationModal';
+import apiClient from "../path/apiClient";
 
 const Header = () => {
   const [activePage, setActivePage] = useState('');
@@ -10,7 +11,7 @@ const Header = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [userTrack, setUserTrack] = useState('');
-
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   const toggleModal = () => {
     setModalOpen(!modalOpen);
@@ -30,6 +31,21 @@ const Header = () => {
   const handlePageChange = (path) => {
     navigate(path);
   };
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await apiClient.get('/notification');
+      const notifications = response.data;
+      const hasUnread = notifications.some(notification => !notification.read);
+      setHasUnreadNotifications(hasUnread);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
 
   return (
@@ -57,7 +73,9 @@ const Header = () => {
             <UserTrack>{userTrack}</UserTrack>
             <UserName>{userName}님</UserName>
           </UserInfo>
-          <NotificationIcon onClick={toggleModal} src="/assets/img/notification.png" alt="알림" />
+          <NotificationIcon onClick={toggleModal} 
+            src={hasUnreadNotifications ? "/assets/img/NotificationPlus.png" : "/assets/img/Notification.png"} 
+            alt="알림" />          
           <NotificationModal isOpen={modalOpen} onClose={toggleModal} />
         </UserAndNotificationContainer>
       </HeaderContent>

@@ -47,47 +47,6 @@ const MainPage3 = () => {
     }
   };
 
-  const executeSearch = async () => {
-    if (!searchTerm.trim()) {
-      // 검색어가 비어있으면 기존 게시글 목록을 다시 불러옵니다.
-      fetchPosts();
-      setSearchedPosts([]);
-      return; // 함수 종료
-    }
-    // searchTerm 상태를 직접 사용합니다.
-    // 제목으로 검색
-    const searchTitleUrl = `/items/search-title?title=${encodeURIComponent(searchTerm)}&page=1`;
-    // 카테고리로 검색
-    const searchCategoryUrl = `/items/search-category?category=${encodeURIComponent(searchTerm)}&page=1`;
-
-    try {
-      const [titleResponse, categoryResponse] = await Promise.all([
-        apiClient.get(searchTitleUrl),
-        apiClient.get(searchCategoryUrl)
-      ]);
-
-      let combinedResults = [...titleResponse.data.content, ...categoryResponse.data.content];
-
-      // 중복 제거
-      combinedResults = Array.from(new Map(combinedResults.map(post => [post.id, post])).values());
-
-      // '조회수 순' 선택 시 결과를 조회수 수에 따라 정렬
-      if (sort === 'view-counts') {
-        combinedResults.sort((a, b) => b.viewCount - a.viewCount);
-      } else if (sort === 'date') {
-        // '최근 작성순' 선택 시 결과를 생성 날짜에 따라 내림차순 정렬
-        combinedResults.sort((a, b) => new Date(b.createdAt) - new Date(a.created_at));
-      }
-
-      setTotalPages(Math.ceil(combinedResults.length / ITEMS_PER_PAGE));
-      setCurrentPage(1); // 검색 결과를 보여줄 때는 첫 페이지로 설정
-      setSearchedPosts(combinedResults); // 검색된 게시글 목록 업데이트
-      updateDisplayedAndPagination(combinedResults); // 화면에 표시될 게시글 목록 업데이트
-    } catch (error) {
-      console.error('Error searching posts:', error);
-    }
-  };
-
   // 처음 렌더링될 때와 sort 상태가 변경될 때 전체 게시글 불러오기
   useEffect(() => {
     fetchPosts();
@@ -140,57 +99,8 @@ const MainPage3 = () => {
     setTotalPages(Math.ceil(postsToUpdate.length / ITEMS_PER_PAGE));
   };
 
-  function isSortedByViews(posts) {
-    for (let i = 0; i < posts.length - 1; i++) {
-      if (posts[i].viewCount < posts[i + 1].viewCount) {
-        // 조회수 순이 아니라면 false 반환
-        return false;
-      }
-    }
-    // 모든 검사를 통과했다면 true 반환
-    return true;
-  }
-
-  function isSortedByDate(posts) {
-    for (let i = 0; i < posts.length - 1; i++) {
-      if (new Date(posts[i].createdAt) < new Date(posts[i + 1].createdAt)) {
-        // 최근 작성순이 아니라면 false 반환
-        return false;
-      }
-    }
-    // 모든 검사를 통과했다면 true 반환
-    return true;
-  }
-
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-  };
-
-  const handleSortChange = (newSort) => {
-    setSort(newSort);
-    setCurrentPage(1); // 정렬 방식 변경 시 첫 페이지로 이동
-  };
-
-  const handleSearchInputClick = () => {
-    searchInputRef.current.focus(); // SearchInput에 포커스
-  };
-
-  // 아이템 작성 페이지로 이동
-  const goToItemPost = () => {
-    navigate('/items');
-  };
-
-  // 아이템 상세 페이지로 이동
-  // const goToItemDetail = (id) => {
-  //   navigate(`/items/${itemId}`);
-  // };
-
-  const handleModalOpen = () => {
-    setIsModalOpen(true); // 모달 열기
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false); // 모달 닫기
   };
 
   const goToItemDetail = (itemId) => {
@@ -230,9 +140,33 @@ const MainPage3 = () => {
     }
   };
 
-  const handleSearch = () => {
-    // 검색어를 RentMainPage로 전달
-    navigate('/rent/mainpage', { state: { searchTerm: searchTerm } });
+  const handleSearch = async () => {
+    try {
+      if (searchTerm.trim() === '') {
+        const response = await apiClient.get('/items/latest');
+        const allItems = response.data.content;
+        navigate('/rent/mainpage', { state: { searchResults: allItems, searchTerm: '' } });
+      } else {
+        const [titleResponse, categoryResponse] = await Promise.all([
+          apiClient.get(`/items/search-title?title=${searchTerm}&page=1`),
+          apiClient.get(`/items/search-category?category=${searchTerm}&page=1`)
+        ]);
+
+        const combinedResults = [
+          ...titleResponse.data.content,
+          ...categoryResponse.data.content
+        ];
+
+        const uniqueResults = Array.from(new Set(combinedResults.map(item => item.id)))
+          .map(id => {
+            return combinedResults.find(item => item.id === id);
+          });
+
+        navigate('/rent/mainpage', { state: { searchResults: uniqueResults, searchTerm: searchTerm } });
+      }
+    } catch (error) {
+      console.error('Error during search:', error);
+    }
   };
 
   return (

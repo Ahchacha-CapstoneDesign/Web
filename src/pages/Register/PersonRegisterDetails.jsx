@@ -5,6 +5,7 @@ import Calendar from "react-calendar";
 import apiClient from "../../path/apiClient";
 import { useLocation, useNavigate } from 'react-router-dom';
 import ConfirmOrCancleModal from '../ConfirmOrCancleModal';
+import ConfirmModal from '../ConfirmModal';
 
 const PersonRegisterDetails = (props) => {
     const location = useLocation(); // location 객체를 통해 현재 위치의 정보를 얻음
@@ -20,6 +21,7 @@ const PersonRegisterDetails = (props) => {
     const minuteOptions = [0, 30];
     const [modalOpen, setModalOpen] = useState(false);
     const [modalClose, setModalClose] = useState(false);
+    const [modalMessage, setModalMessage] = useState(''); 
 
 
     const [formData, setFormData] = useState({
@@ -30,6 +32,17 @@ const PersonRegisterDetails = (props) => {
         borrowPlace:'',
     });
     const [selectedDays, setSelectedDays] = useState([]);
+
+    const validateForm = () => {
+      if (!formData.title) return '상품명을 확인해주세요.';
+      if (!formData.price) return '가격을 확인해주세요.';
+      if (!formData.status) return '상품상태를 확인해주세요.';
+      if (!formData.description) return '설명을 확인해주세요.';
+      if (dateRange.length !== 2) return '대여 가능 일을 체크해주세요.';
+      if (!formData.borrowPlace) return '대여 위치를 확인해주세요.';
+      if (!formData.returnPlace) return '반납 위치를 확인해주세요.';
+      return '';
+    };
 
     const handleStatusChange = (status, e) => {
         e.preventDefault();
@@ -47,14 +60,11 @@ const PersonRegisterDetails = (props) => {
         setImageFiles(newImageFiles);
     };
 
-
     const handleImageChange = (e) => {
         e.preventDefault()
         const files = Array.from(e.target.files);
         setImageFiles(files);
     };
-
-
 
     const handleInputChange = (e, fieldName) => {
         e.preventDefault();
@@ -67,18 +77,30 @@ const PersonRegisterDetails = (props) => {
     };
 
     const openModal = (e) => {
-        e.preventDefault();
-        setModalOpen(true);
+      e.preventDefault();
+  
+      const validationMessage = validateForm();
+      if (validationMessage) {
+          // 입력값이 유효하지 않을 경우, ConfirmModal을 통해 경고 메시지를 띄웁니다.
+          setModalMessage(validationMessage); // 오류 메시지 설정
+          setModalOpen(true); // 오류 메시지를 표시하는 모달 열기
+      } else {
+          // 입력값이 모두 유효할 경우, 사용자에게 등록을 진행할 것인지 최종 확인을 요청합니다.
+          setModalMessage("물건을 등록하시겠습니까?"); // 등록 확인 메시지 설정
+          setModalOpen(true); // 확인 모달 열기
+      }
     };
 
     // 모달 닫기
     const closeModal = () => {
         setModalOpen(false);
     };
-    const handleModalConfirm = async () => {
-        setModalOpen(false);
-        await handleSubmit();
 
+    const handleModalConfirm = async () => {
+      if (!validateForm()) {
+          setModalOpen(false);
+          await handleSubmit();
+      }
     };
 
     const tileDisabled = ({ date, view }) => {
@@ -88,9 +110,16 @@ const PersonRegisterDetails = (props) => {
         return date < currentDate;
     };
 
+    const handleSubmit = async (e) => {
+      if (e) e.preventDefault(); // 폼의 기본 제출 동작을 막음
 
-
-    const handleSubmit = async () => {
+      // 입력 검증 로직 추가
+      const error = validateForm();
+      if (error) {
+          setModalMessage(error);
+          setModalOpen(true);
+          return;
+      }
 
         const formDataToSend = new FormData();
 
@@ -159,9 +188,7 @@ const PersonRegisterDetails = (props) => {
 
                     <Line/>
                     <FormGroup>
-                        <Label>상품 이미지
-                            <RequiredIndicator>*</RequiredIndicator>
-                        </Label>
+                        <Label>상품 이미지</Label>
                         <ImageInput id="image" type="file" accept="image/*" multiple onChange={handleImageChange}  />
                         {/* 이미지 미리보기 */}
                         {imageFiles.length > 0 && imageFiles.map((image, index) => (
@@ -267,7 +294,7 @@ const PersonRegisterDetails = (props) => {
                         />
                     </FormGroup>
                     <FormGroup>
-                        <Label>대여 및 반납 가능 시간
+                        <Label>대여 및 반납 <br/> 가능 시간
                             <RequiredIndicator>*</RequiredIndicator>
                         </Label>
                         <TimeSelectWrapper>
@@ -325,12 +352,20 @@ const PersonRegisterDetails = (props) => {
                             placeholder="반납위치를 입력해주세요(ex.상상관 1층)"/>
                     </FormGroup>
                     <Button onClick={openModal}>등록하기</Button>
-                    {modalOpen && (
+                    {modalOpen && modalMessage !== "물건을 등록하시겠습니까?" && (
+                      <ConfirmModal
+                        message={modalMessage}
+                        isOpen={modalOpen}
+                        setIsOpen={setModalOpen}
+                        onConfirm={() => setModalOpen(false)} 
+                      />
+                    )}
+                    {modalOpen && modalMessage === "물건을 등록하시겠습니까?" && (
                       <ConfirmOrCancleModal
-                          message="물건을 등록하시겠습니까?"
-                          isOpen={modalOpen}
-                          setIsOpen={setModalOpen}
-                          onConfirm={handleModalConfirm}
+                        message={modalMessage}
+                        isOpen={modalOpen}
+                        setIsOpen={setModalOpen}
+                        onConfirm={handleModalConfirm}
                       />
                     )}
                 </Form>

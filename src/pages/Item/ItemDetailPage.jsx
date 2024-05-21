@@ -11,6 +11,7 @@ const ItemDetailPage = () => {
     const navigate = useNavigate();
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [formattedScore, setFormattedScore] = useState("0.0"); // 초기값을 "0.0"으로 설정
+    const [reviews, setReviews] = useState([]);
 
     const handleReserve = () => {
         if (!itemDetails) return;
@@ -26,16 +27,23 @@ const ItemDetailPage = () => {
     useEffect(() => {
         const fetchItemDetails = async () => {
             try {
-                const response = await apiClient.get(`/items/${itemId}`);
-                setItemDetails(response.data);
+              const response = await apiClient.get(`/items/${itemId}`);
+              setItemDetails(response.data);
 
-                const { ownerReviewScore, renterReviewScore } = response.data;
-                const scores = [];
-                if (ownerReviewScore != null && !isNaN(ownerReviewScore)) scores.push(ownerReviewScore);
-                if (renterReviewScore != null && !isNaN(renterReviewScore)) scores.push(renterReviewScore);
+              const { ownerReviewScore, renterReviewScore } = response.data;
+              const scores = [];
+              if (ownerReviewScore != null && !isNaN(ownerReviewScore)) scores.push(ownerReviewScore);
+              if (renterReviewScore != null && !isNaN(renterReviewScore)) scores.push(renterReviewScore);
 
-                const newFormattedScore = scores.length > 0 ? (scores.reduce((acc, score) => acc + score, 0) / scores.length).toFixed(1) : '0.0';
-                setFormattedScore(newFormattedScore); // 상태 업데이트
+              const newFormattedScore = scores.length > 0 ? (scores.reduce((acc, score) => acc + score, 0) / scores.length).toFixed(1) : '0.0';
+              setFormattedScore(newFormattedScore); // 상태 업데이트
+
+              const reviewResponse = await apiClient.get(`/review/reviewDetails/itemOwner/${response.data.userId}`);
+              const latestReviews = reviewResponse.data.content.slice(0, 2).map(review => ({
+                  ...review,
+                  reviewComment: review.reviewComment.length > 20 ? review.reviewComment.slice(0, 20) + '...' : review.reviewComment
+              }));
+              setReviews(latestReviews);
             } catch (error) {
                 console.error('Failed to fetch item details:', error);
             }
@@ -44,7 +52,7 @@ const ItemDetailPage = () => {
     }, [itemId]);
 
     if (!itemDetails) {
-        return <div>Loading...</div>;
+        return <div></div>;
     }
 
     function formatDate(dateString) {
@@ -124,8 +132,13 @@ const ItemDetailPage = () => {
                       </RatingContainer>
                   </UserInfoContainer>
                   <ReviewBubble src="/assets/img/ReviewBubble.png" alt="Star">
-                    <ReviewText>정말 친절하고 좋은 분입니다..</ReviewText>
-                    <ReviewText>횟수가 많이 남아있어요... 괜찮아요..</ReviewText>
+                    {reviews.length > 0 ? (
+                        reviews.map((review) => (
+                            <ReviewText key={review.reviewId}>{review.reviewComment}</ReviewText>
+                        ))
+                    ) : (
+                        <ReviewText>리뷰가 없습니다.</ReviewText>
+                    )}
                   </ReviewBubble>
                     <ButtonContainer>
                       <MoreReviewsButton onClick={handleGoToOwnerReview}>리뷰 더 보러가기</MoreReviewsButton>
@@ -321,36 +334,39 @@ const ItemDetails = styled.div`
 `;
 
 const TitleSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 13rem;
   padding-bottom: 1rem;
-  margin-bottom: 1rem;
+  max-width: 17rem;
+  align-items: center;
+  margin-bottom: 2rem;
 `;
 
-const Title = styled.span`
-  width: 38.125rem;
-  height: 3.6875rem;
+const Title = styled.div`
+  width: 20rem;
   font-size: 1.7rem;
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  margin-right: 5rem;
+  margin-left: -23rem;
+  display: flex;
 `;
 
 const SubTitle = styled.span`
   display: block; // 블록 레벨 요소로 변경
   width: 7.6875rem; // 너비 지정
-  height: 2.875rem; // 높이 지정
   line-height: 2.875rem; // line-height를 height와 동일하게 설정하여 텍스트를 수직 중앙에 배치
   text-align: center; // 텍스트 수평 중앙 정렬
   font-size: 1rem;
   font-weight: 600;
   border-radius: 1.25rem;
   border: 3px solid #FF6B00;
-  margin-left:17rem;
   position: relative; // 상대적 위치 설정, 필요에 따라 조정 가능
-  top: 50%; // 상위 요소 대비 상단에서 50% 위치
   transform: translateY(-80%); // Y축으로 -50% 만큼 이동하여 수직 중앙 정렬
   // 주의: 이 방식을 사용하려면 SubTitle의 상위 요소가 position: relative;로 설정되어야 합니다.
   cursor: pointer;
+  margin-left: 5rem;
 `;
 
 const InformationSection = styled.div`
@@ -383,7 +399,8 @@ const ReviewText = styled.div`
   justify-content: flex-start;
   font-size: 1rem;
   font-style: 'Pretendard';
-  font-weight: 800;
+  max-width: 18rem;
+  font-weight: 600;
   line-height: normal;
   margin-top: 2.2rem;
   margin-bottom: 4.4rem;

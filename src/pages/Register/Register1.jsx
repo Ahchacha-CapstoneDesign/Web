@@ -5,11 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import Pagination, {PaginationContainer} from "../Pagination";
 import apiClient from "../../path/apiClient";
 import ConfirmOrCancleModal from "../ConfirmOrCancleModal";
+import ConfirmModal from "../ConfirmModal";
 
 const LocalPaginationContainer = styled(PaginationContainer)`
   justify-content: flex-end;
-  padding-left: 13rem;
-  margin-top: -1rem;
+  margin-top: 2rem;
 `;
 
 const Register1 = () => {
@@ -24,6 +24,7 @@ const Register1 = () => {
     const [registerData, setRegisterData] = useState({ canreserveCount: 0, reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
     const [currentStatus, setCurrentStatus] = useState('ALL');
     const [modalOpen, setModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
     const [modalClose, setModalClose] = useState(false);
     const [deleteItemId, setDeleteItemId] = useState(null);
 
@@ -120,7 +121,8 @@ const Register1 = () => {
             else alert("잘못된 사용자 입니다");
 
         } else {
-            alert("카테고리를 선택하세요.");
+            setModalMessage("카테고리를 선택하세요.");
+            setModalOpen(true);
         }
     };
 
@@ -194,6 +196,18 @@ const Register1 = () => {
         currentPage * ITEMS_PER_PAGE
     );
 
+    const formatDate = (isoString) => {
+        const date = new Date(isoString);
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 월
+        const day = date.getDate().toString().padStart(2, '0'); // 일
+        const hours = date.getHours().toString().padStart(2, '0'); // 시간
+        const minutes = date.getMinutes().toString().padStart(2, '0'); // 분
+      
+        return `${year}/${month}/${day} ${hours}:${minutes}`;
+      };
+    
+
     return (
         <>
             <GlobalStyle />
@@ -210,7 +224,7 @@ const Register1 = () => {
                     <CategoryWrapper>
                         <CategoryList>
                             {categories.map(category => (
-                                <CategoryItem key={category.id} onClick={() => handleCategoryClick(category)}>
+                                <CategoryItem key={category.id} onClick={() => handleCategoryClick(category)} selected={selectedCategory && category.id === selectedCategory.id} >
                                     {category.name}
                                 </CategoryItem>
                             ))}
@@ -230,6 +244,12 @@ const Register1 = () => {
                     {selectedPage === 'register' && (
                         <RegisterButton onClick={handleRegisterClick}>등록하기</RegisterButton>
                     )}
+                    <ConfirmModal
+                        message={modalMessage}
+                        isOpen={modalOpen}
+                        setIsOpen={setModalOpen}
+                        onConfirm={handleModalConfirm}
+                    />
                 </>
             )}
 
@@ -238,17 +258,42 @@ const Register1 = () => {
                     <RentingTitleContainer>
                         <RentingTitle>등록 내역</RentingTitle>
                     </RentingTitleContainer>
-
-
+                    <ItemLabels>
+                        <ImageLabel>사진</ImageLabel>
+                        <TitleLabel>제목</TitleLabel>
+                        <DetailLabel>대여 및 반납 장소, 시간</DetailLabel>
+                        <PriceLabel>가격</PriceLabel>
+                        <StatusLabel>상태</StatusLabel>
+                    </ItemLabels>
 
                     {displayedItems.map((item, index) => (
                         <ItemContainer key={item.id} isFirst={index === 0}>
                             <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
                             <ItemName>{item.title}</ItemName>
-                            <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
+                            <ItemDetails>
+                                <DetailsContainer>
+                                    <DetailsTitle>대여</DetailsTitle>
+                                    <DetailsContext>
+                                    <Place>{item.borrowPlace}</Place>
+                                    <Time>{formatDate(item.canBorrowDateTime)}</Time>
+                                    </DetailsContext>
+                                </DetailsContainer>
+                                <DetailsContainer>
+                                    <DetailsTitle>반납</DetailsTitle>
+                                    <DetailsContext>
+                                    <Place>{item.returnPlace}</Place>
+                                    <Time>{formatDate(item.returnDateTime)}</Time>
+                                    </DetailsContext>
+                                </DetailsContainer>
+                            </ItemDetails>
                             <ItemPrice>{item.pricePerHour}원/시간</ItemPrice>
-
-                            <UpdateButton onClick={() => handleUpdateClick(item.id)}>수정</UpdateButton>
+                            <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
+                            {item.rentingStatus === 'NONE' ? (
+                                <UpdateButton onClick={() => handleUpdateClick(item.id)} isActive={true}>수정</UpdateButton>
+                            ) : (
+                                <UpdateButton isActive={false}></UpdateButton>
+                            )
+                            }
                             <DeleteButton onClick={() => handleDelete(item.id)}>삭제</DeleteButton>
                             {modalOpen && (
                                 <ConfirmOrCancleModal
@@ -270,7 +315,6 @@ const Register1 = () => {
                     </LocalPaginationContainer>
                 </Container>
             )}
-
         </>
     );
 };
@@ -332,7 +376,7 @@ const ButtonWrapper = styled.div`
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  margin-left: 25rem;
+  margin-left: 20rem;
 `
 const Button = styled.button`
   color: ${({ selected }) => selected ? '#00FFE0' : '#fff'};
@@ -344,91 +388,19 @@ const Button = styled.button`
   margin-left:0.5rem;
   margin-right:0.5rem;
   border: none;
+  cursor: pointer;
 `
 
 const ItemTitle = styled.div` 
   color: #FFF;
   margin-top: 4rem;
   text-align: left;
-  margin-left: 28rem;
+  margin-left: 22rem;
   font-family: "Pretendard";
   font-size: 1.5625rem;
   font-style: normal;
   font-weight: 700;
 `;
-
-const SearchSection = styled.section`
-  width: 26.1875rem;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  align-items:center;
-  margin-top: 3rem;
-  margin-right: 17rem;
-  padding: 10px;
-  border-radius: 0.625rem;
-  border: 1px solid #00FFE0; // 테두리 색상 설정
-  background: transparent;
-  
-`;
-
-const StatusButton = styled.div`
-  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  height: 4.5rem;
-  color: ${(props) => (props.isActive ? '#00FFE0' : 'white')};
-  border-bottom: ${(props) => (props.isActive ? '2px solid #00FFE0' : 'none')};
-  cursor: pointer;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-`;
-
-const SearchText = styled.div`
-  color: #fff; // 텍스트 색상
-  width: 11rem;
-  text-align: center;
-  font-family: "Pretendard";
-  font-size: 1.3rem;
-  font-weight: 700;
-`;
-
-const SearchInput = styled.input`
-  flex: 1; // 검색 입력 창이 섹션을 가득 채우도록 함
-  padding: 10px;
-  border: none; // 테두리 없음
-  background: transparent;
-  margin-right: 10px; // 버튼과의 간격
-  font-family: "Pretendard";
-  font-size: 1.3rem;
-  font-weight: 300;
-  color: #fff;
-  &:focus {
-    outline: none; // 입력 시 테두리 없앰
-  }
-`;
-
-const SearchButton = styled.button`
-  width: 1.8rem;
-  height: 1.8rem;
-  margin-right: 1.5rem;
-  border: none; // 테두리 없음
-  cursor: pointer; // 마우스 오버 시 포인터
-  background-image: url('/assets/img/Search.png'); // 돋보기 아이콘 이미지 경로
-  background-color: transparent; // 배경색 투명
-  background-repeat: no-repeat; // 이미지 반복 없음
-  background-position: center; // 이미지를 버튼 중앙에 위치
-  background-size: contain; // 이미지 사이즈를 버튼에 맞게 조정
-`;
-
-const VerticalLine = styled.div`
-  height: 30px; // 세로 선의 높이
-  width: 1px; // 세로 선의 두께
-  background-color: #00FFE0; // 세로 선 색상
-  margin-right: 2rem; // 입력 필드와의 간격
-`;
-
-
 
 const Span = styled.div` 
     display: inline-block; 
@@ -443,7 +415,7 @@ const CategoryWrapper = styled.div`
   display: flex;
   margin-top: 3rem;
   width: 65rem;
-  margin-left: 27rem;
+  margin-left: 22rem;
   justify-content: center;
   font-size: 1.25rem;
   font-style: normal;
@@ -506,7 +478,7 @@ const Item = styled.div`
   color: ${({ selected }) => selected ? '#00FFE0' : '#fff'};
   padding: 1rem;
   cursor: pointer;
-  margin-left:1rem;
+  margin-left: 1rem;
 `;
 
 const RegisterButton = styled.button`
@@ -522,16 +494,14 @@ const RegisterButton = styled.button`
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  margin-left: 73.5rem;
+  margin-left: 68rem;
   margin-top: 6rem;
 `;
 
-/////
 const ItemContainer = styled.div`
   display: flex;
-  width: 59.5rem;
   height: 7rem;
-  margin-left: 15rem;
+  width: 65rem;
   border-bottom: 0.5px solid #FFF;
   align-items: center;
 `;
@@ -549,17 +519,68 @@ const ItemName = styled.div`
   font-family: "Pretendard";
   font-size: 1.2rem;
   font-weight: 500;
-  width: 15.875rem;
+  width: 15rem;
+  max-width: 15rem;
   margin-left: 2rem;
+  overflow: hidden; // 내용이 넘치면 숨김 처리
+  text-overflow: ellipsis; // 내용이 넘칠 때 ... 표시
+  white-space: nowrap; 
+`;
+
+const ItemDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const DetailsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-left: 5rem;
+`;
+
+const DetailsTitle = styled.div` 
+  color: white;
+  font-family: "Pretendard";
+  font-size: 1rem;
+  font-weight: 300;
+  width: 3rem;
+  align-items: center;
+`;
+
+const DetailsContext = styled.div`
+  display: flex;
+  color: white;
+  font-family: "Pretendard";
+  align-items: center;
+`;
+
+const Place = styled.div`
+  font-size: 1.2rem;
+  font-weight: 500;
+  align-items: center;
+  width: 8rem; // 최대 너비 설정
+  max-width: 10rem;
+  overflow: hidden; // 내용이 넘치면 숨김 처리
+  text-overflow: ellipsis; // 내용이 넘칠 때 ... 표시
+  white-space: nowrap; // 텍스트를 한 줄로 표시
+`;
+
+const Time = styled.div`
+  font-size: 0.8rem;
+  font-weight: 300;
+  align-items: center;
+  width: 8rem;
 `;
 
 const ItemPrice = styled.div`
-  width: 6rem;
+  margin-left: 3rem;
+  width: 10rem;
   color: white;
   font-family: "Pretendard";
   font-size: 1rem;
   font-weight: 500;
-  margin-left:3rem;
 `;
 
 const ItemStatus = styled.div`
@@ -567,16 +588,17 @@ const ItemStatus = styled.div`
   font-size: 1rem;
   font-weight: 600;
   padding: 0.5rem;
-  margin-left: 8rem;
+  margin-left: 2rem;
+  width: 8rem;
   ${(props) => `color: ${props.color}; background-color: ${props.backgroundColor};`}
 `;
-
 
 const RentingTitleContainer = styled.div`
   display: flex;
   align-items: center;
   margin-top: 2rem;
-  margin-left: 14rem;
+  margin-bottom: 3rem;
+  margin-left: -5rem;
 `;
 
 const RentingTitle = styled.div`
@@ -588,99 +610,76 @@ const RentingTitle = styled.div`
   margin-right: 51rem;
 `;
 
-const RentingInfoBox = styled.div`
-  background: #343434;
-  display: flex;
-  justify-content: space-between;
-  width: 59.5rem;
-  height: 7rem;
-  margin-top: 1rem;
-  margin-left: 15rem;
-  align-items: center;
-  border-radius: 12px;
-`;
-
-
-const ReservationYes = styled.div`
-  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  color: white;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-  border-right: 1px solid #FFF;
-`;
-
-const Reserved = styled.div`
-  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  color: white;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-  border-right: 1px solid #FFF;
-`;
-
-const Renting = styled.div`
-  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  color: white;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-  border-right: 1px solid #FFF;
-`;
-
-const Returned = styled.div`
-  flex-grow: 1; /* 자식 요소들의 너비를 동일하게 설정 */
-  color: white;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-`;
-
 const Container = styled.div`
   display: flex;
-  margin-right:20rem;
   flex-direction: column;
   align-items: center;
   font-family: "Pretendard";
+  width: 100%;
+`;
+
+const ItemLabels = styled.div`
+  display: flex;
+  padding: 0.5rem 2rem;
+  color: white;
+  font-family: pretendard;
+  font-size: 1rem;
+  width: 62rem;
+  background-color: transparent;  // 라벨 배경색 설정
+  border-top: 1px solid #FFF;
+  border-bottom: 1px solid #FFF;
+`;
+
+const ImageLabel = styled.div`
+    text-align: center;
+    width: 6.5rem;
+`;
+
+const TitleLabel = styled.div`
+    text-align: center;
+    width: 15rem;
+`;
+
+const DetailLabel = styled.div`
+    text-align: center;
+    width: 18rem;
+`;
+
+const PriceLabel = styled.div `
+    text-align: center;
+    width: 11rem;
+`;
+
+const StatusLabel = styled.div`
+    text-align: center;
+    width: 4rem;
 `;
 
 const UpdateButton=styled.button`
-  background-color: #000;
+  background-color: transparent;
   width:5.3rem;
   height:2.6rem;
   color:#fff;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-style: normal;
   font-weight: 500;
   line-height: 1.875rem; 
-  border-radius: 1rem;
-  border: 0.1rem solid #fff;
-  margin-left:15rem;
-
+  border-radius: 10px;
+  border: ${({ isActive }) => isActive ? "0.1rem solid #fff" : "none"};
+  cursor: ${({ isActive }) => isActive ? "pointer" : "default"};
 `;
 
 const DeleteButton=styled.button`
-  background-color: #000;
+  background-color: transparent;
   width:5.3rem;
   height:2.6rem;
   color:#fff;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-style: normal;
   font-weight: 500;
   line-height: 1.875rem; 
-  border-radius: 1rem;
+  border-radius: 10px;
   border: 0.1rem solid #fff;
-  margin-left:1.5rem;
-
-`;
-
-const Divider = styled.div`
-  height: 0.5px;
-  background-color: #FFF; // 배경색 설정
-  width: 59.5rem; // 너비 설정
-  margin-left: 15rem; // 좌측 여백 조정
-`;
-
-const Break = styled.div`
-  margin-bottom: 0.75rem; /* 원하는 간격 조정 */
+  margin-left: 1rem;
+  cursor: pointer;
 `;
