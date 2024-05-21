@@ -31,12 +31,20 @@ const Login = () => {
 
   const handleLogin = async (event) => {
     event.preventDefault();
+    if (isOfficial && !canOfficial) {
+      setOfficialLoginError('공식 사용자로의 인증이 필요합니다!');
+      return;
+    }
+    console.log("Login attempt:", username, password, "Official:", isOfficial);
     try {
+      const personOrOfficial = isOfficial && canOfficial ? "OFFICIAL" : "PERSON";
       const response = await apiClient.post('/users/login', {
         id: username,
         passwd: password,
-        personOrOfficial: isOfficial ? "OFFICIAL" : "PERSON"  // 서버에 전달할 로그인 유형
+        personOrOfficial: personOrOfficial  // 서버에 전달할 로그인 유형
       });
+      console.log("Server response:", response.data);
+
 
       localStorage.setItem('userName', response.data.name);
       localStorage.setItem('userTrack', response.data.track1);
@@ -57,6 +65,7 @@ const Login = () => {
       if (response.data.authenticationValue === 'CANOFFICIAL' && isOfficial) {
         if (response.data.personOrOfficial !== 'OFFICIAL') {
           setOfficialLoginError('공식 사용자로의 인증이 필요합니다!');
+          console.error('Official login attempt failed:', officialLoginError);
           return;
         }
       }
@@ -103,10 +112,9 @@ const Login = () => {
         
         <CheckboxContainer onClick={handleCheckboxChange}>
             <CheckboxIcon src={isOfficial ? "/assets/img/Check.png" : "/assets/img/Unchecked.png"} />
-            <Label>공식 사용자로 로그인하기</Label>
+            <Label>과사무실 근로장학생 / 학생회로 로그인하기</Label>
           </CheckboxContainer>
-        {loginFailed && <ErrorMessage>로그인 실패! 아이디와 비밀번호를 확인해주세요.</ErrorMessage>}
-        {loginFailed && <ErrorMessage>
+          {loginFailed && <ErrorMessage>
           <p>아차차! 로그인 실패! </p>
           <p>아이디와 비밀번호가 일치하지 않습니다</p>
           </ErrorMessage>}
@@ -246,12 +254,14 @@ const CheckboxContainer = styled.div`
 `;
 
 const CheckboxIcon = styled.img`
-  width: 24px;
-  height: 24px;
+  width: 1.2rem;
+  height: 1.2rem;
 `;
 
 const Label = styled.label`
   margin-left: 0.5rem;
   color: white;
-  font-family: "Pretendard";
+  font-family: 'Pretendard';
+  cursor: pointer;
+  font-weight: 400;
 `;
