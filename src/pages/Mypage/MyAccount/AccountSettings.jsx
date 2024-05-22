@@ -123,6 +123,7 @@ const AccountSettings = () => {
         const imageUrl = response.data; // 서버로부터 받은 이미지 URL
         localStorage.setItem('profileImageUrl', imageUrl); // localStorage에 이미지 URL 저장
         setProfileImage(imageUrl); // 상태 업데이트로 UI에 반영
+        setSuccessModalMessage('이미지 변경이 완료되었습니다!');
         setShowSuccessModal(true); 
       } catch (error) {
         console.error('이미지 업로드 실패:', error);
@@ -136,6 +137,7 @@ const AccountSettings = () => {
         await apiClient.post('/users/reset-profile');
         localStorage.removeItem('profileImageUrl'); // 로컬 스토리지에서 이미지 URL 삭제
         setProfileImage(DEFAULT_IMAGE_URL); // 상태 업데이트로 기본 이미지 사용
+        setSuccessModalMessage('이미지 변경이 완료되었습니다!');
         setShowSuccessModal(true); // 성공 모달을 표시
       } catch (error) {
         console.error('기본 이미지로 재설정 실패:', error);
@@ -168,7 +170,7 @@ const AccountSettings = () => {
       if (officialFile) {
         formData.append('file', officialFile);
       }
-
+    
       try {
         const response = await apiClient.post('/authentication', formData, {
           headers: {
@@ -176,11 +178,15 @@ const AccountSettings = () => {
           },
         });
         if (response.status === 201) {
-          alert('인증 정보가 성공적으로 제출되었습니다.');
+          // 성공 메시지 설정 및 모달 표시
+          setSuccessModalMessage('인증 정보가 제출되었습니다.');
+          setShowSuccessModal(true);  // 성공 모달을 표시
         }
       } catch (error) {
         console.error('인증 정보 제출 실패:', error);
-        alert('인증 정보 제출에 실패했습니다.');
+        // 실패한 경우에도 사용자에게 피드백을 주기 위해 모달을 사용할 수 있습니다.
+        setSuccessModalMessage('인증 정보 제출에 실패했습니다.');
+        setShowSuccessModal(true);  // 실패 모달을 표시
       }
     };
 
@@ -287,10 +293,10 @@ const AccountSettings = () => {
           </AccountContainer>
           {showSuccessModal && (
                 <ConfirmModal
-                    message="이미지 변경이 완료되었습니다!"
-                    isOpen={showSuccessModal}
-                    setIsOpen={setShowSuccessModal}
-                    onConfirm={handleModalClose}
+                  message={successModalMessage}
+                  isOpen={showSuccessModal}
+                  setIsOpen={setShowSuccessModal}
+                  onConfirm={handleModalClose}
                 />
           )}
         </>
