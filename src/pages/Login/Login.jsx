@@ -11,7 +11,6 @@ const Login = () => {
   const [passwordShown, setPasswordShown] = useState(false);
   const [loginFailed, setLoginFailed] = useState(false);
   const [isOfficial, setIsOfficial] = useState(false);
-  const [canOfficial, setCanOfficial] = useState(false);
   const [officialLoginError, setOfficialLoginError] = useState('');
   const navigate = useNavigate();
   const DEFAULT_IMAGE_URL = '/assets/img/Profile.png';
@@ -20,29 +19,35 @@ const Login = () => {
     setPasswordShown(!passwordShown);
   };
 
-  useEffect(() => {
-    const authValue = localStorage.getItem('authenticationValue');
-    setCanOfficial(authValue === 'CANOFFICIAL');
-  }, []);
-
   const handleCheckboxChange = () => {
     setIsOfficial(!isOfficial);  // 체크박스 상태 변경
+    setOfficialLoginError(''); // 체크박스 변경시 인증 에러 메시지 초기화
+    setLoginFailed(false);
   };
 
   const handleLogin = async (event) => {
     event.preventDefault();
-    if (isOfficial && !canOfficial) {
-      setOfficialLoginError('공식 사용자로의 인증이 필요합니다!');
-      return;
-    }
-    console.log("Login attempt:", username, password, "Official:", isOfficial);
+    setLoginFailed(false);
+  setOfficialLoginError('');
     try {
-      const personOrOfficial = isOfficial && canOfficial ? "OFFICIAL" : "PERSON";
+      const personOrOfficial = isOfficial ? 'OFFICIAL' : 'PERSON';
       const response = await apiClient.post('/users/login', {
         id: username,
         passwd: password,
-        personOrOfficial: personOrOfficial  // 서버에 전달할 로그인 유형
+        personOrOfficial: personOrOfficial
       });
+
+      if (response.data.authenticationValue === 'CANOFFICIAL' && isOfficial) {
+        if (response.data.personOrOfficial === 'OFFICIAL') {
+          localStorage.setItem('personOrOfficial', 'OFFICIAL');
+        } else {
+          setLoginFailed(false); // 다른 에러 메시지를 초기화
+          setOfficialLoginError('공식 사용자로의 인증이 필요합니다. 개인정보 관리 페이지에서 인증을 진행해주세요.');
+          return;
+        }
+      } else {
+        localStorage.setItem('personOrOfficial', 'PERSON');
+      }
       console.log("Server response:", response.data);
 
 
@@ -61,12 +66,10 @@ const Login = () => {
       localStorage.setItem('ownerReviewScore', response.data.ownerReviewScore);
       localStorage.setItem('renterReviewScore', response.data.renterReviewScore);
       localStorage.setItem('authenticationValue', response.data.authenticationValue);
-      localStorage.setItem('officialName', response.data.officialName);
 
       if (response.data.authenticationValue === 'CANOFFICIAL' && isOfficial) {
         if (response.data.personOrOfficial !== 'OFFICIAL') {
           setOfficialLoginError('공식 사용자로의 인증이 필요합니다!');
-          console.error('Official login attempt failed:', officialLoginError);
           return;
         }
       }
@@ -78,8 +81,12 @@ const Login = () => {
         navigate('/loading');
       }
     } catch (error) {
-      console.error("Login failed:", error);
-      setLoginFailed(true);
+      if (error.response && error.response.status === 403) {
+        // 403 Forbidden 응답 코드 체크
+        setOfficialLoginError('공식 사용자로의 인증이 필요합니다. 개인정보 관리 페이지에서 인증을 진행해주세요.');
+      } else {
+        setLoginFailed(true); // 일반 로그인 실패 상태 설정
+      }
     }
   };
 
@@ -115,6 +122,10 @@ const Login = () => {
             <CheckboxIcon src={isOfficial ? "/assets/img/Check.png" : "/assets/img/Unchecked.png"} />
             <Label>과사무실 근로장학생 / 학생회로 로그인하기</Label>
           </CheckboxContainer>
+          {officialLoginError && <ErrorMessage>
+            <p>공식 사용자로의 인증이 필요합니다.</p>
+            <p>개인정보 관리 페이지에서 인증을 진행해주세요.</p>
+          </ErrorMessage>}
           {loginFailed && <ErrorMessage>
           <p>아차차! 로그인 실패! </p>
           <p>아이디와 비밀번호가 일치하지 않습니다</p>
@@ -214,8 +225,8 @@ const ErrorMessage = styled.div`
   font-size: 0.9375rem;
   font-style: normal;
   font-weight: 800;
-  position: absolute; 
-  top: 7rem; 
+  position: absolute;
+  top: 9rem; 
   left: 1rem;
 `;  
 
