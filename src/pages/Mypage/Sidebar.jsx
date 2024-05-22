@@ -54,7 +54,7 @@ const Sidebar = () => {
       </MenuItem>
       <MenuItem active={activePage === '/mypage/myreview'} onClick={() => handlePageChange('/mypage/myreview')}>My 리뷰</MenuItem>
       {isAdmin && (
-        <MenuItem active={activePage === '/mypage/management'} onClick={() => handlePageChange('/mypage/management')}>Official 계정 인증</MenuItem>
+        <MenuItem active={activePage === '/mypage/manageofficial'} onClick={() => handlePageChange('/mypage/manageofficial')}>Official 계정 인증</MenuItem>
       )}      
       <Logout onClick={handleLogout}>로그아웃</Logout>
     </SidebarContainer>
