@@ -66,6 +66,7 @@ const Login = () => {
       localStorage.setItem('ownerReviewScore', response.data.ownerReviewScore);
       localStorage.setItem('renterReviewScore', response.data.renterReviewScore);
       localStorage.setItem('authenticationValue', response.data.authenticationValue);
+      localStorage.setItem('officialName', response.data.officialName);
 
       if (response.data.authenticationValue === 'CANOFFICIAL' && isOfficial) {
         if (response.data.personOrOfficial !== 'OFFICIAL') {

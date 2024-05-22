@@ -74,6 +74,7 @@ const AdminLogin = () => {
       localStorage.setItem('ownerReviewScore', response.data.ownerReviewScore);
       localStorage.setItem('renterReviewScore', response.data.renterReviewScore);
       localStorage.setItem('authenticationValue', response.data.authenticationValue);
+      localStorage.setItem('officialName', response.data.officialName);
 
       navigate('/loading');
     } catch (error) {
