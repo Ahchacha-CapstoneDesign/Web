@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../path/apiClient';
 
-const NotificationModal = ({ isOpen, onClose }) => {
+const NotificationModal = ({ isOpen, onClose, onNotificationsChange }) => {
     const [notifications, setNotifications] = useState([]);
     const navigate = useNavigate();
 
@@ -62,7 +62,8 @@ const NotificationModal = ({ isOpen, onClose }) => {
             } else {
                 navigate('/mypage/main');
             }
-            onClose(); 
+            onClose();
+            onNotificationsChange();
         } catch (error) {
             console.error('Failed to update read status:', error);
         }

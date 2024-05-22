@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
@@ -10,6 +10,9 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [passwordShown, setPasswordShown] = useState(false);
   const [loginFailed, setLoginFailed] = useState(false);
+  const [isOfficial, setIsOfficial] = useState(false);
+  const [canOfficial, setCanOfficial] = useState(false);
+  const [officialLoginError, setOfficialLoginError] = useState('');
   const navigate = useNavigate();
   const DEFAULT_IMAGE_URL = '/assets/img/Profile.png';
 
@@ -17,14 +20,31 @@ const Login = () => {
     setPasswordShown(!passwordShown);
   };
 
+  useEffect(() => {
+    const authValue = localStorage.getItem('authenticationValue');
+    setCanOfficial(authValue === 'CANOFFICIAL');
+  }, []);
+
+  const handleCheckboxChange = () => {
+    setIsOfficial(!isOfficial);  // 체크박스 상태 변경
+  };
 
   const handleLogin = async (event) => {
     event.preventDefault();
+    if (isOfficial && !canOfficial) {
+      setOfficialLoginError('공식 사용자로의 인증이 필요합니다!');
+      return;
+    }
+    console.log("Login attempt:", username, password, "Official:", isOfficial);
     try {
+      const personOrOfficial = isOfficial && canOfficial ? "OFFICIAL" : "PERSON";
       const response = await apiClient.post('/users/login', {
         id: username,
         passwd: password,
+        personOrOfficial: personOrOfficial  // 서버에 전달할 로그인 유형
       });
+      console.log("Server response:", response.data);
+
 
       localStorage.setItem('userName', response.data.name);
       localStorage.setItem('userTrack', response.data.track1);
@@ -40,6 +60,15 @@ const Login = () => {
       localStorage.setItem('profileImageUrl', imageUrl);
       localStorage.setItem('ownerReviewScore', response.data.ownerReviewScore);
       localStorage.setItem('renterReviewScore', response.data.renterReviewScore);
+      localStorage.setItem('authenticationValue', response.data.authenticationValue);
+
+      if (response.data.authenticationValue === 'CANOFFICIAL' && isOfficial) {
+        if (response.data.personOrOfficial !== 'OFFICIAL') {
+          setOfficialLoginError('공식 사용자로의 인증이 필요합니다!');
+          console.error('Official login attempt failed:', officialLoginError);
+          return;
+        }
+      }
 
       // 로그인 후 처리 로직
       if (!response.data.nickname) {
@@ -80,7 +109,12 @@ const Login = () => {
           />
           <EyeIcon src="/assets/img/Eye.png"  onClick={togglePasswordVisibility} />
         </PasswordContainer>
-        {loginFailed && <ErrorMessage>
+        
+        <CheckboxContainer onClick={handleCheckboxChange}>
+            <CheckboxIcon src={isOfficial ? "/assets/img/Check.png" : "/assets/img/Unchecked.png"} />
+            <Label>과사무실 근로장학생 / 학생회로 로그인하기</Label>
+          </CheckboxContainer>
+          {loginFailed && <ErrorMessage>
           <p>아차차! 로그인 실패! </p>
           <p>아이디와 비밀번호가 일치하지 않습니다</p>
           </ErrorMessage>}
@@ -210,4 +244,24 @@ export const LoginFooter = styled.div`
   text-align: left;
   margin-top: 1.81rem;
   line-height: normal;
+`;
+
+const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  cursor: pointer;
+`;
+
+const CheckboxIcon = styled.img`
+  width: 1.2rem;
+  height: 1.2rem;
+`;
+
+const Label = styled.label`
+  margin-left: 0.5rem;
+  color: white;
+  font-family: 'Pretendard';
+  cursor: pointer;
+  font-weight: 400;
 `;

@@ -76,7 +76,7 @@ const Header = () => {
           <NotificationIcon onClick={toggleModal} 
             src={hasUnreadNotifications ? "/assets/img/NotificationPlus.png" : "/assets/img/Notification.png"} 
             alt="알림" />          
-          <NotificationModal isOpen={modalOpen} onClose={toggleModal} />
+          <NotificationModal isOpen={modalOpen} onClose={toggleModal} onNotificationsChange={fetchNotifications}/>
         </UserAndNotificationContainer>
       </HeaderContent>
     </HeaderContainer>
