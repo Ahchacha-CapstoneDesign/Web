@@ -39,10 +39,13 @@ const ItemDetailPage = () => {
               setFormattedScore(newFormattedScore); // 상태 업데이트
 
               const reviewResponse = await apiClient.get(`/review/reviewDetails/itemOwner/${response.data.userId}`);
-              const latestReviews = reviewResponse.data.content.slice(0, 2).map(review => ({
+              // 필터링하여 null이 아닌 reviewComment만 포함
+              const validReviews = reviewResponse.data.content.filter(review => review.reviewComment != "");
+              const latestReviews = validReviews.slice(0, 2).map(review => ({
                   ...review,
                   reviewComment: review.reviewComment.length > 20 ? review.reviewComment.slice(0, 20) + '...' : review.reviewComment
               }));
+              console.log(reviews);
               setReviews(latestReviews);
             } catch (error) {
                 console.error('Failed to fetch item details:', error);
