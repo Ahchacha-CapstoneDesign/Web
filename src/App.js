@@ -34,6 +34,8 @@ import UpdatePersonRegisterDetails from "./pages/Register/UpdatePersonRegisterDe
 import UpdateOfficialRegisterDetails from "./pages/Register/UpdateOfficialRegisterDetails";
 import OwnerReview from './pages/Item/OwnerReview.jsx';
 
+import Chat from './pages/Chat/Chat.js';
+
 
 function App() {
   return (
@@ -88,6 +90,9 @@ function App() {
             <Route path="/mypage/passwordcheck" element={<> <Header /> <Sidebar /> <PasswordCheck /> </> } />
             <Route path="/mypage/accountsettings" element={<> <Header /> <Sidebar /> <AccountSettings /> </> } />
             <Route path="/mypage/myreview" element={<> <Header /> <Sidebar /> <MyReview /> </> } />
+
+            {/* 채팅 */}
+            <Route path="/chat" element={<> <Header /> <Chat /> </> } />
           </Routes>
         </div>
       </Router>
