@@ -116,7 +116,7 @@ const OwnerReview = () => {
           reviews.slice(0, visibleCounts[activeReviewType]).map((review, index) => (
             <ReviewItem key={index}>
               <ProfileItem>
-                <ProfileImg src={activeReviewType === 'rental' ? review.renterProfile : review.ownerProfile} alt="Profile" />
+              <ProfileImg src={`${activeReviewType === 'rental' ? (review.renterProfile || "/assets/img/Profile.png") : (review.ownerProfile || "/assets/img/Profile.png")}?${new Date().getTime()}`} alt="Profile" />
                 <NickNameAndRating>
                   <UserNickname>{activeReviewType === 'rental' ? review.renterNickName : review.ownerNickName}</UserNickname>
                   <StarRating score={review.reviewScore} />

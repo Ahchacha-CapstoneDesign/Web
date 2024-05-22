@@ -17,12 +17,6 @@ const Header = () => {
     setModalOpen(!modalOpen);
   };
 
-  useEffect(() => {
-    const name = localStorage.getItem('userName');
-    setUserName(name);
-    const track = localStorage.getItem('userTrack');
-    setUserTrack(track);
-  });
 
   useEffect(() => {
     setActivePage(location.pathname); // 현재 경로를 상태로 설정합니다.
@@ -47,6 +41,21 @@ const Header = () => {
     fetchNotifications();
   }, []);
 
+  useEffect(() => {
+    const name = localStorage.getItem('userName');
+    setUserName(name);
+    const personOrOfficial = localStorage.getItem('personOrOfficial');
+    let track;
+    if (personOrOfficial === "OFFICIAL") {
+      track = localStorage.getItem('officialName'); // 공식 사용자일 경우 officialName 사용
+    } else if (personOrOfficial === "ADMIN") {
+      track = "관리자"; // 관리자일 경우 "관리자"라는 텍스트 사용
+    } else {
+      track = localStorage.getItem('userTrack'); // 일반 사용자일 경우 userTrack 사용
+    }
+    setUserTrack(track);
+  }, []);
+
 
   return (
     <HeaderContainer>
@@ -61,8 +70,8 @@ const Header = () => {
             onClick={() => handlePageChange('/rent/')}>아차! 대여</NavItem>
           <NavItem active={activePage.startsWith('/register/')}
             onClick={() => handlePageChange('/register/')}>아차! 등록</NavItem>
-          <NavItem active={activePage === '/talk'}
-            onClick={() => handlePageChange('/talk')}>아차! 톡</NavItem>
+          <NavItem active={activePage === '/chat'}
+            onClick={() => handlePageChange('/chat')}>아차! 톡</NavItem>
           <NavItem active={activePage.startsWith('/community/')}
             onClick={() => handlePageChange('/community/main')}>아차! 게시판</NavItem>
           <NavItem active={activePage.startsWith('/mypage/')}
@@ -76,7 +85,7 @@ const Header = () => {
           <NotificationIcon onClick={toggleModal} 
             src={hasUnreadNotifications ? "/assets/img/NotificationPlus.png" : "/assets/img/Notification.png"} 
             alt="알림" />          
-          <NotificationModal isOpen={modalOpen} onClose={toggleModal} />
+          <NotificationModal isOpen={modalOpen} onClose={toggleModal} onNotificationsChange={fetchNotifications}/>
         </UserAndNotificationContainer>
       </HeaderContent>
     </HeaderContainer>

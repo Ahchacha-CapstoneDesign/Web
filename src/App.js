@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login/Login';
+import AdminLogin from './pages/Login/AdminLogin';
 import SettingNickname from './pages/Login/SettingNickname';
 import Header from './pages/Header';
 import MainPage1 from './pages/Home/MainPage1';
@@ -15,7 +16,6 @@ import AccountSettings from './pages/Mypage/MyAccount/AccountSettings';
 import MyRegister from './pages/Mypage/MyRegisterList.jsx';
 import MyRentingList from './pages/Mypage/MyRentingList.jsx';
 import MyReview from './pages/Mypage/MyReview.jsx';
-
 import CommunityMain from './pages/Community/CommunityMain';
 import RentMainPage from './pages/Rent/RentMainPage.jsx';
 import RentFirstPage from './pages/Rent/RentFirstPage.jsx';
@@ -34,6 +34,8 @@ import UpdatePersonRegisterDetails from "./pages/Register/UpdatePersonRegisterDe
 import UpdateOfficialRegisterDetails from "./pages/Register/UpdateOfficialRegisterDetails";
 import OwnerReview from './pages/Item/OwnerReview.jsx';
 
+import Chat from './pages/Chat/Chat.js';
+
 
 function App() {
   return (
@@ -42,6 +44,7 @@ function App() {
           <Routes>
             {/* 로그인 페이지 */}
             <Route path="/" element={<Login />} />
+            <Route path="/adminlogin" element={<AdminLogin />} />
             
             {/* 닉네임 설정 */}
             <Route path="/setting-nickname" element={<SettingNickname />} />
@@ -87,6 +90,9 @@ function App() {
             <Route path="/mypage/passwordcheck" element={<> <Header /> <Sidebar /> <PasswordCheck /> </> } />
             <Route path="/mypage/accountsettings" element={<> <Header /> <Sidebar /> <AccountSettings /> </> } />
             <Route path="/mypage/myreview" element={<> <Header /> <Sidebar /> <MyReview /> </> } />
+
+            {/* 채팅 */}
+            <Route path="/chat" element={<> <Header /> <Chat /> </> } />
           </Routes>
         </div>
       </Router>
