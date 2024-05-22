@@ -21,23 +21,22 @@ const MainPage1 = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await apiClient.get('/items/view-counts');
-        setItems(response.data.content); // 응답에서 'content' 필드를 가정하여 아이템을 설정
+        const response = await apiClient.get('/items/top-reservations');
+        console.log(response); // 전체 응답 로그로 확인
+        if(response.data) {
+          setItems(response.data); // 응답 데이터를 직접 사용
+        } else {
+          setItems([]); // 응답 데이터가 없는 경우 빈 배열로 설정
+        }
       } catch (error) {
         console.error('아이템을 가져오는데 실패했습니다:', error);
+        setItems([]); // 오류가 발생한 경우 빈 배열로 설정
       }
     };
-
+  
     fetchItems();
   }, []);
-
-  const handleModalOpen = () => {
-    setIsModalOpen(true); // 모달 열기
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false); // 모달 닫기
-  };
+  
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);

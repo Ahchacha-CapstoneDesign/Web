@@ -22,9 +22,14 @@ const AccountSettings = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successModalMessage, setSuccessModalMessage] = useState('');
+    const [officialName, setOfficialName] = useState('');
+    const [officialFile, setOfficialFile] = useState(null);
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
     const DEFAULT_IMAGE_URL = '/assets/img/Profile.png';
+
+    const [isCheck, setIsCheck] = useState(null);  // 인증 상태를 null로 초기화
+    const [authenticationChecked, setAuthenticationChecked] = useState(false);
 
     useEffect(() => {
         const name = localStorage.getItem('userName');
@@ -49,6 +54,9 @@ const AccountSettings = () => {
         }
 
         setNewNickname(localStorage.getItem('userNickname') || '');
+
+        checkAuthenticationStatus();
+
       }, [userNickname]);
 
       const handleNicknameChange = (e) => {
@@ -144,6 +152,48 @@ const AccountSettings = () => {
       setShowSuccessModal(false);
     }
 
+    const handleOfficialNameChange = (e) => {
+      setOfficialName(e.target.value);
+    };
+
+    // 파일 선택 처리
+    const handleFileChange = (e) => {
+      setOfficialFile(e.target.files[0]);
+    };
+
+    // 인증 정보 제출
+    const handleSubmitOfficialInfo = async () => {
+      const formData = new FormData();
+      formData.append('officialName', officialName);
+      if (officialFile) {
+        formData.append('file', officialFile);
+      }
+
+      try {
+        const response = await apiClient.post('/authentication', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        if (response.status === 201) {
+          alert('인증 정보가 성공적으로 제출되었습니다.');
+        }
+      } catch (error) {
+        console.error('인증 정보 제출 실패:', error);
+        alert('인증 정보 제출에 실패했습니다.');
+      }
+    };
+
+    const checkAuthenticationStatus = async () => {
+      try {
+          const response = await apiClient.get('/authentication/status');
+          setIsCheck(response.data);
+          setAuthenticationChecked(true);  // 인증 상태가 확인되었음
+      } catch (error) {
+          console.error('인증 상태 확인 실패:', error);
+      }
+    };
+
     return (
         <>
         <GlobalStyle /> 
@@ -211,6 +261,28 @@ const AccountSettings = () => {
                     <Value>{userStatus}</Value>
                 </DetailItem>
                 <DetailDivider />
+                <DetailItem>
+                    <Label>소속 학생회 혹은 과사무실 근로장학생</Label>
+                    <Value>
+                      <NicknameInput type="text" value={officialName} onChange={handleOfficialNameChange} placeholder="소속 이름 입력" />
+                    </Value>
+                </DetailItem>
+                <DetailDivider />
+                <DetailItem>
+                    <Label>소속학생회 혹은 학생회 인증 사진 제출</Label>
+                    <SubmitValue>
+                      <input type="file" onChange={handleFileChange} />
+                      <NicknameEditButton onClick={handleSubmitOfficialInfo}>제출</NicknameEditButton>
+                      {authenticationChecked && isCheck === false && (
+                        <Message>승인 대기중입니다.</Message>
+                      )}
+                      {authenticationChecked && isCheck === true && (
+                          <Message>승인 완료되었습니다! 로그인이 가능합니다.</Message>
+                      )}
+                    </SubmitValue>
+                </DetailItem>
+                
+                <DetailDivider />
             </DetailsSection>
           </AccountContainer>
           {showSuccessModal && (
@@ -235,7 +307,22 @@ html, body, #root {
     display: flex;
     flex-direction: column;
     background-color: #000; // body 전체의 배경색을 검은색으로 설정
-    overflow: hidden;
+  }
+
+  /* 스크롤바 전체 스타일 */
+  ::-webkit-scrollbar {
+    width: 0.5rem;
+  }
+
+  /* 스크롤바 트랙(바탕) 스타일 */
+  ::-webkit-scrollbar-track {
+    background: transparent; /* 트랙의 배경색 */
+  }
+
+  /* 스크롤바 핸들(움직이는 부분) 스타일 */
+  ::-webkit-scrollbar-thumb {
+    background: #00FFE0; /* 핸들의 배경색 */
+    border-radius: 5px;
   }
 `;
 
@@ -354,6 +441,18 @@ const Value = styled.div`
     margin-bottom: 0.5rem;
 `;
 
+
+const SubmitValue = styled.div`
+    color: #fff;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+`;
+
 const NicknameInput= styled.input`
     color: #fff;
     font-size: 1rem;
@@ -361,7 +460,8 @@ const NicknameInput= styled.input`
     font-weight: 500;
     margin-bottom: 0.5rem;
     background-color: transparent;
-    border: none;
+    border: 1px solid #00ffe0;
+    border-radius: 5px;
     outline: none;
  `;
 
@@ -422,4 +522,13 @@ const SuccessMessage = styled.div`
   font-weight: 800;
   position: absolute; 
   margin-left: 28.5rem;
+`;  
+
+const Message = styled.div`
+  color: #00FF00;;
+  font-family: "Pretendard";
+  font-size: 0.9375rem;
+  font-style: normal;
+  font-weight: 800;
+  margin-left: 2rem;
 `;  
