@@ -8,9 +8,12 @@ const Sidebar = () => {
   const [activePage, setActivePage] = useState('');
   const location = useLocation(); // 현재 위치를 가져옵니다.
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);  // 관리자 여부 상태 추가
 
   useEffect(() => {
-    setActivePage(location.pathname); // 현재 경로를 상태로 설정합니다.
+    setActivePage(location.pathname);
+    const personOrOfficial = localStorage.getItem('personOrOfficial');
+    setIsAdmin(personOrOfficial === 'ADMIN');  // localStorage에서 관리자 여부 확인
   }, [location]);
 
   const handlePageChange = (path) => {
@@ -50,6 +53,9 @@ const Sidebar = () => {
         계정 관리
       </MenuItem>
       <MenuItem active={activePage === '/mypage/myreview'} onClick={() => handlePageChange('/mypage/myreview')}>My 리뷰</MenuItem>
+      {isAdmin && (
+        <MenuItem active={activePage === '/mypage/management'} onClick={() => handlePageChange('/mypage/management')}>Official 계정 인증</MenuItem>
+      )}      
       <Logout onClick={handleLogout}>로그아웃</Logout>
     </SidebarContainer>
   );
