@@ -30,20 +30,15 @@ const MainPage3 = () => {
   });
 
   const fetchPosts = async () => {
-    // 모든 게시글을 불러오는 URL. 페이지나 사이즈 매개변수 없음
-    let url = `/items/latest`;
-
-    if (sort === 'view-counts') { //조회수 순
-      url = `/items/view-counts`;
-    }
-
+    const url = '/items/MyTop-reservations';
     try {
-      const response = await apiClient.get(url);
-      const totalPosts = response.data.content;
+      const response = await apiClient.get(url, { withCredentials: true });
+      const totalPosts = response.data; // 이제 response.data 자체가 필요한 배열입니다.
       setPosts(totalPosts);
-      setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE)); // 전체 게시글을 기반으로 총 페이지 수 계산
+      setTotalPages(Math.ceil(totalPosts.length / ITEMS_PER_PAGE));
     } catch (error) {
       console.error('Error fetching posts:', error);
+      alert('데이터를 불러오는 데 실패했습니다. 서버 설정을 확인하세요.');
     }
   };
 
@@ -142,28 +137,22 @@ const MainPage3 = () => {
 
   const handleSearch = async () => {
     try {
-      if (searchTerm.trim() === '') {
-        const response = await apiClient.get('/items/latest');
-        const allItems = response.data.content;
-        navigate('/rent/mainpage', { state: { searchResults: allItems, searchTerm: '' } });
-      } else {
-        const [titleResponse, categoryResponse] = await Promise.all([
-          apiClient.get(`/items/search-title?title=${searchTerm}&page=1`),
-          apiClient.get(`/items/search-category?category=${searchTerm}&page=1`)
-        ]);
+      const [titleResponse, categoryResponse] = await Promise.all([
+        apiClient.get(`/items/search-title?title=${searchTerm}&page=1`),
+        apiClient.get(`/items/search-category?category=${searchTerm}&page=1`)
+      ]);
 
-        const combinedResults = [
-          ...titleResponse.data.content,
-          ...categoryResponse.data.content
-        ];
+      const combinedResults = [
+        ...titleResponse.data.content,
+        ...categoryResponse.data.content
+      ];
 
-        const uniqueResults = Array.from(new Set(combinedResults.map(item => item.id)))
-          .map(id => {
-            return combinedResults.find(item => item.id === id);
-          });
+      const uniqueResults = Array.from(new Set(combinedResults.map(item => item.id)))
+        .map(id => {
+          return combinedResults.find(item => item.id === id);
+        });
 
-        navigate('/rent/mainpage', { state: { searchResults: uniqueResults, searchTerm: searchTerm } });
-      }
+      navigate('/rent/mainpage', { state: { searchResults: uniqueResults, searchTerm: searchTerm } });
     } catch (error) {
       console.error('Error during search:', error);
     }
