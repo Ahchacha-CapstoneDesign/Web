@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login/Login';
+import AdminLogin from './pages/Login/AdminLogin';
 import SettingNickname from './pages/Login/SettingNickname';
 import Header from './pages/Header';
 import MainPage1 from './pages/Home/MainPage1';
@@ -15,7 +16,6 @@ import AccountSettings from './pages/Mypage/MyAccount/AccountSettings';
 import MyRegister from './pages/Mypage/MyRegisterList.jsx';
 import MyRentingList from './pages/Mypage/MyRentingList.jsx';
 import MyReview from './pages/Mypage/MyReview.jsx';
-
 import CommunityMain from './pages/Community/CommunityMain';
 import RentMainPage from './pages/Rent/RentMainPage.jsx';
 import RentFirstPage from './pages/Rent/RentFirstPage.jsx';
@@ -44,6 +44,7 @@ function App() {
           <Routes>
             {/* 로그인 페이지 */}
             <Route path="/" element={<Login />} />
+            <Route path="/adminlogin" element={<AdminLogin />} />
             
             {/* 닉네임 설정 */}
             <Route path="/setting-nickname" element={<SettingNickname />} />

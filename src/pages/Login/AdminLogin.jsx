@@ -5,44 +5,57 @@ import styled from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 import apiClient from '../../path/apiClient';
 
-const Login = () => {
+const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [passwordShown, setPasswordShown] = useState(false);
   const [loginFailed, setLoginFailed] = useState(false);
+  const [isPerson, setIsPerson] = useState(true);
   const [isOfficial, setIsOfficial] = useState(false);
-  const [canOfficial, setCanOfficial] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [officialLoginError, setOfficialLoginError] = useState('');
   const navigate = useNavigate();
   const DEFAULT_IMAGE_URL = '/assets/img/Profile.png';
+
+  const handleLoginTypeChange = (type) => {
+    if (type === 'person') {
+      setIsPerson(true);
+      setIsOfficial(false);
+      setIsAdmin(false);
+    } else if (type === 'official') {
+      setIsPerson(false);
+      setIsOfficial(true);
+      setIsAdmin(false);
+    } else if (type === 'admin') {
+      setIsPerson(false);
+      setIsOfficial(false);
+      setIsAdmin(true);
+    }
+  };
 
   const togglePasswordVisibility = () => {
     setPasswordShown(!passwordShown);
   };
 
-  useEffect(() => {
-    const authValue = localStorage.getItem('authenticationValue');
-    setCanOfficial(authValue === 'CANOFFICIAL');
-  }, []);
-
-  const handleCheckboxChange = () => {
-    setIsOfficial(!isOfficial);  // 체크박스 상태 변경
-  };
-
   const handleLogin = async (event) => {
     event.preventDefault();
-    if (isOfficial && !canOfficial) {
-      setOfficialLoginError('공식 사용자로의 인증이 필요합니다!');
-      return;
-    }
-    console.log("Login attempt:", username, password, "Official:", isOfficial);
     try {
-      const personOrOfficial = isOfficial && canOfficial ? "OFFICIAL" : "PERSON";
+      const loginType = isOfficial ? 'OFFICIAL' : isPerson ? 'PERSON' : 'ADMIN'; // 사용자가 선택한 로그인 유형을 결정
       const response = await apiClient.post('/users/login', {
         id: username,
         passwd: password,
-        personOrOfficial: personOrOfficial  // 서버에 전달할 로그인 유형
+        personOrOfficial: loginType
       });
+  
+      if (response.data.authenticationValue === 'CANADMIN') {
+        // admin 권한이 있는 경우, 사용자가 선택한 로그인 유형에 따라 다르게 처리
+        const storedType = isOfficial ? 'OFFICIAL' : isPerson ? 'PERSON' : 'ADMIN';
+        localStorage.setItem('personOrOfficial', storedType);
+      } else {
+        // admin 권한이 없는 경우, 기본적으로 PERSON으로 처리
+        localStorage.setItem('personOrOfficial', 'PERSON');
+      }
+  
       console.log("Server response:", response.data);
 
 
@@ -61,22 +74,8 @@ const Login = () => {
       localStorage.setItem('ownerReviewScore', response.data.ownerReviewScore);
       localStorage.setItem('renterReviewScore', response.data.renterReviewScore);
       localStorage.setItem('authenticationValue', response.data.authenticationValue);
-      localStorage.setItem('officialName', response.data.officialName);
 
-      if (response.data.authenticationValue === 'CANOFFICIAL' && isOfficial) {
-        if (response.data.personOrOfficial !== 'OFFICIAL') {
-          setOfficialLoginError('공식 사용자로의 인증이 필요합니다!');
-          console.error('Official login attempt failed:', officialLoginError);
-          return;
-        }
-      }
-
-      // 로그인 후 처리 로직
-      if (!response.data.nickname) {
-        navigate('/setting-nickname');
-      } else {
-        navigate('/loading');
-      }
+      navigate('/loading');
     } catch (error) {
       console.error("Login failed:", error);
       setLoginFailed(true);
@@ -111,10 +110,20 @@ const Login = () => {
           <EyeIcon src="/assets/img/Eye.png"  onClick={togglePasswordVisibility} />
         </PasswordContainer>
         
-        <CheckboxContainer onClick={handleCheckboxChange}>
-            <CheckboxIcon src={isOfficial ? "/assets/img/Check.png" : "/assets/img/Unchecked.png"} />
-            <Label>과사무실 근로장학생 / 학생회로 로그인하기</Label>
-          </CheckboxContainer>
+        <LoginTypeSelector>
+          <LoginTypeDetail onClick={() => handleLoginTypeChange('person')}>
+            <LoginTypeButton src={isPerson ? '/assets/img/Check.png' : '/assets/img/Unchecked.png'} />
+            <Label>개인 계정</Label>
+          </LoginTypeDetail>
+          <LoginTypeDetail onClick={() => handleLoginTypeChange('official')}>
+            <LoginTypeButton src={isOfficial ? '/assets/img/Check.png' : '/assets/img/Unchecked.png'} />
+            <Label>과사무실 근로장학생 / 학생회</Label>
+          </LoginTypeDetail>
+          <LoginTypeDetail onClick={() => handleLoginTypeChange('admin')}>
+            <LoginTypeButton src={isAdmin ? '/assets/img/Check.png' : '/assets/img/Unchecked.png'} />
+            <Label>관리자</Label>
+          </LoginTypeDetail>
+       </LoginTypeSelector>
           {loginFailed && <ErrorMessage>
           <p>아차차! 로그인 실패! </p>
           <p>아이디와 비밀번호가 일치하지 않습니다</p>
@@ -130,7 +139,7 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default AdminLogin;
 
 
 export const GlobalStyle = createGlobalStyle`
@@ -215,7 +224,7 @@ const ErrorMessage = styled.div`
   font-style: normal;
   font-weight: 800;
   position: absolute; 
-  top: 7rem; 
+  top: 13rem; 
   left: 1rem;
 `;  
 
@@ -247,16 +256,22 @@ export const LoginFooter = styled.div`
   line-height: normal;
 `;
 
-const CheckboxContainer = styled.div`
+const LoginTypeSelector = styled.div`
   display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-  cursor: pointer;
+  flex-direction: column;
+  justify-content: center;
 `;
 
-const CheckboxIcon = styled.img`
-  width: 1.2rem;
-  height: 1.2rem;
+const LoginTypeDetail = styled.div` 
+  display: flex;
+  flex-direction: row;
+  margin-bottom:1rem;
+`;
+const LoginTypeButton = styled.img`
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
 `;
 
 const Label = styled.label`
