@@ -17,12 +17,6 @@ const Header = () => {
     setModalOpen(!modalOpen);
   };
 
-  useEffect(() => {
-    const name = localStorage.getItem('userName');
-    setUserName(name);
-    const track = localStorage.getItem('userTrack');
-    setUserTrack(track);
-  });
 
   useEffect(() => {
     setActivePage(location.pathname); // 현재 경로를 상태로 설정합니다.
@@ -45,6 +39,21 @@ const Header = () => {
 
   useEffect(() => {
     fetchNotifications();
+  }, []);
+
+  useEffect(() => {
+    const name = localStorage.getItem('userName');
+    setUserName(name);
+    const personOrOfficial = localStorage.getItem('personOrOfficial');
+    let track;
+    if (personOrOfficial === "OFFICIAL") {
+      track = localStorage.getItem('officialName'); // 공식 사용자일 경우 officialName 사용
+    } else if (personOrOfficial === "ADMIN") {
+      track = "관리자"; // 관리자일 경우 "관리자"라는 텍스트 사용
+    } else {
+      track = localStorage.getItem('userTrack'); // 일반 사용자일 경우 userTrack 사용
+    }
+    setUserTrack(track);
   }, []);
 
 
