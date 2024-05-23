@@ -206,6 +206,10 @@ const Register1 = () => {
       
         return `${year}/${month}/${day} ${hours}:${minutes}`;
       };
+
+      const handleItemDetailPage = (item) => {
+        navigate(`/rent/itemdetail/${item}`);
+      };
     
 
     return (
@@ -268,8 +272,8 @@ const Register1 = () => {
 
                     {displayedItems.map((item, index) => (
                         <ItemContainer key={item.id} isFirst={index === 0}>
-                            <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} />
-                            <ItemName>{item.title}</ItemName>
+                            <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} onClick={() => handleItemDetailPage(item.itemId)}/>
+                            <ItemName onClick={() => handleItemDetailPage(item.id)}>{item.title}</ItemName>
                             <ItemDetails>
                                 <DetailsContainer>
                                     <DetailsTitle>대여</DetailsTitle>
@@ -288,12 +292,16 @@ const Register1 = () => {
                             </ItemDetails>
                             <ItemPrice>{item.pricePerHour}원/시간</ItemPrice>
                             <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
-                            {item.rentingStatus === 'NONE' ? (
-                                <UpdateButton onClick={() => handleUpdateClick(item.id)} isActive={true}>수정</UpdateButton>
-                            ) : (
-                                <UpdateButton isActive={false}></UpdateButton>
-                            )
-                            }
+                            <UpdateButton
+                                onClick={() => {
+                                    if (item.rentingStatus === 'NONE' || item.rentingStatus === 'RETURNED') {
+                                    handleUpdateClick(item.id);
+                                    }
+                                }}
+                                isActive={item.rentingStatus === 'NONE' || item.rentingStatus === 'RETURNED'}
+                                >
+                                {item.rentingStatus === 'NONE' ? '수정' : item.rentingStatus === 'RETURNED' ? '재등록' : ''}
+                            </UpdateButton>
                             <DeleteButton onClick={() => handleDelete(item.id)}>삭제</DeleteButton>
                             {modalOpen && (
                                 <ConfirmOrCancleModal
@@ -512,6 +520,7 @@ const ItemImage = styled.img`
   border-radius: 20px;
   border: 1px solid white;
   margin-left: 2rem;
+  cursor: pointer;
 `;
 
 const ItemName = styled.div`
@@ -525,6 +534,7 @@ const ItemName = styled.div`
   overflow: hidden; // 내용이 넘치면 숨김 처리
   text-overflow: ellipsis; // 내용이 넘칠 때 ... 표시
   white-space: nowrap; 
+  cursor: pointer;
 `;
 
 const ItemDetails = styled.div`
@@ -537,7 +547,7 @@ const DetailsContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-left: 5rem;
+  margin-left: 1rem;
 `;
 
 const DetailsTitle = styled.div` 
@@ -575,8 +585,8 @@ const Time = styled.div`
 `;
 
 const ItemPrice = styled.div`
-  margin-left: 3rem;
-  width: 10rem;
+  margin-left: 1rem;
+  width: 7rem;
   color: white;
   font-family: "Pretendard";
   font-size: 1rem;
@@ -585,10 +595,11 @@ const ItemPrice = styled.div`
 
 const ItemStatus = styled.div`
   font-family: 'Pretendard';
+  margin-left: 2rem;
+  margin-right:-2rem;
   font-size: 1rem;
   font-weight: 600;
   padding: 0.5rem;
-  margin-left: 2rem;
   width: 8rem;
   ${(props) => `color: ${props.color}; background-color: ${props.backgroundColor};`}
 `;
@@ -647,17 +658,17 @@ const DetailLabel = styled.div`
 
 const PriceLabel = styled.div `
     text-align: center;
-    width: 11rem;
+    width: 8rem;
 `;
 
 const StatusLabel = styled.div`
     text-align: center;
-    width: 4rem;
+    width: 7rem;
 `;
 
 const UpdateButton=styled.button`
   background-color: transparent;
-  width:5.3rem;
+  width:5rem;
   height:2.6rem;
   color:#fff;
   font-size: 1rem;
@@ -680,6 +691,6 @@ const DeleteButton=styled.button`
   line-height: 1.875rem; 
   border-radius: 10px;
   border: 0.1rem solid #fff;
-  margin-left: 1rem;
+  margin-left: 0.5rem;
   cursor: pointer;
 `;
