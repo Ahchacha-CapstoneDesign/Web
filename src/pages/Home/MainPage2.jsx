@@ -136,33 +136,34 @@ const MainPage2 = () => {
   };
 
   const handleSearch = async () => {
-    try {
-      if (searchTerm.trim() === '') {
+    if (!searchTerm.trim()) {
+      try {
         const response = await apiClient.get('/items/latest');
-        const allItems = response.data.content;
-        navigate('/rent/mainpage', { state: { searchResults: allItems, searchTerm: '' } });
-      } else {
-        const [titleResponse, categoryResponse] = await Promise.all([
-          apiClient.get(`/items/search-title?title=${searchTerm}&page=1`),
-          apiClient.get(`/items/search-category?category=${searchTerm}&page=1`)
-        ]);
-
-        const combinedResults = [
-          ...titleResponse.data.content,
-          ...categoryResponse.data.content
-        ];
-
-        const uniqueResults = Array.from(new Set(combinedResults.map(item => item.id)))
-          .map(id => {
-            return combinedResults.find(item => item.id === id);
-          });
-
-        navigate('/rent/mainpage', { state: { searchResults: uniqueResults, searchTerm: searchTerm } });
+        navigate('/rent/mainpage', { state: { searchResults: response.data.content, searchTerm: '' } });
+      } catch (error) {
+        console.error('Error fetching latest items:', error);
       }
+      return;
+    }
+
+    navigate('/rent/mainpage', { state: { searchTerm } });
+
+    try {
+      const [titleResponse, categoryResponse] = await Promise.all([
+        apiClient.get(`/items/search-title?title=${searchTerm}`),
+        apiClient.get(`/items/search-category?category=${searchTerm}`)
+      ]);
+
+      const combinedResults = [...titleResponse.data.content, ...categoryResponse.data.content];
+      const uniqueResults = Array.from(new Set(combinedResults.map(item => item.id)))
+      .map(id => {
+        return combinedResults.find(item => item.id === id);
+      });
+      navigate('/rent/mainpage', { state: { searchResults: uniqueResults} });
     } catch (error) {
       console.error('Error during search:', error);
     }
-  };
+};
 
   return (
     <>
