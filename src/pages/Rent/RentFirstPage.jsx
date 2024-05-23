@@ -56,22 +56,6 @@ const RentFirstPage = () => {
     }
   };
 
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-  };
-
-  const handleSearchInputClick = () => {
-    searchInputRef.current.focus(); // SearchInput에 포커스
-  };
-  
-  const handleModalOpen = () => {
-    setIsModalOpen(true); // 모달 열기
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false); // 모달 닫기
-  };
-
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -90,10 +74,12 @@ const RentFirstPage = () => {
       return;
     }
 
+    navigate('/rent/mainpage', { state: { searchTerm } }); // 상태와 함께 navigate 호출
+
     try {
       const [titleResponse, categoryResponse] = await Promise.all([
-        apiClient.get(`/items/search-title?title=${searchTerm}&page=1`),
-        apiClient.get(`/items/search-category?category=${searchTerm}&page=1`)
+        apiClient.get(`/items/search-title?title=${searchTerm}`),
+        apiClient.get(`/items/search-category?category=${searchTerm}`)
       ]);
 
       const combinedResults = [
@@ -106,6 +92,8 @@ const RentFirstPage = () => {
         .map(id => {
           return combinedResults.find(item => item.id === id);
         });
+
+        setSearchedPosts(uniqueResults); 
 
       // 검색 결과를 RentMainPage로 전달
       navigate('/rent/mainpage', { state: { searchResults: uniqueResults } });
