@@ -62,7 +62,7 @@ const Chat = (props) => {
 
     const subscribeToChatRoom = (itemId) => {
         if (stompClient.current.connected) {
-            stompClient.current.subscribe(`/topic/greetings/${itemId}`, (greeting) => {
+            stompClient.current.subscribe(`/queue/greetings/${itemId}`, (greeting) => {
                 showGreeting(JSON.parse(greeting.body));
             });
         }
