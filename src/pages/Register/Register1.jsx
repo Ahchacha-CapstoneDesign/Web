@@ -53,6 +53,14 @@ const Register1 = () => {
         }
     }
 
+    const handleReRegisterClick = (itemId) => {
+        if (userstatus === "PERSON") {
+            navigate(`/register/personreRegister/${itemId}`);
+        } else if (userstatus === "OFFICIAL") {
+            navigate(`/register/officialreRegister/${itemId}`);
+        }
+    }
+
     const fetchItemsByStatus = async (status) => {
         let url = '/items/myItems'; // 기본 엔드포인트
         if (status !== 'ALL') {
@@ -294,12 +302,14 @@ const Register1 = () => {
                             <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
                             <UpdateButton
                                 onClick={() => {
-                                    if (item.rentingStatus === 'NONE' || item.rentingStatus === 'RETURNED') {
-                                    handleUpdateClick(item.id);
+                                    if (item.rentingStatus === 'NONE') {
+                                        handleUpdateClick(item.id);
+                                    } else if (item.rentingStatus === 'RETURNED') {
+                                        handleReRegisterClick(item.id);
                                     }
                                 }}
                                 isActive={item.rentingStatus === 'NONE' || item.rentingStatus === 'RETURNED'}
-                                >
+                            >
                                 {item.rentingStatus === 'NONE' ? '수정' : item.rentingStatus === 'RETURNED' ? '재등록' : ''}
                             </UpdateButton>
                             <DeleteButton onClick={() => handleDelete(item.id)}>삭제</DeleteButton>

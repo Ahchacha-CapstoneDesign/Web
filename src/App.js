@@ -36,6 +36,8 @@ import OwnerReview from './pages/Item/OwnerReview.jsx';
 
 import Chat from './pages/Chat/Chat.js';
 import ManageOfficialAccount from './pages/Mypage/ManageOfficialAccount.jsx';
+import ReRegisterPersonRegisterDetails from './pages/Register/ReRegisterPersonRegisterDetails.jsx';
+import ReRegisterOfficialRegisterDetails from './pages/Register/ReRegisterOfficialRegisterDetails.jsx';
 
 
 function App() {
@@ -83,6 +85,8 @@ function App() {
             <Route path="/register/officialregisterdetails" element={<> <Header /> <OfficialRegisterDetails /> </> } />
             <Route path="/register/personUpdate/:itemId" element={<><Header /> <UpdatePersonRegisterDetails /></> } />
             <Route path="/register/officialUpdate/:itemId" element={<><Header /> <UpdateOfficialRegisterDetails /></> } />
+            <Route path="/register/personreRegister/:itemId" element={<><Header /> <ReRegisterPersonRegisterDetails /></>} />
+            <Route path="/register/officialreRegister/:itemId" element={<><Header /> <ReRegisterOfficialRegisterDetails /></>} />
 
             {/* 마이 페이지 */}
             <Route path="/mypage/main" element={<> <Header /> <Sidebar /> <MypageMain /> </> } />
