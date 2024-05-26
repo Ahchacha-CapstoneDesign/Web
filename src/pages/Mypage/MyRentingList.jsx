@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import Pagination, {PaginationContainer} from '../Pagination';
 import ConfirmOrCancleModalDetail from '../ConfirmOrCancleModalDetail';
 import ReviewModal from '../ReviewModalToOwner';
+import ConfirmModal from '../ConfirmModal';
 
 const LocalPaginationContainer = styled(PaginationContainer)`
   justify-content: flex-end;
@@ -25,6 +26,8 @@ const MyRentingList = () => {
   const [processingItemId, setProcessingItemId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
 
   const [statusData, setStatusData] = useState({
     ALL: { items: [], totalPages: 0 },
@@ -86,6 +89,21 @@ const MyRentingList = () => {
     RETURNED: { text: "반납완료", color: "#F00" }
   };
 
+  const handleCancelModalOpen = (itemId) => {
+    setProcessingItemId(itemId);
+    setCancelModalOpen(true);
+  };
+
+  const handleCancelReservation = async () => {
+    try {
+      await apiClient.delete(`/reservation/cancel/renter/${processingItemId}`);
+      setCancelModalOpen(false);
+      setConfirmModalOpen(true);
+    } catch (error) {
+      console.error('Failed to cancel reservation:', error);
+    }
+  };
+
   const handleStatusChange = (status) => {
     setCurrentStatus(status);
     setCurrentPage(1); // Reset to page 1 on status change
@@ -123,6 +141,10 @@ const MyRentingList = () => {
     navigate(`/rent/itemdetail/${item}`);
   };
 
+  const handleRejectModal = () => {
+    setCancelModalOpen(false);  // '아니오'를 클릭했을 때 예약 취소 모달을 닫음
+  };
+
   const displayedItems = statusData[currentStatus].items.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -138,6 +160,7 @@ const MyRentingList = () => {
   
     return `${year}/${month}/${day} ${hours}:${minutes}`;
   };
+  
 
     return (
         <>
@@ -178,7 +201,30 @@ const MyRentingList = () => {
                   </ItemDetails>
                   <ItemPrice onClick={() => handleItemDetailPage(item.itemId)}>{item.totalPrice}원</ItemPrice>
                   <ItemStatusDetail>
-                  <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
+                    <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
+                    {item.rentingStatus === 'RESERVED' && (
+                      <>
+                        <Handlebutton onClick={() => handleCancelModalOpen(item.id)}>예약 취소</Handlebutton>
+                        {cancelModalOpen && (
+                          <ConfirmOrCancleModalDetail
+                            title="예약 취소 확인"
+                            message="이 예약을 취소하시겠습니까?"
+                            isOpen={cancelModalOpen}
+                            setIsOpen={setCancelModalOpen}  // 여기를 수정했습니다.
+                            onConfirm={handleCancelReservation}
+                          />
+                        )}
+
+                        {confirmModalOpen && (
+                          <ConfirmModal
+                            message="예약이 취소되었습니다."
+                            isOpen={confirmModalOpen}
+                            setIsOpen={setConfirmModalOpen}
+                            onConfirm={() => setConfirmModalOpen(false)}
+                          />
+                        )}
+                      </>
+                    )}
                     {item.rentingStatus === 'RETURNED' && (
                       item.toOwnerWrittenStatus === 'NONWRITTEN' || item.toOwnerWrittenStatus === null ? (
                       <>
@@ -230,6 +276,7 @@ export const GlobalStyle = createGlobalStyle`
       display: flex;
       flex-direction: column;
       background-color: #000; // body 전체의 배경색을 검은색으로 설정
+      overflow: hidden;
   }
 `;
 
@@ -264,21 +311,22 @@ const ItemTitle = styled.div`
   font-family: "Pretendard";
   font-size: 1.2rem;
   font-weight: 500;
-  width: 15rem;
+  width: 11rem; // 최대 너비 설정
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
   margin-left: 2rem;
 `;
 
 const ItemOwnerImage = styled.img`
-  position: fixed;
-  margin-left: 18.5rem;
+  margin-left: 1rem;
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;
 `;
 
 const ItemOwnerNickname = styled.div `
-  position: fixed;
-  margin-left: 20rem;
+  margin-left: 0.2rem;
   width: 8rem;
   color: white;
   font-family: "Pretendard";
@@ -287,11 +335,8 @@ const ItemOwnerNickname = styled.div `
 `;
 
 const ItemDetails = styled.div`
-  position: fixed;
-  margin-left: 27rem;
   display: flex;
   flex-direction: column;
-  
 `;
 
 const DetailsContainer = styled.div`
@@ -316,22 +361,24 @@ const DetailsContext = styled.div`
 `;
 
 const Place = styled.div`
-  width: 5rem;
   font-size: 1.2rem;
   font-weight: 500;
   align-items: center;
+  width: 5rem; // 최대 너비 설정
+  max-width: 7rem;
+  overflow: hidden; // 내용이 넘치면 숨김 처리
+  text-overflow: ellipsis; // 내용이 넘칠 때 ... 표시
+  white-space: nowrap; // 텍스트를 한 줄로 표시
 `;
 
 const Time = styled.div`
-  margin-left: 0.5rem;
   font-size: 0.8rem;
   font-weight: 300;
   align-items: center;
 `;
 
 const ItemPrice = styled.div`
-  position: fixed;
-  margin-left: 45rem;
+margin-left: 2rem;
   width: 6rem;
   color: white;
   font-family: "Pretendard";
@@ -393,8 +440,6 @@ const ItemStatusDetail = styled.div`
   display: flex;
   flex-direction: column;
   text-align: center;
-  position: fixed;
-  margin-left: 52rem;
 `;
 
 const Handlebutton = styled.button`
