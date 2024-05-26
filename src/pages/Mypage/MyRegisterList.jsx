@@ -442,7 +442,6 @@ const DetailsTitle = styled.div`
   font-weight: 300;
   width:2rem;
   align-items: center;
-
 `;
 
 const DetailsContext = styled.div`
