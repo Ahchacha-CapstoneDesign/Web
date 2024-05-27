@@ -20,9 +20,7 @@ const MyRentingList = () => {
   const navigate = useNavigate();
   const ITEMS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
   const [currentStatus, setCurrentStatus] = useState('ALL');
-  const [showModal, setShowModal] = useState(false);
   const [processingItemId, setProcessingItemId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -55,12 +53,11 @@ const MyRentingList = () => {
           break;
       }
     }
-  
     try {
       const { data } = await apiClient.get(url);
       const filteredData = data.content;
       const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
-      
+      console.log(data);
       setStatusData(prev => ({
         ...prev,
         [status]: { 
@@ -117,32 +114,8 @@ const MyRentingList = () => {
     setCurrentPage(newPage); // 페이지 변경 처리
   };
 
-  const handleRent = (itemId) => {
-    setProcessingItemId(itemId);
-    setModalOpen(true);
-  };
-
-  const handleConfirm = () => {
-    setModalOpen(false);  // 기존 모달을 닫고
-    setReviewModalOpen(true);  // 리뷰 모달을 엽니다.
-  };
-
-  const goBackToConfirm = () => {
-    setReviewModalOpen(false); // 리뷰 모달 닫기
-    setModalOpen(true); // 이전 모달 열기
-  };
-
-  const handleCloseAllModals = () => {
-    setModalOpen(false);
-    setReviewModalOpen(false);
-  };
-
   const handleItemDetailPage = (item) => {
     navigate(`/rent/itemdetail/${item}`);
-  };
-
-  const handleRejectModal = () => {
-    setCancelModalOpen(false);  // '아니오'를 클릭했을 때 예약 취소 모달을 닫음
   };
 
   const displayedItems = statusData[currentStatus].items.slice(
@@ -179,9 +152,9 @@ const MyRentingList = () => {
 
               {displayedItems.map((item, index) => (
                 <ItemContainer key={item.id} isFirst={index === 0}>
-                  <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'}  onClick={() => handleItemDetailPage(item.itemId)}/>
-                  <ItemTitle  onClick={() => handleItemDetailPage(item.itemId)}>{item.title}</ItemTitle>
-                  <ItemOwnerImage src = {item.itemRegisterDefaultProfile || '/assets/img/Profile.png'} alt="Profile"  onClick={() => handleItemDetailPage(item.itemId)}/>
+                  <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} onClick={() => handleItemDetailPage(item.itemId)}/>
+                  <ItemTitle onClick={() => handleItemDetailPage(item.itemId)}>{item.title}</ItemTitle>
+                  <ItemOwnerImage src={item.itemRegisterDefaultProfile || '/assets/img/Profile.png'} alt="Profile" onClick={() => handleItemDetailPage(item.itemId)}/>
                   <ItemOwnerNickname>{item.itemUserNickName}</ItemOwnerNickname>
                   <ItemDetails onClick={() => handleItemDetailPage(item.itemId)}>
                     <DetailsContainer>
@@ -199,59 +172,33 @@ const MyRentingList = () => {
                       </DetailsContext>
                     </DetailsContainer>
                   </ItemDetails>
-                  <ItemPrice onClick={() => handleItemDetailPage(item.itemId)}>{item.totalPrice}원</ItemPrice>
+                  <ItemPrice>{item.totalPrice}원</ItemPrice>
                   <ItemStatusDetail>
-                    <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
-                    {item.rentingStatus === 'RESERVED' && (
-                      <>
-                        <Handlebutton onClick={() => handleCancelModalOpen(item.id)}>예약 취소</Handlebutton>
-                        {cancelModalOpen && (
-                          <ConfirmOrCancleModalDetail
-                            title="예약 취소 확인"
-                            message="이 예약을 취소하시겠습니까?"
-                            isOpen={cancelModalOpen}
-                            setIsOpen={setCancelModalOpen}  // 여기를 수정했습니다.
-                            onConfirm={handleCancelReservation}
-                          />
-                        )}
-
-                        {confirmModalOpen && (
-                          <ConfirmModal
-                            message="예약이 취소되었습니다."
-                            isOpen={confirmModalOpen}
-                            setIsOpen={setConfirmModalOpen}
-                            onConfirm={() => setConfirmModalOpen(false)}
-                          />
-                        )}
-                      </>
+                    <ItemStatus 
+                      style={{ color: item.cancelStatus && item.rentingStatus === 'RESERVED' ? 'red' : getStatusStyle(item.rentingStatus).color }}>
+                      {item.cancelStatus && item.rentingStatus === 'RESERVED' ? '예약 취소' : statusColors[item.rentingStatus].text}
+                    </ItemStatus>
+                    {item.rentingStatus === 'RESERVED' && !item.cancelStatus && (
+                      <Handlebutton onClick={() => handleCancelModalOpen(item.id)}>예약 취소</Handlebutton>
                     )}
-                    {item.rentingStatus === 'RETURNED' && (
-                      item.toOwnerWrittenStatus === 'NONWRITTEN' || item.toOwnerWrittenStatus === null ? (
-                      <>
-                        <Handlebutton onClick={() => handleRent(item.id)}>리뷰 쓰기</Handlebutton>
-                        {modalOpen && (
-                          <ConfirmOrCancleModalDetail
-                            title="리뷰를 작성하시겠습니까?"
-                            message={<span>제공자에 대한 별점을 주셔야 <br/>다른 물건 대여가 가능합니다<br/><RedText>삭제 및 수정이 불가능합니다.</RedText></span>}                          
-                            isOpen={modalOpen}
-                            setIsOpen={setModalOpen}
-                            onConfirm={handleConfirm}
-                          />
-                        )}
-                        {reviewModalOpen && (
-                          <ReviewModal
-                            onBack={goBackToConfirm}
-                            isOpen={reviewModalOpen}
-                            setIsOpen={setReviewModalOpen}
-                            reservationId={processingItemId}
-                            handleCloseAllModals={handleCloseAllModals}
-                            // 여기에 리뷰 모달에 필요한 추가적인 props를 전달할 수 있습니다.
-                          />
-                        )}
-                      </>
-                    ) : null
+                    {cancelModalOpen && (
+                      <ConfirmOrCancleModalDetail
+                        title="예약 취소 확인"
+                        message="이 예약을 취소하시겠습니까?"
+                        isOpen={cancelModalOpen}
+                        setIsOpen={setCancelModalOpen}
+                        onConfirm={handleCancelReservation}
+                      />
                     )}
-                </ItemStatusDetail>
+                    {confirmModalOpen && (
+                      <ConfirmModal
+                        message="예약이 취소되었습니다."
+                        isOpen={confirmModalOpen}
+                        setIsOpen={setConfirmModalOpen}
+                        onConfirm={() => setConfirmModalOpen(false)}
+                      />
+                    )}
+                  </ItemStatusDetail>
                 </ItemContainer>
               ))}
               <LocalPaginationContainer>
