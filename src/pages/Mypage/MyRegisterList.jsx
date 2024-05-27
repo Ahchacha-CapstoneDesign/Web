@@ -8,6 +8,7 @@ import Pagination, {PaginationContainer} from '../Pagination';
 import ConfirmOrCancleModal from '../ConfirmOrCancleModal';
 import ConfirmOrCancleModalDetail from '../ConfirmOrCancleModalDetail';
 import ReviewModal from '../ReviewModalToRetner'
+import ConfirmModal from '../ConfirmModal';
 
 const LocalPaginationContainer = styled(PaginationContainer)`
   justify-content: flex-end;
@@ -21,10 +22,11 @@ const MyRegisterList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [registerData, setRegisterData] = useState({ canreserveCount: 0, reservedCount: 0, rentingCount: 0, returnedCount: 0, items: []  });
   const [currentStatus, setCurrentStatus] = useState('ALL');
-  const [showModal, setShowModal] = useState(false);
   const [processingItemId, setProcessingItemId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
 
 
   const [statusData, setStatusData] = useState({
@@ -124,6 +126,21 @@ const MyRegisterList = () => {
       fetchItemsByStatus(status).then(() => {
         // 상태 변경 후 데이터를 성공적으로 불러온 후 UI 업데이트
       });
+    }
+  };
+
+  const handleCancelModalOpen = (itemId) => {
+    setProcessingItemId(itemId);
+    setCancelModalOpen(true);
+  };
+
+  const handleCancelReservation = async () => {
+    try {
+      await apiClient.delete(`/reservation/cancel/owner/${processingItemId}`);
+      setCancelModalOpen(false);
+      setConfirmModalOpen(true);
+    } catch (error) {
+      console.error('Failed to cancel reservation:', error);
     }
   };
 
@@ -280,8 +297,11 @@ const MyRegisterList = () => {
                   </Item>
                 )}
                 <ItemStatusDetail>
-                  <ItemStatus {...getStatusStyle(item.rentingStatus)}>{statusColors[item.rentingStatus].text}</ItemStatus>
-                  {item.rentingStatus === 'RESERVED' && (
+                    <ItemStatus 
+                      style={{ color: item.cancelStatus && item.rentingStatus === 'RESERVED' ? 'red' : getStatusStyle(item.rentingStatus).color }}>
+                      {item.cancelStatus && item.rentingStatus === 'RESERVED' ? '예약 취소' : statusColors[item.rentingStatus].text}
+                    </ItemStatus>                  
+                    {item.rentingStatus === 'RESERVED' && !item.cancelStatus && (
                     <>
                       <Handlebutton onClick={() => handleRent(item.id)}>대여 처리</Handlebutton>
                       {modalOpen && (
@@ -291,6 +311,24 @@ const MyRegisterList = () => {
                           isOpen={modalOpen}
                           setIsOpen={setModalOpen}
                           onConfirm={confirmRent}
+                        />
+                      )}
+                      <Handlebutton onClick={() => handleCancelModalOpen(item.id)}>예약 취소</Handlebutton>
+                      {cancelModalOpen && (
+                        <ConfirmOrCancleModalDetail
+                          title="예약 취소 확인"
+                          message="이 예약을 취소하시겠습니까?"
+                          isOpen={cancelModalOpen}
+                          setIsOpen={setCancelModalOpen}
+                          onConfirm={handleCancelReservation}
+                        />
+                      )}
+                      {confirmModalOpen && (
+                        <ConfirmModal
+                          message="예약이 취소되었습니다."
+                          isOpen={confirmModalOpen}
+                          setIsOpen={setConfirmModalOpen}
+                          onConfirm={() => setConfirmModalOpen(false)}
                         />
                       )}
                     </>
@@ -442,7 +480,6 @@ const DetailsTitle = styled.div`
   font-weight: 300;
   width:2rem;
   align-items: center;
-
 `;
 
 const DetailsContext = styled.div`
