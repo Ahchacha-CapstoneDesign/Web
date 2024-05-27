@@ -20,9 +20,7 @@ const MyRentingList = () => {
   const navigate = useNavigate();
   const ITEMS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
   const [currentStatus, setCurrentStatus] = useState('ALL');
-  const [showModal, setShowModal] = useState(false);
   const [processingItemId, setProcessingItemId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -116,32 +114,8 @@ const MyRentingList = () => {
     setCurrentPage(newPage); // 페이지 변경 처리
   };
 
-  const handleRent = (itemId) => {
-    setProcessingItemId(itemId);
-    setModalOpen(true);
-  };
-
-  const handleConfirm = () => {
-    setModalOpen(false);  // 기존 모달을 닫고
-    setReviewModalOpen(true);  // 리뷰 모달을 엽니다.
-  };
-
-  const goBackToConfirm = () => {
-    setReviewModalOpen(false); // 리뷰 모달 닫기
-    setModalOpen(true); // 이전 모달 열기
-  };
-
-  const handleCloseAllModals = () => {
-    setModalOpen(false);
-    setReviewModalOpen(false);
-  };
-
   const handleItemDetailPage = (item) => {
     navigate(`/rent/itemdetail/${item}`);
-  };
-
-  const handleRejectModal = () => {
-    setCancelModalOpen(false);  // '아니오'를 클릭했을 때 예약 취소 모달을 닫음
   };
 
   const displayedItems = statusData[currentStatus].items.slice(
