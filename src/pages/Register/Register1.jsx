@@ -232,7 +232,8 @@ const Register1 = () => {
             {/* 카테고리 및 아이템 목록 */}
             {selectedPage === 'register' && (
                 <>
-                    <ItemTitle>카테고리<Span>*필수항목</Span></ItemTitle>
+                <ItemTitle>카테고리<Span>*필수항목</Span></ItemTitle>
+                <Container>
                     <CategoryWrapper>
                         <CategoryList>
                             {categories.map(category => (
@@ -262,6 +263,7 @@ const Register1 = () => {
                         setIsOpen={setModalOpen}
                         onConfirm={handleModalConfirm}
                     />
+                </ Container>
                 </>
             )}
 
@@ -394,7 +396,8 @@ const ButtonWrapper = styled.div`
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  margin-left: 20rem;
+  margin-left: 21rem;
+  margin-top: 2rem;
 `
 const Button = styled.button`
   color: ${({ selected }) => selected ? '#00FFE0' : '#fff'};
@@ -433,8 +436,6 @@ const CategoryWrapper = styled.div`
   display: flex;
   margin-top: 3rem;
   width: 65rem;
-  margin-left: 22rem;
-  justify-content: center;
   font-size: 1.25rem;
   font-style: normal;
   font-weight: 800;
