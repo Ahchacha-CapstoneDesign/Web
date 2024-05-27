@@ -38,6 +38,7 @@ import Chat from './pages/Chat/Chat.js';
 import ManageOfficialAccount from './pages/Mypage/ManageOfficialAccount.jsx';
 import ReRegisterPersonRegisterDetails from './pages/Register/ReRegisterPersonRegisterDetails.jsx';
 import ReRegisterOfficialRegisterDetails from './pages/Register/ReRegisterOfficialRegisterDetails.jsx';
+import Talk from './pages/Talk/Talk.jsx';
 
 
 function App() {
@@ -99,6 +100,7 @@ function App() {
 
             {/* 채팅 */}
             <Route path="/chat" element={<> <Header /> <Chat /> </> } />
+            <Route path="/talk/:itemId" element={<> <Header /> <Talk /> </>} />
           </Routes>
         </div>
       </Router>
