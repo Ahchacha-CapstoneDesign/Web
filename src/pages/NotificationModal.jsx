@@ -39,6 +39,12 @@ const NotificationModal = ({ isOpen, onClose, onNotificationsChange }) => {
                 return `${notification.itemTitle}의 반납 1시간 전입니다.`;
             case 'RETURN_TWENTY_FOUR_HOURS':
                 return `${notification.itemTitle}의 반납 하루 전입니다.`;
+            case  'CANCEL':
+                return `${notification.itemTitle}이 예약취소되었습니다.`;
+            case 'REVIEW_TO_RENTER':
+                return `${notification.writer}님이 리뷰를 작성하였습니다.`;
+            case 'REVIEW_TO_OWNER':
+                return `${notification.writer}님이 리뷰를 작성하였습니다.`;
             default:
                 return '알 수 없는 알림입니다.';
         }
@@ -48,17 +54,19 @@ const NotificationModal = ({ isOpen, onClose, onNotificationsChange }) => {
         try {
             // 알림을 읽음 상태로 업데이트
             await apiClient.put(`/notification/${notification.id}/read`);
-
+    
             // 클라이언트 상태를 업데이트
             setNotifications((prevNotifications) => 
                 prevNotifications.map((noti) => 
                     noti.id === notification.id ? { ...noti, isRead: true } : noti
                 )
             );
-
+    
             // 페이지 이동 후 모달 닫기
             if (['COMMENT', 'HEART'].includes(notification.notificationType) && notification.communityId) {
                 navigate(`/community/${notification.communityId}`);
+            } else if (notification.notificationType === 'REVIEW_TO_RENTER' || notification.notificationType === 'REVIEW_TO_OWNER') {
+                navigate('/mypage/myreview');
             } else {
                 navigate('/mypage/main');
             }
@@ -68,6 +76,7 @@ const NotificationModal = ({ isOpen, onClose, onNotificationsChange }) => {
             console.error('Failed to update read status:', error);
         }
     };
+    
 
     return (
         <>
