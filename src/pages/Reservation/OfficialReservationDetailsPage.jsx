@@ -280,11 +280,9 @@ const Value = styled.div`
 `;
 
 const CheckboxLabel = styled.label`
-  width: 100%;
   height: 1.875rem;
   display: flex;
   margin-bottom: 1.44rem;
-  
 `;
 
 const TextLabel = styled.span`
@@ -294,7 +292,7 @@ const TextLabel = styled.span`
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  margin-left: 28rem;
+  margin-left: 10rem;
   text-align: left; // 텍스트를 왼쪽 정렬
 `;
 
