@@ -28,7 +28,7 @@ const Login = () => {
   const handleLogin = async (event) => {
     event.preventDefault();
     setLoginFailed(false);
-  setOfficialLoginError('');
+    setOfficialLoginError('');
     try {
       const personOrOfficial = isOfficial ? 'OFFICIAL' : 'PERSON';
       const response = await apiClient.post('/users/login', {
