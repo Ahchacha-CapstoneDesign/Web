@@ -37,6 +37,7 @@ import OwnerReview from './pages/Item/OwnerReview.jsx';
 import ManageOfficialAccount from './pages/Mypage/ManageOfficialAccount.jsx';
 import ReRegisterPersonRegisterDetails from './pages/Register/ReRegisterPersonRegisterDetails.jsx';
 import ReRegisterOfficialRegisterDetails from './pages/Register/ReRegisterOfficialRegisterDetails.jsx';
+import SettingUrl from './pages/Register/SettingUrl.jsx';
 
 
 function App() {
@@ -47,19 +48,19 @@ function App() {
             {/* 로그인 페이지 */}
             <Route path="/" element={<Login />} />
             <Route path="/adminlogin" element={<AdminLogin />} />
-            
+
             {/* 닉네임 설정 */}
             <Route path="/setting-nickname" element={<SettingNickname />} />
-            
+
             {/* 로딩 페이지 */}
             <Route path="/loading" element={<Loading />} />
-            
+
             {/* 메인 페이지 */}
             <Route path="/mainpage/1" element={<> <Header /> <MainPage1 /> </> } />
             <Route path="/mainpage/2" element={<> <Header /> <MainPage2 /> </> } />
             <Route path="/mainpage/3" element={<> <Header /> <MainPage3 /> </> } />
             <Route path="/mainpage/4" element={<> <Header /> <MainPage4 /> </> } />
-            
+
             {/* 대여 페이지 */}
             <Route path="/rent" element={<> <Header /> <RentFirstPage /> </> } />
             <Route path="/rent/mainpage" element={<> <Header /> <RentMainPage /> </> } />
@@ -86,6 +87,7 @@ function App() {
             <Route path="/register/officialUpdate/:itemId" element={<><Header /> <UpdateOfficialRegisterDetails /></> } />
             <Route path="/register/personreRegister/:itemId" element={<><Header /> <ReRegisterPersonRegisterDetails /></>} />
             <Route path="/register/officialreRegister/:itemId" element={<><Header /> <ReRegisterOfficialRegisterDetails /></>} />
+            <Route path="/register/settingURL" element={<><Header /> <SettingUrl /></>} />
 
             {/* 마이 페이지 */}
             <Route path="/mypage/main" element={<> <Header /> <Sidebar /> <MypageMain /> </> } />
