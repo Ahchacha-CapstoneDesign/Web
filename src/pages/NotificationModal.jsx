@@ -37,7 +37,7 @@ const NotificationModal = ({ isOpen, onClose, onNotificationsChange }) => {
                 return `${notification.writer}님의 ${notification.itemTitle} 물건을 예약하였습니다.`;
             case 'RETURN_ONE_HOUR':
                 return `${notification.itemTitle}의 반납 1시간 전입니다.`;
-            case 'RETURN_TWENTY_FOUR_HOURS':
+            case 'RETURN_ONE_DAY':
                 return `${notification.itemTitle}의 반납 하루 전입니다.`;
             case  'CANCEL':
                 return `${notification.itemTitle}이 예약취소되었습니다.`;
@@ -46,7 +46,7 @@ const NotificationModal = ({ isOpen, onClose, onNotificationsChange }) => {
             case 'REVIEW_TO_OWNER':
                 return `${notification.writer}님이 리뷰를 작성하였습니다.`;
             default:
-                return '알 수 없는 알림입니다.';
+                return null;
         }
     };
 
