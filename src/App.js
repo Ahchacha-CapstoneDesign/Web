@@ -97,8 +97,6 @@ function App() {
             <Route path="/mypage/myreview" element={<> <Header /> <Sidebar /> <MyReview /> </> } />
             <Route path="/mypage/manageofficial" element={<> <Header /> <Sidebar /> <ManageOfficialAccount /> </> } />
 
-            {/* 채팅 */}
-            <Route path="/chat" element={<> <Header /> <Chat /> </> } />
           </Routes>
         </div>
       </Router>
