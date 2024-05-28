@@ -1,10 +1,10 @@
-import React, {useEffect, useState} from 'react';
-import styled, {createGlobalStyle} from 'styled-components';
-import {useNavigate, useLocation} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import styled, { createGlobalStyle } from 'styled-components';
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import apiClient from '../../path/apiClient';
 import ConfirmOrCancleModal from '../ConfirmOrCancleModal';
 import ConfirmModal from '../ConfirmModal';
-
 
 const PersonReservationDetailsPage = () => {
     const location = useLocation();
@@ -12,30 +12,45 @@ const PersonReservationDetailsPage = () => {
     const [userNickname, setUserNickname] = useState('');
     const [userPhoneNumber, setUserPhoneNumber] = useState('');
     const [reservationDetails, setReservationDetails] = useState(location.state || {});
-    const [isWarningModalOpen, setIsWarningModalOpen] = useState(false); // 경고 모달 상태
+    const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [isPaymentSuccessModalOpen, setIsPaymentSuccessModalOpen] = useState(false);
+    const [isPaymentFailureModalOpen, setIsPaymentFailureModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [confirmAction, setConfirmAction] = useState(null);
 
     useEffect(() => {
-      const nickname = localStorage.getItem('userNickname');
-      setUserNickname(nickname);
-      const phonenum = localStorage.getItem('userPhoneNumber');
-      setUserPhoneNumber(phonenum);
-    });
+        const nickname = localStorage.getItem('userNickname');
+        setUserNickname(nickname);
+        const phonenum = localStorage.getItem('userPhoneNumber');
+        setUserPhoneNumber(phonenum);
+    }, []);
 
     useEffect(() => {
-      const reservationData = location.state;
-      if (reservationData) {
-          setReservationDetails(reservationData);
-      }
-  }, [location.state]);
+        const reservationData = location.state;
+        if (reservationData) {
+            setReservationDetails(reservationData);
+        }
+    }, [location.state]);
 
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.iamport.kr/js/iamport.payment-1.2.0.js';
+        script.async = true;
+        script.onload = () => {
+            if (window.IMP) {
+                window.IMP.init('imp60728723');
+            } else {
+                console.error('Failed to load Iamport script.');
+            }
+        };
+        document.body.appendChild(script);
+    }, []);
 
-    // 체크박스 변경을 다루는 함수
     const [consents, setConsents] = useState({
         personalInfoConsent: false,
         severeDamageConsent: false
     });
-
 
     const handleImageClick = (consentName) => {
         const newConsentValue = !consents[consentName];
@@ -46,113 +61,150 @@ const PersonReservationDetailsPage = () => {
     };
 
     const handleGoBack = () => {
-      console.log('돌아가기 버튼 클릭');
-      navigate(-1);
-    };
-    
-    const handlePaymentClick = () => {
-      if (!consents.personalInfoConsent || !consents.severeDamageConsent) {
-          setIsWarningModalOpen(true); // 동의 항목 미체크 시 경고 모달 열기
-      } else {
-          setIsConfirmModalOpen(true); // 동의 항목 체크 시 예약 확인 모달 열기
-      }
+        console.log('돌아가기 버튼 클릭');
+        navigate(-1);
     };
 
-    // 결제하기 버튼 클릭 처리 함수
-    const handleSubmit = async () => {
-      try {
-          await apiClient.post('/reservation/person', {
-              ...reservationDetails,
-              consents
-          });
-          console.log(reservationDetails);
-          navigate('/mypage/rentinglist'); 
-      } catch (error) {
-          console.error('예약 실패:', error);
-          alert('예약에 실패했습니다. 다시 시도해주세요.');
-      }
+    const handlePaymentClick = () => {
+        if (!consents.personalInfoConsent || !consents.severeDamageConsent) {
+            setIsWarningModalOpen(true);
+        } else {
+            setIsConfirmModalOpen(true);
+        }
+    };
+
+    const handleConfirm = () => {
+        setIsConfirmModalOpen(false);
+        requestPay();
+    };
+
+    const requestPay = () => {
+        if (window.IMP) {
+            window.IMP.request_pay({
+                pg: 'kakaopay.TC0ONETIME', // Test는 TC0ONETIME
+                pay_method: 'card',
+                merchant_uid: `payment-${crypto.randomUUID()}`,
+                name: 'Ah!Chacha 결제',
+                amount: reservationDetails.totalFee,
+                buyer_email: 'sponus@test.com',
+                buyer_name: 'Ah!Chacha',
+                buyer_tel: userPhoneNumber,
+                buyer_addr: '서울특별시',
+                buyer_postcode: '123-456',
+            }, rsp => {
+                if (rsp.success) {
+                    updateItemStatus();
+                } else {
+                    setModalMessage(`결제에 실패하였습니다. 에러 내용: ${rsp.error_msg}`);
+                    setConfirmAction(null); // 확인 버튼을 눌러도 아무 동작도 하지 않음
+                    setIsPaymentFailureModalOpen(true);
+                }
+            });
+        } else {
+            console.error('IMP 객체가 초기화되지 않았습니다.');
+        }
+    };
+
+    const updateItemStatus = async () => {
+        try {
+            await apiClient.post('/reservation/person', {
+                ...reservationDetails,
+                consents
+            });
+            console.log(reservationDetails);
+            setModalMessage('예약이 완료되었습니다.');
+            setConfirmAction(() => () => navigate('/mypage/rentinglist')); // 확인 버튼을 누르면 /mypage/rentinglist로 이동
+            setIsPaymentSuccessModalOpen(true);
+        } catch (error) {
+            console.error('예약 실패:', error);
+            setModalMessage('예약에 실패했습니다. 다시 시도해주세요.');
+            setConfirmAction(null); // 확인 버튼을 눌러도 아무 동작도 하지 않음
+            setIsPaymentFailureModalOpen(true);
+        }
     };
 
     const formatPhoneNumber = (phoneNumber) => {
-      // 전화번호가 11자리인 경우 010-0000-0000 형식으로 변환
-      return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+        return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
     };
 
     const formatDate = (isoString) => {
-      const date = new Date(isoString);
-      return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`;
+        const date = new Date(isoString);
+        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`;
     };
 
     return (
         <>
-          <GlobalStyle/>
-          <PageWrapper>
-            <TitleBar>
-                <BackButton src="/assets/img/BackArrow.png" alt="Back" onClick={handleGoBack} />
-                <Title>예약자 확인</Title>
-            </TitleBar>
-            <FormItem>
-                <Label>닉네임</Label>
-                <Value>{userNickname}</Value>
-            </FormItem>
-            <FormItem>
-                <Label>전화번호</Label>
-                <Value>{formatPhoneNumber(userPhoneNumber)}</Value>
-            </FormItem>
-            <FormItem>
-                <Label>대여 시간</Label>
-                <Value>{formatDate(reservationDetails.startDate)}</Value>
-            </FormItem>
-            <FormItem>
-                <Label>반납 시간</Label>
-                <Value>{formatDate(reservationDetails.endDate)}</Value>
-            </FormItem>
-            <FormItem>
-                <Label>대여 위치</Label>
-                <Value>{reservationDetails.borrowPlace}</Value>
-            </FormItem>
-            <FormItem>
-                <Label>반납 위치</Label>
-                <Value>{reservationDetails.returnPlace}</Value>
-            </FormItem>
-            <Line/>
+            <GlobalStyle />
+            <PageWrapper>
+                <TitleBar>
+                    <BackButton src="/assets/img/BackArrow.png" alt="Back" onClick={handleGoBack} />
+                    <Title>예약자 확인</Title>
+                </TitleBar>
+                <FormItem>
+                    <Label>닉네임</Label>
+                    <Value>{userNickname}</Value>
+                </FormItem>
+                <FormItem>
+                    <Label>전화번호</Label>
+                    <Value>{formatPhoneNumber(userPhoneNumber)}</Value>
+                </FormItem>
+                <FormItem>
+                    <Label>대여 시간</Label>
+                    <Value>{formatDate(reservationDetails.startDate)}</Value>
+                </FormItem>
+                <FormItem>
+                    <Label>반납 시간</Label>
+                    <Value>{formatDate(reservationDetails.endDate)}</Value>
+                </FormItem>
+                <FormItem>
+                    <Label>대여 위치</Label>
+                    <Value>{reservationDetails.borrowPlace}</Value>
+                </FormItem>
+                <FormItem>
+                    <Label>반납 위치</Label>
+                    <Value>{reservationDetails.returnPlace}</Value>
+                </FormItem>
+                <Line />
                 <CheckboxLabel>
                     <TextLabel>예약자 본인 정보와 일치하신가요?</TextLabel>
                     <Image src={consents.personalInfoConsent ? '/assets/img/Check.PNG' : '/assets/img/unChecked.PNG'}
-                           alt="Personal Info Consent"
-                           onClick={() => handleImageClick('personalInfoConsent')} />
+                        alt="Personal Info Consent"
+                        onClick={() => handleImageClick('personalInfoConsent')} />
                 </CheckboxLabel>
                 <CheckboxLabel>
                     <TextLabel>훼손 상태가 심각하거나 사용하지 못하는 상태로 반납시 손해 배상이 청구될 수 있습니다. 이에 동의하십니까?</TextLabel>
                     <Image src={consents.severeDamageConsent ? '/assets/img/Check.PNG' : '/assets/img/unChecked.PNG'}
-                           alt="Severe Damage Consent"
-                           onClick={() => handleImageClick('severeDamageConsent')} />
+                        alt="Severe Damage Consent"
+                        onClick={() => handleImageClick('severeDamageConsent')} />
                 </CheckboxLabel>
+                <FeeWrapper>
+                    <FeeLabelValueWrapper>
+                        <FeeLabel>결제 금액 </FeeLabel>
+                        <Value>{reservationDetails.totalFee}</Value>
+                    </FeeLabelValueWrapper>
+                    <ConfirmButton onClick={handlePaymentClick}>결제하기</ConfirmButton>
+                </FeeWrapper>
+            </PageWrapper>
 
-
-            {/* 사용료 및 결제하기 버튼 */}
-            <FeeWrapper>
-                <FeeLabelValueWrapper>
-                    <FeeLabel>결제 금액 </FeeLabel>
-                    <Value>{reservationDetails.totalFee}</Value>
-                </FeeLabelValueWrapper>
-                <ConfirmButton onClick={handlePaymentClick} >결제하기</ConfirmButton>
-            </FeeWrapper>
-        </PageWrapper>
-
-        <ConfirmModal 
-          message={<span>모든 동의 항목에 체크해야 <br /> 예약이 가능합니다.</span>}
-          isOpen={isWarningModalOpen}
-          setIsOpen={setIsWarningModalOpen}
-          onConfirm={() => setIsWarningModalOpen(false)}
-        />
-        <ConfirmOrCancleModal 
-          message="예약하시겠습니까?"
-          isOpen={isConfirmModalOpen}
-          setIsOpen={setIsConfirmModalOpen}
-          onConfirm={handleSubmit}
-        />
-      </>
+            <ConfirmModal
+                message={<span>모든 동의 항목에 체크해야 <br /> 예약이 가능합니다.</span>}
+                isOpen={isWarningModalOpen}
+                setIsOpen={setIsWarningModalOpen}
+                onConfirm={() => setIsWarningModalOpen(false)}
+            />
+            <ConfirmOrCancleModal
+                message="예약하시겠습니까?"
+                isOpen={isConfirmModalOpen}
+                setIsOpen={setIsConfirmModalOpen}
+                onConfirm={handleConfirm}
+            />
+            <ConfirmModal
+                message={modalMessage}
+                isOpen={isPaymentSuccessModalOpen || isPaymentFailureModalOpen}
+                setIsOpen={isPaymentSuccessModalOpen ? setIsPaymentSuccessModalOpen : setIsPaymentFailureModalOpen}
+                onConfirm={confirmAction ? confirmAction : () => (isPaymentFailureModalOpen ? setIsPaymentFailureModalOpen(false) : setIsPaymentSuccessModalOpen(false))}
+            />
+        </>
     );
 };
 
@@ -181,7 +233,6 @@ const GlobalStyle = createGlobalStyle`
     background: #00FFE0; /* 핸들의 배경색 */
     border-radius: 5px;
   }
-
 `;
 
 // 전체 페이지를 감싸는 컴포넌트
@@ -229,6 +280,7 @@ const Line = styled.span`
   margin-bottom: 1.87rem;
   background-color: #00FFE0; // 형광색 배경색 설정
 `;
+
 // 폼 아이템을 감싸는 컴포넌트
 const FormItem = styled.div`
   display: flex;
@@ -257,7 +309,6 @@ const Value = styled.div`
 `;
 
 const CheckboxLabel = styled.label`
-  width: 100%;
   height: 1.875rem;
   display: flex;
   margin-bottom: 1.44rem;
@@ -270,7 +321,7 @@ const TextLabel = styled.span`
   font-style: normal;
   font-weight: 800;
   line-height: normal;
-  margin-left: 28rem;
+  margin-left: 10rem;
   text-align: left; // 텍스트를 왼쪽 정렬
 `;
 
@@ -280,7 +331,6 @@ const Image = styled.img`
   margin-left: -2rem;
   cursor: pointer;
 `;
-
 
 // 사용료 및 결제하기 버튼을 감싸는 컴포넌트
 const FeeWrapper = styled.div`
@@ -321,8 +371,5 @@ const ConfirmButton = styled.button`
   height: 3.0625rem;
   margin-top: 2rem; // 여백 조정
 `;
-
-// 이제 모든 스타일 컴포넌트가 왼쪽으로 정렬되어 표시됩니다.
-
 
 export default PersonReservationDetailsPage;
