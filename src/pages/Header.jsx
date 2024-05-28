@@ -56,6 +56,17 @@ const Header = () => {
     setUserTrack(track);
   }, []);
 
+  const handleRegistrationPageNavigation = () => {
+    // 로컬 스토리지에서 kakaoUrl 값을 가져옵니다.
+    const kakaoUrl = localStorage.getItem('kakaoUrl');
+    // kakaoUrl이 설정되지 않았다면 설정 페이지로, 설정되었다면 등록 페이지로 이동합니다.
+    if (!kakaoUrl) {
+      navigate('/register/settingURL');
+    } else {
+      navigate('/register/');
+    }
+  };
+
 
   return (
     <HeaderContainer>
@@ -69,9 +80,7 @@ const Header = () => {
           <NavItem active={activePage.startsWith('/rent/')}
             onClick={() => handlePageChange('/rent/')}>아차! 대여</NavItem>
           <NavItem active={activePage.startsWith('/register/')}
-            onClick={() => handlePageChange('/register/')}>아차! 등록</NavItem>
-          <NavItem active={activePage === '/chat'}
-            onClick={() => handlePageChange('/chat')}>아차! 톡</NavItem>
+            onClick={handleRegistrationPageNavigation}>아차! 등록</NavItem>
           <NavItem active={activePage.startsWith('/community/')}
             onClick={() => handlePageChange('/community/main')}>아차! 게시판</NavItem>
           <NavItem active={activePage.startsWith('/mypage/')}
