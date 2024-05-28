@@ -106,6 +106,7 @@ const ItemDetailPage = () => {
           window.open(itemDetails.kakaoUrl, '_blank'); // 새로운 페이지(탭)에서 사용자 프로필에 저장된 kakaoUrl로 이동
       } else {
           console.error('카카오 URL이 존재하지 않습니다.');
+          console.log(itemDetails.kakaoUrl);
       }
     };
   
