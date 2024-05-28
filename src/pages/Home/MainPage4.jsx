@@ -7,18 +7,25 @@ const MainPage4 = () => {
 
     const [isScrolled, setIsScrolled] = useState(false);
     const navigate = useNavigate();
+    const [scrollPosition, setScrollPosition] = useState(0); // 스크롤 위치를 저장할 상태
+    const scrollThreshold = 100; // 스크롤 임계값 설정
 
     useEffect(() => {
-        const handleWheel = (e) => {
-          if (e.deltaY < 0) { // 마우스 휠을 위로 스크롤할 경우
-            navigate('/mainpage/3');
-          }
-        };
-    
-        window.addEventListener('wheel', handleWheel);
-    
-        return () => window.removeEventListener('wheel', handleWheel);
-      }, [navigate]);
+      const handleWheel = (e) => {
+          setScrollPosition(prev => {
+              const newScrollPosition = prev + e.deltaY;
+              if (newScrollPosition <= -scrollThreshold) {
+                  navigate('/mainpage/3');
+                  return 0; // 페이지가 변경되면 스크롤 위치를 초기화
+              }
+              return newScrollPosition;
+          });
+      };
+
+      window.addEventListener('wheel', handleWheel);
+
+      return () => window.removeEventListener('wheel', handleWheel);
+  }, [navigate]);
     
 
     return (
