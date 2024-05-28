@@ -34,7 +34,6 @@ import UpdatePersonRegisterDetails from "./pages/Register/UpdatePersonRegisterDe
 import UpdateOfficialRegisterDetails from "./pages/Register/UpdateOfficialRegisterDetails";
 import OwnerReview from './pages/Item/OwnerReview.jsx';
 
-import Chat from './pages/Chat/Chat.js';
 import ManageOfficialAccount from './pages/Mypage/ManageOfficialAccount.jsx';
 import ReRegisterPersonRegisterDetails from './pages/Register/ReRegisterPersonRegisterDetails.jsx';
 import ReRegisterOfficialRegisterDetails from './pages/Register/ReRegisterOfficialRegisterDetails.jsx';
