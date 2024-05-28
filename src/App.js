@@ -34,11 +34,10 @@ import UpdatePersonRegisterDetails from "./pages/Register/UpdatePersonRegisterDe
 import UpdateOfficialRegisterDetails from "./pages/Register/UpdateOfficialRegisterDetails";
 import OwnerReview from './pages/Item/OwnerReview.jsx';
 
-import Chat from './pages/Chat/Chat.js';
 import ManageOfficialAccount from './pages/Mypage/ManageOfficialAccount.jsx';
 import ReRegisterPersonRegisterDetails from './pages/Register/ReRegisterPersonRegisterDetails.jsx';
 import ReRegisterOfficialRegisterDetails from './pages/Register/ReRegisterOfficialRegisterDetails.jsx';
-import Talk from './pages/Talk/Talk.jsx';
+import SettingUrl from './pages/Register/SettingUrl.jsx';
 
 
 function App() {
@@ -88,6 +87,7 @@ function App() {
             <Route path="/register/officialUpdate/:itemId" element={<><Header /> <UpdateOfficialRegisterDetails /></> } />
             <Route path="/register/personreRegister/:itemId" element={<><Header /> <ReRegisterPersonRegisterDetails /></>} />
             <Route path="/register/officialreRegister/:itemId" element={<><Header /> <ReRegisterOfficialRegisterDetails /></>} />
+            <Route path="/register/settingURL" element={<><Header /> <SettingUrl /></>} />
 
             {/* 마이 페이지 */}
             <Route path="/mypage/main" element={<> <Header /> <Sidebar /> <MypageMain /> </> } />
@@ -98,9 +98,6 @@ function App() {
             <Route path="/mypage/myreview" element={<> <Header /> <Sidebar /> <MyReview /> </> } />
             <Route path="/mypage/manageofficial" element={<> <Header /> <Sidebar /> <ManageOfficialAccount /> </> } />
 
-            {/* 채팅 */}
-            <Route path="/chat" element={<> <Header /> <Chat /> </> } />
-            <Route path="/talk/:itemId" element={<> <Header /> <Talk /> </>} />
           </Routes>
         </div>
       </Router>
