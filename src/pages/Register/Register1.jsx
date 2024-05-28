@@ -282,7 +282,7 @@ const Register1 = () => {
 
                     {displayedItems.map((item, index) => (
                         <ItemContainer key={item.id} isFirst={index === 0}>
-                            <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} onClick={() => handleItemDetailPage(item.itemId)}/>
+                            <ItemImage src={item.imageUrls[0] || '/assets/img/ItemDefault.png'} onClick={() => handleItemDetailPage(item.id)}/>
                             <ItemName onClick={() => handleItemDetailPage(item.id)}>{item.title}</ItemName>
                             <ItemDetails>
                                 <DetailsContainer>

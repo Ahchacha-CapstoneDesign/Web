@@ -24,6 +24,10 @@ const AccountSettings = () => {
     const [successModalMessage, setSuccessModalMessage] = useState('');
     const [officialName, setOfficialName] = useState('');
     const [officialFile, setOfficialFile] = useState(null);
+    const [kakaoUrl, setKakaoUrl] = useState('');
+    const [newKakaoUrl, setNewKakaoUrl] = useState(kakaoUrl);
+    const [urlErrorMessage, setUrlErrorMessage] = useState('');
+    const [urlSuccessMessage, setUrlSuccessMessage] = useState('');
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
     const DEFAULT_IMAGE_URL = '/assets/img/Profile.png';
@@ -31,33 +35,36 @@ const AccountSettings = () => {
     const [isCheck, setIsCheck] = useState(null);  // 인증 상태를 null로 초기화
     const [authenticationChecked, setAuthenticationChecked] = useState(false);
 
+
     useEffect(() => {
-        const name = localStorage.getItem('userName');
-        setUserName(name);
-        const nickname = localStorage.getItem('userNickname');
-        setUserNickname(nickname);
-        const phonenum = localStorage.getItem('userPhoneNumber');
-        setUserPhoneNumber(phonenum);
-        const track1 = localStorage.getItem('userTrack');
-        setUserTrack(track1);
-        const track2 = localStorage.getItem('userTrack2');
-        setUserTrack2(track2);
-        const grade = localStorage.getItem('userGrade');
-        setUserGrade(grade);
-        const status = localStorage.getItem('userStatus');
-        setUserStatus(status);
-        const id = localStorage.getItem('userID');
-        setUserID(id);
-        const savedImageUrl = localStorage.getItem('profileImageUrl');
-        if (savedImageUrl) {
-            setProfileImage(savedImageUrl); // 저장된 이미지 URL로 상태 업데이트
-        }
+      const name = localStorage.getItem('userName');
+      setUserName(name);
+      const nickname = localStorage.getItem('userNickname');
+      setUserNickname(nickname);
+      setNewNickname(nickname);
+      const phonenum = localStorage.getItem('userPhoneNumber');
+      setUserPhoneNumber(phonenum);
+      const track1 = localStorage.getItem('userTrack');
+      setUserTrack(track1);
+      const track2 = localStorage.getItem('userTrack2');
+      setUserTrack2(track2);
+      const grade = localStorage.getItem('userGrade');
+      setUserGrade(grade);
+      const status = localStorage.getItem('userStatus');
+      setUserStatus(status);
+      const id = localStorage.getItem('userID');
+      setUserID(id);
+      const kakaoUrl = localStorage.getItem('kakaoUrl');
+      setKakaoUrl(kakaoUrl);
+      setNewKakaoUrl(kakaoUrl);
 
-        setNewNickname(localStorage.getItem('userNickname') || '');
+      const savedImageUrl = localStorage.getItem('profileImageUrl');
+      if (savedImageUrl) {
+          setProfileImage(savedImageUrl); // 저장된 이미지 URL로 상태 업데이트
+      }
 
-        checkAuthenticationStatus();
-
-      }, [userNickname]);
+      checkAuthenticationStatus();
+  }, []);
 
       const handleNicknameChange = (e) => {
         const input = e.target.value;
@@ -130,6 +137,43 @@ const AccountSettings = () => {
         alert('이미지 업로드에 실패했습니다.');
       }
     };
+
+    const handleKakaoUrlChange = (e) => {
+      setNewKakaoUrl(e.target.value);
+    };
+
+
+    // url을 서버에 저장하는 함수
+    const handleSetKakaoUrl = async () => {
+      if (!newKakaoUrl.trim()) {
+          setUrlSuccessMessage('');
+          setUrlErrorMessage('아차! URL을 입력해주세요!');
+          return;
+      }
+
+      try {
+          const response = await apiClient.post('/users/kakaoUrl', { url: newKakaoUrl }, {
+              headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+              },
+          });
+          if (response.status === 200) {
+              localStorage.setItem('kakaoUrl', newKakaoUrl);
+              setKakaoUrl(newKakaoUrl);
+              setUrlErrorMessage('');
+              setUrlSuccessMessage('URL이 성공적으로 변경되었습니다!');
+              navigate('/mypage/accountsettings');
+          }
+      } catch (error) {
+          setUrlSuccessMessage('');
+          if (error.response && error.response.status === 400) {
+              setUrlErrorMessage("아차! 이미 사용 중인 URL입니다.");
+          } else {
+              setUrlErrorMessage("URL 설정 중 에러가 발생했습니다.");
+          }
+          console.error("URL 설정 실패:", error);
+      }
+  };
 
     const resetToDefaultImage = async () => {
       try {
@@ -239,6 +283,19 @@ const AccountSettings = () => {
                         <NicknameEditButton onClick={handleSetNickname}>변경</NicknameEditButton>
                         {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
                         {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
+                    </NicknameButtonContainer>
+                </DetailItem>
+                <DetailDivider />
+                <DetailItem>
+                    <Label>카카오톡 오픈채팅방 URL</Label>
+                    <NicknameButtonContainer>
+                        <KakaoUrlInput
+                            value={newKakaoUrl}
+                            onChange={handleKakaoUrlChange}
+                        />
+                        <NicknameEditButton onClick={handleSetKakaoUrl}>변경</NicknameEditButton>
+                          {urlErrorMessage && <ErrorMessage>{urlErrorMessage}</ErrorMessage>}
+                          {urlSuccessMessage && <SuccessMessage>{urlSuccessMessage}</SuccessMessage>}
                     </NicknameButtonContainer>
                 </DetailItem>
                 <DetailDivider />
@@ -461,6 +518,19 @@ const SubmitValue = styled.div`
 
 const NicknameInput= styled.input`
     color: #fff;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    background-color: transparent;
+    border: 1px solid #00ffe0;
+    border-radius: 5px;
+    outline: none;
+ `;
+
+ const KakaoUrlInput= styled.input`
+    color: #fff;
+    width: ;
     font-size: 1rem;
     font-style: normal;
     font-weight: 500;

@@ -144,8 +144,14 @@ const ReRegisterOfficialRegisterDetails = (props) => {
 
       const formDataToSend = new FormData();
 
-      const borrowDateTime = startDate.toISOString().split('T')[0] + "T" + startTime.padStart(2,'0') + ":" + startMinutes.padStart(2, '0') + ":00";
-      const returnDateTime = endDate.toISOString().split('T')[0] + "T" + endTime.padStart(2, '0') + ":" + endMinutes.padStart(2, '0') + ":00";
+        const formatDate = (date, time, minutes) => {
+            const offset = date.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(date - offset)).toISOString().slice(0, -1);
+            return localISOTime.split('T')[0] + "T" + time.padStart(2, '0') + ":" + minutes.padStart(2, '0') + ":00";
+        };
+
+        const borrowDateTime = formatDate(startDate, startTime, startMinutes);
+        const returnDateTime = formatDate(endDate, endTime, endMinutes);
 
       formDataToSend.append('title', formData.title);
       formDataToSend.append('pricePerHour', formData.price);

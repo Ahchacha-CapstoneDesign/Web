@@ -101,17 +101,13 @@ const ItemDetailPage = () => {
       navigate(`/rent/ownerreview/${itemDetails.userId}`, { state: { userProfile: itemDetails.userProfile, userNickName: itemDetails.userNickName, averageScore: formattedScore } });
     };
 
-    const handleChat = async () => {
-      try {
-          const payload = { itemId: itemDetails.id };
-          console.log('Sending request to create or get chat room with payload:', payload);
-          const response = await apiClient.post('/chat/room', payload);
-          console.log('Chat room creation response:', response.data);
-          navigate(`/talk/${response.data.id}`);
-      } catch (error) {
-          console.error('채팅방 생성 실패:', error.response ? error.response.data : error.message);
+    const handleChat = () => {
+      if (itemDetails && itemDetails.kakaoUrl) {
+          window.open(itemDetails.kakaoUrl, '_blank'); // 새로운 페이지(탭)에서 사용자 프로필에 저장된 kakaoUrl로 이동
+      } else {
+          console.error('카카오 URL이 존재하지 않습니다.');
       }
-  };
+    };
   
 
     return (
