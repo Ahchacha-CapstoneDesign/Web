@@ -101,6 +101,19 @@ const ItemDetailPage = () => {
       navigate(`/rent/ownerreview/${itemDetails.userId}`, { state: { userProfile: itemDetails.userProfile, userNickName: itemDetails.userNickName, averageScore: formattedScore } });
     };
 
+    const handleChat = async () => {
+      try {
+          const payload = { itemId: itemDetails.id };
+          console.log('Sending request to create or get chat room with payload:', payload);
+          const response = await apiClient.post('/chat/room', payload);
+          console.log('Chat room creation response:', response.data);
+          navigate(`/talk/${response.data.id}`);
+      } catch (error) {
+          console.error('채팅방 생성 실패:', error.response ? error.response.data : error.message);
+      }
+  };
+  
+
     return (
         <>
             <GlobalStyle/>
@@ -187,7 +200,7 @@ const ItemDetailPage = () => {
                             <DescriptionText>{itemDetails.introduction}</DescriptionText>
                         </ProductDescription>
                         <ButtonsContainer>
-                            <ActionButton>채팅하기</ActionButton>
+                            <ActionButton onClick={handleChat}>채팅하기</ActionButton>
                             <ReservationButton 
                               reservation={itemDetails.reservation} 
                               onClick={itemDetails.reservation !== 'NO' ? handleReserve : undefined}
