@@ -40,7 +40,10 @@ const PersonReservationPage = () => {
       // 'month' 뷰일 때만 비활성화 조건 적용
       if (view === 'month') {
           // 선택 가능한 날짜 범위를 벗어나면 비활성화
-          return date < availableStart || date > availableEnd;
+          const dateWithoutTime = new Date(date.getFullYear(), date.getMonth(), date.getDate()); // 시간 부분 제거
+          const startWithoutTime = new Date(availableStart.getFullYear(), availableStart.getMonth(), availableStart.getDate());
+          const endWithoutTime = new Date(availableEnd.getFullYear(), availableEnd.getMonth(), availableEnd.getDate());
+          return dateWithoutTime < startWithoutTime || dateWithoutTime > endWithoutTime;
       }
     };
 
@@ -59,8 +62,11 @@ const PersonReservationPage = () => {
           if (dateStr === nowStr) {
               return 'today';
           }
+          const dateWithoutTime = new Date(date.getFullYear(), date.getMonth(), date.getDate()); // 시간 부분 제거
+          const startWithoutTime = new Date(availableStart.getFullYear(), availableStart.getMonth(), availableStart.getDate());
+          const endWithoutTime = new Date(availableEnd.getFullYear(), availableEnd.getMonth(), availableEnd.getDate());
           // 대여 가능 범위 밖의 날짜인 경우
-          if (date < availableStart || date > availableEnd) {
+          if (dateWithoutTime < startWithoutTime || dateWithoutTime > endWithoutTime) {
               return 'disabled-date';
           }
       }
@@ -111,8 +117,14 @@ const PersonReservationPage = () => {
 
       const hours = diffMinutes / 60;
 
-      const borrowDateTime = startDate.toISOString().split('T')[0] + "T" + startTime.padStart(2,'0') + ":" + startMinutes.padStart(2, '0') + ":00";
-      const returnDateTime = endDate.toISOString().split('T')[0] + "T" + endTime.padStart(2, '0') + ":" + endMinutes.padStart(2, '0') + ":00";
+        const formatDate = (date, time, minutes) => {
+            const offset = date.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(date - offset)).toISOString().slice(0, -1);
+            return localISOTime.split('T')[0] + "T" + time.padStart(2, '0') + ":" + minutes.padStart(2, '0') + ":00";
+        };
+
+        const borrowDateTime = formatDate(startDate, startTime, startMinutes);
+        const returnDateTime = formatDate(endDate, endTime, endMinutes);
 
       // 총 요금 계산
       const totalFee = Math.round(hours * itemDetails.pricePerHour);
