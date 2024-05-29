@@ -175,14 +175,14 @@ const ReRegisterPersonRegisterDetails = (props) => {
         console.log('FormDataToSend:', formDataToSend);
 
         try {
-            const response = await apiClient.post(`/items`, formDataToSend);
+            const response = await apiClient.post(`/items/${itemId}/recreate`, formDataToSend);
             // 응답 확인
 
             console.log('상품 재등록 성공', response.data);
             navigate('/mypage/registerlist');
         } catch (error) {
             // 에러 처리
-            console.error('상품 수정 에러:', error.message);
+            console.error('상품 재등록 에러:', error.message);
         }
     };
     // Here you would typically handle the submission, e.g., posting to an API
