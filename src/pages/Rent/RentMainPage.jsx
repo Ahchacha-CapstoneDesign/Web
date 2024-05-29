@@ -401,7 +401,6 @@ const PostList = styled.div`
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-gap: 22px;
-    width:60%;
     margin-top: 1rem;
 `;
 
