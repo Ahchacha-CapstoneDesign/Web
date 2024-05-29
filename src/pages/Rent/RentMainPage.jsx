@@ -227,7 +227,7 @@ const RentMainPage = () => {
                 {post.reservation === 'NO' && <RentingImage src={"/assets/img/renting.png"} alt="Renting" />}
               </ImageWrapper>
               )}
-              <div>
+              <Wrapper>
                 <TitleWrapper>
                   {post.title}
                 </TitleWrapper>
@@ -244,7 +244,7 @@ const RentMainPage = () => {
                 <CanBorrowDateTime>
                   {post.reservation === 'YES' ? <ReservationAvailable>예약 가능</ReservationAvailable> : <ReservationUnavailable>예약 불가</ReservationUnavailable>}
                 </CanBorrowDateTime>
-              </div>
+              </Wrapper>
               <Details>
                 조회수 {post.viewCount}
               </Details>
@@ -390,7 +390,9 @@ const Details = styled.div`
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
-    margin-left: 4rem;
+    margin-left: 1rem;
+    white-space: nowrap; /* 한 줄로 유지 */
+
 `;
 
 const PostList = styled.div`
@@ -430,6 +432,10 @@ const Cost = styled.div`
     margin-left: 2rem;
 `;
 
+const Wrapper = styled.div` 
+
+`;
+
 const CanBorrowDateTime = styled.div`
     font-size: 1rem;
     font-style: normal;
@@ -442,12 +448,14 @@ const RentPlaceWrapper = styled.div`
     display: flex;
     align-items: center;
     margin-left: 2rem;
+    width: 17rem;
 `;
 
 const RentPlace = styled.div`
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
+    white-space: nowrap; /* 한 줄로 유지 */
     margin-right: 0.5rem; /* 간격 조정 */
 `;
 
@@ -456,6 +464,9 @@ const RentPlaceColor = styled.div`
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
+    white-space: nowrap; /* 한 줄로 유지 */
+    overflow: hidden; /* 넘치는 텍스트 숨김 */
+    text-overflow: ellipsis; /* 넘치는 텍스트 뒤에 "..." 추가 */
 `;
 
 const NonColor = styled.div`
@@ -463,8 +474,10 @@ const NonColor = styled.div`
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
+    white-space: nowrap; /* 한 줄로 유지 */
+    overflow: hidden; /* 넘치는 텍스트 숨김 */
+    text-overflow: ellipsis; /* 넘치는 텍스트 뒤에 "..." 추가 */
 `;
-
 const ReservationAvailable = styled.span`
   color: #B9E0FD; 
 `;
