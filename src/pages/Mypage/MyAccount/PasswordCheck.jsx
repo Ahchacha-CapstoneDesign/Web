@@ -68,9 +68,8 @@ const PasswordCheck = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
           <EyeIcon 
-            src="/assets/img/Eye.png" 
-            onClick={togglePasswordVisibility}
-            alt="비밀번호 보기/숨기기" 
+            src={passwordShown ? "/assets/img/Eye.png" : "/assets/img/EyeClosed.png"}  
+            onClick={togglePasswordVisibility} 
           />
           {error && <ErrorMessage>{error}</ErrorMessage>}
           <Confirmbutton type="submit">확인</Confirmbutton>

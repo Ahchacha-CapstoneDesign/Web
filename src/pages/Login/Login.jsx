@@ -117,12 +117,15 @@ const Login = () => {
             value={password} 
             onChange={(e) => setPassword(e.target.value)}
           />
-          <EyeIcon src="/assets/img/Eye.png"  onClick={togglePasswordVisibility} />
+          <EyeIcon 
+            src={passwordShown ? "/assets/img/Eye.png" : "/assets/img/EyeClosed.png"}  
+            onClick={togglePasswordVisibility} 
+          />
         </PasswordContainer>
         
         <CheckboxContainer onClick={handleCheckboxChange}>
-            <CheckboxIcon src={isOfficial ? "/assets/img/Check.png" : "/assets/img/Unchecked.png"} />
-            <Label>과사무실 근로장학생 / 학생회로 로그인하기</Label>
+            <CheckboxIcon src={isOfficial ? "/assets/img/LoginCheck.png" : "/assets/img/LoginUnCheck.png"} />
+            <Label checked={isOfficial}>과사무실 근로장학생 / 학생회로 로그인하기</Label>
           </CheckboxContainer>
           {officialLoginError && <ErrorMessage>
             <p>공식 사용자로의 인증이 필요합니다.</p>
@@ -274,7 +277,7 @@ const CheckboxIcon = styled.img`
 
 const Label = styled.label`
   margin-left: 0.5rem;
-  color: white;
+  color: ${({ checked }) => checked ? '#00FFE0' : 'white'};
   font-family: 'Pretendard';
   cursor: pointer;
   font-weight: 400;
