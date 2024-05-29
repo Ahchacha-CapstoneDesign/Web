@@ -60,7 +60,7 @@ const Header = () => {
     // 로컬 스토리지에서 kakaoUrl 값을 가져옵니다.
     const kakaoUrl = localStorage.getItem('kakaoUrl');
     // kakaoUrl이 설정되지 않았다면 설정 페이지로, 설정되었다면 등록 페이지로 이동합니다.
-    if (!kakaoUrl) {
+    if (!kakaoUrl || kakaoUrl === 'null') {
       navigate('/register/settingURL');
     } else {
       navigate('/register/');
