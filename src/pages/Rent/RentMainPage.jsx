@@ -441,6 +441,7 @@ const CanBorrowDateTime = styled.div`
     font-weight: 400;
     margin-left: 2rem;
     width: 13rem;
+    white-space: nowrap; 
 `;
 
 const RentPlaceWrapper = styled.div`
